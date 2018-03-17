@@ -16,7 +16,7 @@ class App extends Component {
     }
 
     fetchSongs() {
-        fetch('http://localhost:4000/api/songs')
+        fetch('/api/songs')
             .then(res => res.json())
             .then((categories) => {
                 this.setState({categories: categories, activeItem: categories[0].name, activeCategory: categories[0]});

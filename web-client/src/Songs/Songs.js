@@ -8,7 +8,7 @@ export default class Songs extends Component {
     }
 
     playSong(event) {
-        fetch('http://localhost:4000/api/songs?category=' + this.props.category.name + '&song='+event.target.value);
+        fetch('/api/songs?category=' + this.props.category.name + '&song='+event.target.value);
     }
 
     render() {

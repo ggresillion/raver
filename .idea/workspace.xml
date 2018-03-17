@@ -2,278 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1c9f8dcf-faa0-4284-b040-e0a9f257c4ee" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/.dockerignore" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Dockerfile" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/web-client/src/Songs/Songs.js" />
       <change beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" afterPath="$PROJECT_DIR$/package-lock.json" />
-      <change beforePath="$PROJECT_DIR$/package.json" afterPath="$PROJECT_DIR$/package.json" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/adedigato.jpg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/adedigato.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/aled.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/aled.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/aled.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/asagi.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/asagi.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/asagi.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/boom.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/boom.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/boom.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/booster-comme-jamais.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/booster-comme-jamais.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/bref.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/clac.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/clac.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/clac.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/crever-sardoche.mp3" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/crever-sardoche.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/etrange-internet.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/etrange-internet.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/etrange-internet.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/excellent.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/excellent.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/favicon.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/formule-1.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/formule-1.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/formule-1.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/gne.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/gne.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/gne.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/header.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/hihihi.jpg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/hihihi.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/le-petit-pouce-bleu.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/le-petit-pouce-bleu.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/le-petit-pouce-bleu.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/loading.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/mal-a-la-queue.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/mal-a-la-queue.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/mal-a-la-queue.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/met-un-pouce-bleu.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/met-un-pouce-bleu.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/met-un-pouce-bleu.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/oui-bravo-pouce-bleu.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/oui-bravo-pouce-bleu.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/oui-bravo-pouce-bleu.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/ouiii.jpg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/ouiii.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/parfait.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/parfait.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/pouce-bleu-oui.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/pouce-bleu-oui.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/pouce-bleu-oui.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/quoi-ahah.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/quoi-ahah.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/rohohoho.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/rohohoho.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/sale-merde.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/sale-merde.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/sale-merde.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/tac-tac-tac.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/tac-tac-tac.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/tac-tac-tac.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/tres-content.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/tres-content.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/volume.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/waaaw.gif" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/waaaw.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/waaaw.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/zbeub.jpg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/sardoche/zbeub.wav" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/abonne.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/abonne1.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/ahoui.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/atchoum.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/bagger288.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/bolosse.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/bouteilledecoca.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/bug.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/bung.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/camenervelesgens.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/camvenere.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/cestdelat�%83©l�%83©.mp3" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/cestdelat�%83©l�%83©.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/cestquilepapa.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/commejecheat.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/cplus.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/cutezle.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/d181.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/dah.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/donnerlesboulaisses.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/dora.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/enclume.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/faker.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/followtheleader.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/generique.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/genie.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/huissier.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/inventaire.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/jentendspastarage.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/jesuiscoinc�%83©.mp3" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/jesuiscoinc�%83©.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/jesuisunemachine.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/jesuisvraimentcon.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/laperceuse.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/legedanslecul.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/legendaire.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/lejeuestsimple.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/lespagesjaunes.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/mauvaisecran.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/merde.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/onpuelamerde.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/oui1.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/oui2.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/oui3.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/peur1.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/peur2.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/peur3.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/quandtuveux.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/quelporc.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/quoi1.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/rage1.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/rage2.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/rage3.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/rage4.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/rage5.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/rat�%83©.mp3" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/rat�%83©.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/rat�%83©2.mp3" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/rat�%83©2.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/sorcellerie.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/unefemme.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/unicorn.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/unpetitcaniche.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/songs/zerator/zeravssquelette.ogg" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/src/discord/bot.js" afterPath="$PROJECT_DIR$/src/discord/bot.js" />
-      <change beforePath="$PROJECT_DIR$/src/server/Server.js" afterPath="$PROJECT_DIR$/src/server/Server.js" />
-      <change beforePath="$PROJECT_DIR$/src/server/routes/Songs.js" afterPath="$PROJECT_DIR$/src/server/routes/Songs.js" />
-      <change beforePath="$PROJECT_DIR$/src/songs/ah!.mp3" afterPath="$PROJECT_DIR$/songs/divers/ah!.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/duck.mp3" afterPath="$PROJECT_DIR$/songs/divers/duck.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 103.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 103.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 108.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 108.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 115.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 115.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 120.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 120.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 129.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 129.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 135.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 135.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 14.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 14.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 140.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 140.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 145.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 145.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 150.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 150.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 155.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 155.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 161.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 161.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 166.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 166.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 171.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 171.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 176.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 176.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 181.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 181.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 187.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 187.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 19.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 19.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 192.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 192.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 197.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 197.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 202.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 202.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 207.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 207.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 212.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 212.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 217.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 217.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 222.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 222.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 227.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 227.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 232.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 232.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 237.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 237.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 242.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 242.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 247.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 247.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 25.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 25.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 252.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 252.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 257.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 257.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 262.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 262.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 267.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 267.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 272.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 272.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 277.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 277.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 283.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 283.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 289.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 289.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 297.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 297.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 30.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 30.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 302.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 302.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 307.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 307.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 312.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 312.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 317.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 317.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 322.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 322.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 327.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 327.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 332.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 332.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 337.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 337.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 342.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 342.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 35.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 35.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 40.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 40.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 45.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 45.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 50.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 50.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 56.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 56.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 61.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 61.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 66.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 66.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 71.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 71.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 78.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 78.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 88.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 88.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 9.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 9.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 93.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 93.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/Sound 98.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/Sound 98.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/mistermv/incroyable.mp3" afterPath="$PROJECT_DIR$/songs/mistermv/incroyable.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/sardoche/bref.mp3" afterPath="$PROJECT_DIR$/songs/sardoche/bref.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/abonne.mp3" afterPath="$PROJECT_DIR$/songs/zerator/abonne.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/abonne1.mp3" afterPath="$PROJECT_DIR$/songs/zerator/abonne1.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/ahoui.mp3" afterPath="$PROJECT_DIR$/songs/zerator/ahoui.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/atchoum.mp3" afterPath="$PROJECT_DIR$/songs/zerator/atchoum.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/bagger288.mp3" afterPath="$PROJECT_DIR$/songs/zerator/bagger288.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/bolosse.mp3" afterPath="$PROJECT_DIR$/songs/zerator/bolosse.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/bouteilledecoca.mp3" afterPath="$PROJECT_DIR$/songs/zerator/bouteilledecoca.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/bug.mp3" afterPath="$PROJECT_DIR$/songs/zerator/bug.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/bung.mp3" afterPath="$PROJECT_DIR$/songs/zerator/bung.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/camenervelesgens.mp3" afterPath="$PROJECT_DIR$/songs/zerator/camenervelesgens.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/camvenere.mp3" afterPath="$PROJECT_DIR$/songs/zerator/camvenere.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/cestquilepapa.mp3" afterPath="$PROJECT_DIR$/songs/zerator/cestquilepapa.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/commejecheat.mp3" afterPath="$PROJECT_DIR$/songs/zerator/commejecheat.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/cplus.mp3" afterPath="$PROJECT_DIR$/songs/zerator/cplus.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/cutezle.mp3" afterPath="$PROJECT_DIR$/songs/zerator/cutezle.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/d181.mp3" afterPath="$PROJECT_DIR$/songs/zerator/d181.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/dah.mp3" afterPath="$PROJECT_DIR$/songs/zerator/dah.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/donnerlesboulaisses.mp3" afterPath="$PROJECT_DIR$/songs/zerator/donnerlesboulaisses.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/dora.mp3" afterPath="$PROJECT_DIR$/songs/zerator/dora.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/easy.mp3" afterPath="$PROJECT_DIR$/songs/zerator/easy.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/enclume.mp3" afterPath="$PROJECT_DIR$/songs/zerator/enclume.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/faker.mp3" afterPath="$PROJECT_DIR$/songs/zerator/faker.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/followtheleader.mp3" afterPath="$PROJECT_DIR$/songs/zerator/followtheleader.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/generique.mp3" afterPath="$PROJECT_DIR$/songs/zerator/generique.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/genie.mp3" afterPath="$PROJECT_DIR$/songs/zerator/genie.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/huissier.mp3" afterPath="$PROJECT_DIR$/songs/zerator/huissier.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/inventaire.mp3" afterPath="$PROJECT_DIR$/songs/zerator/inventaire.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/jentendspastarage.mp3" afterPath="$PROJECT_DIR$/songs/zerator/jentendspastarage.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/jesuisunemachine.mp3" afterPath="$PROJECT_DIR$/songs/zerator/jesuisunemachine.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/jesuisvraimentcon.mp3" afterPath="$PROJECT_DIR$/songs/zerator/jesuisvraimentcon.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/laperceuse.mp3" afterPath="$PROJECT_DIR$/songs/zerator/laperceuse.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/legedanslecul.mp3" afterPath="$PROJECT_DIR$/songs/zerator/legedanslecul.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/legendaire.mp3" afterPath="$PROJECT_DIR$/songs/zerator/legendaire.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/lejeuestsimple.mp3" afterPath="$PROJECT_DIR$/songs/zerator/lejeuestsimple.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/lespagesjaunes.mp3" afterPath="$PROJECT_DIR$/songs/zerator/lespagesjaunes.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/mauvaisecran.mp3" afterPath="$PROJECT_DIR$/songs/zerator/mauvaisecran.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/merde.mp3" afterPath="$PROJECT_DIR$/songs/zerator/merde.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/onpuelamerde.mp3" afterPath="$PROJECT_DIR$/songs/zerator/onpuelamerde.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/oui1.mp3" afterPath="$PROJECT_DIR$/songs/zerator/oui1.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/oui2.mp3" afterPath="$PROJECT_DIR$/songs/zerator/oui2.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/oui3.mp3" afterPath="$PROJECT_DIR$/songs/zerator/oui3.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/peur1.mp3" afterPath="$PROJECT_DIR$/songs/zerator/peur1.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/peur2.mp3" afterPath="$PROJECT_DIR$/songs/zerator/peur2.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/peur3.mp3" afterPath="$PROJECT_DIR$/songs/zerator/peur3.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/quandtuveux.mp3" afterPath="$PROJECT_DIR$/songs/zerator/quandtuveux.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/quelporc.mp3" afterPath="$PROJECT_DIR$/songs/zerator/quelporc.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/quoi1.mp3" afterPath="$PROJECT_DIR$/songs/zerator/quoi1.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/rage1.mp3" afterPath="$PROJECT_DIR$/songs/zerator/rage1.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/rage2.mp3" afterPath="$PROJECT_DIR$/songs/zerator/rage2.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/rage3.mp3" afterPath="$PROJECT_DIR$/songs/zerator/rage3.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/rage4.mp3" afterPath="$PROJECT_DIR$/songs/zerator/rage4.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/rage5.mp3" afterPath="$PROJECT_DIR$/songs/zerator/rage5.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/sorcellerie.mp3" afterPath="$PROJECT_DIR$/songs/zerator/sorcellerie.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/unefemme.mp3" afterPath="$PROJECT_DIR$/songs/zerator/unefemme.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/unicorn.mp3" afterPath="$PROJECT_DIR$/songs/zerator/unicorn.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/unpetitcaniche.mp3" afterPath="$PROJECT_DIR$/songs/zerator/unpetitcaniche.mp3" />
-      <change beforePath="$PROJECT_DIR$/src/songs/zerator/zeravssquelette.mp3" afterPath="$PROJECT_DIR$/songs/zerator/zeravssquelette.mp3" />
       <change beforePath="$PROJECT_DIR$/web-client/src/App.js" afterPath="$PROJECT_DIR$/web-client/src/App.js" />
+      <change beforePath="$PROJECT_DIR$/web-client/src/Songs/Songs.js" afterPath="$PROJECT_DIR$/web-client/src/Songs/Songs.js" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -287,11 +19,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Server.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Server.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/server/Server.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="283">
-              <caret line="28" column="5" lean-forward="true" selection-start-line="28" selection-start-column="5" selection-end-line="28" selection-end-column="5" />
+              <caret line="28" column="5" lean-forward="false" selection-start-line="28" selection-start-column="5" selection-end-line="28" selection-end-column="5" />
               <folding />
             </state>
           </provider>
@@ -310,8 +42,8 @@
       <file leaf-file-name="App.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/web-client/src/App.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="211">
-              <caret line="30" column="29" lean-forward="false" selection-start-line="30" selection-start-column="29" selection-end-line="30" selection-end-column="29" />
+            <state relative-caret-position="49">
+              <caret line="18" column="0" lean-forward="false" selection-start-line="18" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -323,7 +55,7 @@
         <entry file="file://$PROJECT_DIR$/web-client/src/Songs/Songs.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="126">
-              <caret line="10" column="46" lean-forward="false" selection-start-line="10" selection-start-column="46" selection-end-line="10" selection-end-column="46" />
+              <caret line="10" column="15" lean-forward="false" selection-start-line="10" selection-start-column="15" selection-end-line="10" selection-end-column="15" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -331,11 +63,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="false">
+      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="36">
-              <caret line="2" column="15" lean-forward="false" selection-start-line="2" selection-start-column="15" selection-end-line="2" selection-end-column="15" />
+            <state relative-caret-position="54">
+              <caret line="3" column="6" lean-forward="false" selection-start-line="3" selection-start-column="6" selection-end-line="3" selection-end-column="6" />
               <folding />
             </state>
           </provider>
@@ -428,12 +160,12 @@
         <option value="$PROJECT_DIR$/Dockerfile" />
         <option value="$PROJECT_DIR$/.dockerignore" />
         <option value="$PROJECT_DIR$/package.json" />
-        <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/src/server/Server.js" />
         <option value="$PROJECT_DIR$/src/discord/bot.js" />
         <option value="$PROJECT_DIR$/src/server/routes/Songs.js" />
-        <option value="$PROJECT_DIR$/web-client/src/App.js" />
         <option value="$PROJECT_DIR$/web-client/src/Songs/Songs.js" />
+        <option value="$PROJECT_DIR$/web-client/src/App.js" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -447,7 +179,7 @@
     <handled-path value="$PROJECT_DIR$/node_modules" />
     <handled-path value="$PROJECT_DIR$/web-client/node_modules" />
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="213" />
     <option name="width" value="427" />
     <option name="height" value="480" />
@@ -596,24 +328,25 @@
       <workItem from="1521298462642" duration="1004000" />
       <workItem from="1521301675631" duration="2871000" />
       <workItem from="1521307941912" duration="4035000" />
-      <workItem from="1521319061472" duration="6300000" />
+      <workItem from="1521319061472" duration="6899000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="37470000" />
+    <option name="totallyTimeSpent" value="38069000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1920" height="969" extended-state="7" />
+    <frame x="0" y="0" width="1920" height="969" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17616034" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3292232" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29839703" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.29839703" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3329223" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3329223" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3993135" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -896,14 +629,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="2" column="15" lean-forward="false" selection-start-line="2" selection-start-column="15" selection-end-line="2" selection-end-column="15" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/node_modules/express/lib/express.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="256">
@@ -927,16 +652,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/web-client/src/App.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="211">
-          <caret line="30" column="29" lean-forward="false" selection-start-line="30" selection-start-column="29" selection-end-line="30" selection-end-column="29" />
-          <folding>
-            <element signature="e#0#39#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/server/routes/Songs.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="324">
@@ -947,20 +662,38 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/server/Server.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="283">
+          <caret line="28" column="5" lean-forward="false" selection-start-line="28" selection-start-column="5" selection-end-line="28" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/web-client/src/Songs/Songs.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="126">
-          <caret line="10" column="46" lean-forward="false" selection-start-line="10" selection-start-column="46" selection-end-line="10" selection-end-column="46" />
+          <caret line="10" column="15" lean-forward="false" selection-start-line="10" selection-start-column="15" selection-end-line="10" selection-end-column="15" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/server/Server.js">
+    <entry file="file://$PROJECT_DIR$/web-client/src/App.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="283">
-          <caret line="28" column="5" lean-forward="true" selection-start-line="28" selection-start-column="5" selection-end-line="28" selection-end-column="5" />
+        <state relative-caret-position="49">
+          <caret line="18" column="0" lean-forward="false" selection-start-line="18" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#39#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="3" column="6" lean-forward="false" selection-start-line="3" selection-start-column="6" selection-end-line="3" selection-end-column="6" />
           <folding />
         </state>
       </provider>
