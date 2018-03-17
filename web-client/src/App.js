@@ -1,13 +1,14 @@
 import React, {Component} from 'react';
-import {Button} from 'semantic-ui-react';
-import logo from './logo.svg';
+import {Input, Menu, Segment} from 'semantic-ui-react'
+import 'semantic-ui-css/semantic.min.css';
 import './App.css';
+import Songs from "./Songs/Songs";
 
 class App extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {songs: []}
+        this.state = {categories: [], activeItem: '', activeCategory: []}
     }
 
     componentDidMount() {
@@ -17,20 +18,35 @@ class App extends Component {
     fetchSongs() {
         fetch('http://localhost:4000/api/songs')
             .then(res => res.json())
-            .then((songs) => {
-                this.setState({songs: songs});
+            .then((categories) => {
+                this.setState({categories: categories, activeItem: categories[0].name, activeCategory: categories[0]});
             });
     }
 
-    playSong(event){
-        fetch('http://localhost:4000/api/songs/'+event.target.value);
-    }
+    handleItemClick = (e, {name}) => {
+        const activeCategory = this.state.categories.find((item) => {
+            return item.name === name;
+        });
+        this.setState({
+            activeItem: name,
+            activeCategory: activeCategory
+        });
+    };
 
     render() {
 
         return (
             <div>
-                {this.state.songs.map((song) => <Button key={song.name} value={song.name} onClick={this.playSong}>{song.name}</Button>)}
+                <div className={'ui container'}>
+                    <Menu pointing>
+                        {this.state.categories.map((item) =>
+                            <Menu.Item name={item.name} active={this.state.activeItem === item.name}
+                                       key={item.name}
+                                       onClick={this.handleItemClick}/>
+                        )}
+                    </Menu>
+                    <Songs category={this.state.activeCategory}/>
+                </div>
             </div>
         );
     }
