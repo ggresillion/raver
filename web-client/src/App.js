@@ -16,7 +16,7 @@ class App extends Component {
     }
 
     fetchSongs() {
-        fetch('/api/songs')
+        fetch('http://florianboulay.pro:4000/api/songs')
             .then(res => res.json())
             .then((categories) => {
                 this.setState({categories: categories, activeItem: categories[0].name, activeCategory: categories[0]});
@@ -45,7 +45,7 @@ class App extends Component {
                                        onClick={this.handleItemClick}/>
                         )}
                     </Menu>
-                    <Songs category={this.state.activeCategory}/>
+                    <Songs refresh={this.fetchSongs} category={this.state.activeCategory}/>
                 </div>
             </div>
         );
