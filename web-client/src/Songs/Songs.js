@@ -11,7 +11,7 @@ export default class Songs extends Component {
     }
 
     playSong(event) {
-        fetch('http://florianboulay.pro:4000/api/songs?category=' + this.props.category.name + '&song=' + event.target.value);
+        fetch('http://guillaumegresillion.ddns.net/api/songs?category=' + this.props.category.name + '&song=' + event.target.value);
     }
 
     uploadSongs(e) {
@@ -20,7 +20,7 @@ export default class Songs extends Component {
         let data = new FormData();
         data.append('category', this.props.category.name);
         data.append('songs', this.state.songsToUpload);
-        fetch('http://florianboulay.pro:4000/api/songs', {
+        fetch('http://guillaumegresillion.ddns.net/api/songs', {
             method: 'POST',
             body: data
         })
