@@ -2,3 +2,4 @@ node_modules/
 web-client/node_modules/
 web-client/lib/
 .idea/
+dist/

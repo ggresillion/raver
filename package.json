@@ -4,19 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon src/server/Server.js --exec babel-node --presets es2015,stage-2",
-    "start_prod": "babel-node src/server/Server.js --presets es2015,stage-2",
+    "start": "nodemon src/server/Server.js --exec babel-node",
+    "start_prod": "npm run build && forever start dist/server/Server.js",
+    "install_prod": "npm install & (cd web-client && npm install)",
+    "build": "babel src/ -d dist/ & npm run build_web_client",
+    "build_web_client": "cd web-client && npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start_with_web_client": "npm start & npm run start_web_client",
-    "start_web_client": "cd web-client && npm start",
-    "start_with_web_client_prod": "npm start_prod & npm run start_web_client_prod",
-    "start_web_client_prod": "cd web-client && npm build"
+    "start_web_client": "cd web-client && npm start"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "babel-preset-env": "^1.6.1",
     "discord.js": "^11.3.2",
     "express": "^4.16.3",
+    "forever": "^0.15.3",
     "fs": "0.0.1-security",
     "node-opus": "^0.2.7",
     "semantic-ui-css": "^2.3.0"
