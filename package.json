@@ -11,7 +11,8 @@
     "build_web_client": "cd web-client && npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start_with_web_client": "npm start & npm run start_web_client",
-    "start_web_client": "cd web-client && npm start"
+    "start_web_client": "cd web-client && npm start",
+    "stop": "forever stopall"
   },
   "author": "",
   "license": "ISC",
