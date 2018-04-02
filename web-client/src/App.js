@@ -1,14 +1,16 @@
 import React, {Component} from 'react';
-import {Input, Menu, Segment} from 'semantic-ui-react'
+import {Input, Menu, Segment, Button} from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.min.css';
 import './App.css';
 import Songs from "./Songs/Songs";
+import config from './config'
 
 class App extends Component {
 
     constructor(props) {
         super(props);
         this.state = {categories: [], activeItem: '', activeCategory: []}
+        this.fetchSongs = this.fetchSongs.bind(this);
     }
 
     componentDidMount() {
@@ -16,7 +18,7 @@ class App extends Component {
     }
 
     fetchSongs() {
-        fetch('api/songs')
+        fetch(config.api.url + '/api/songs')
             .then(res => res.json())
             .then((categories) => {
                 this.setState({categories: categories, activeItem: categories[0].name, activeCategory: categories[0]});
@@ -44,6 +46,7 @@ class App extends Component {
                                        key={item.name}
                                        onClick={this.handleItemClick}/>
                         )}
+                        {/*<Menu.Item> <Button basic color="green" name="+" key="+" onClick={console.log}>+</Button></Menu.Item>*/}
                     </Menu>
                     <Songs refresh={this.fetchSongs} category={this.state.activeCategory}/>
                 </div>

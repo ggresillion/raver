@@ -1,17 +1,18 @@
 import React, { Component } from 'react';
 import { Button } from "semantic-ui-react";
+import config from "../config";
 
 export default class Songs extends Component {
 
     constructor(props) {
         super(props);
         this.state = { songsToUpload: [] };
-        this.onChange = this.onChange.bind(this);
         this.uploadSongs = this.uploadSongs.bind(this);
+        this.openUploadDialog = this.openUploadDialog.bind(this);
     }
 
     playSong(event) {
-        fetch('api/songs?category=' + this.props.category.name + '&song=' + event.target.value);
+        fetch(config.api.url + '/api/songs?category=' + this.props.category.name + '&song=' + event.target.value);
     }
 
     uploadSongs(e) {
@@ -19,18 +20,18 @@ export default class Songs extends Component {
         e.preventDefault();
         let data = new FormData();
         data.append('category', this.props.category.name);
-        data.append('songs', this.state.songsToUpload);
-        fetch('api/songs', {
+        data.append('songs', e.target.files[0]);
+        fetch(config.api.url + '/api/songs', {
             method: 'POST',
             body: data
         })
             .then((res) => {
-                //this.props.refresh();
+                this.props.refresh();
             })
     }
 
-    onChange(e) {
-        this.setState({ songsToUpload: e.target.files[0] })
+    openUploadDialog(){
+        this.refs.input.click();
     }
 
     render() {
@@ -48,10 +49,8 @@ export default class Songs extends Component {
                             </div>
                         )}
                         <div className='column'>
-                            <form onSubmit={this.uploadSongs}>
-                                <input name="songs" type="file" onChange={this.onChange} style={{ display: 'block' }} />
-                                <Button basic color='green' type='submit' key='add'>+</Button>
-                            </form>
+                                <input ref="input" name="songs" type="file" onChange={this.uploadSongs} style={{ display: 'none' }} />
+                                <Button basic color='green' onClick={this.openUploadDialog} key='add'>+</Button>
                         </div>
                     </div>
                 </div>
