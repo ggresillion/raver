@@ -22,6 +22,7 @@
     "express": "^4.16.3",
     "forever": "^0.15.3",
     "fs": "0.0.1-security",
+    "multer": "^1.3.0",
     "node-opus": "^0.2.7",
     "semantic-ui-css": "^2.3.0"
   },
@@ -29,6 +30,7 @@
     "babel-cli": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
+    "babel-register": "^6.26.0",
     "nodemon": "^1.17.1"
   }
 }
