@@ -5,13 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon src/server/Server.js --exec babel-node",
-    "start_prod": "npm run build && forever start dist/server/Server.js",
+    "start_prod": "forever start dist/server/Server.js",
     "install_prod": "npm install & (cd web-client && npm install)",
-    "build": "babel src/ -d dist/ & npm run build_web_client",
-    "build_web_client": "cd web-client && npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start_with_web_client": "npm start & npm run start_web_client",
-    "start_web_client": "cd web-client && npm start",
+    "build_prod": "babel src/ -d dist/ & (cd web-client && npm run build)",
     "stop_prod": "forever stopall"
   },
   "author": "",
