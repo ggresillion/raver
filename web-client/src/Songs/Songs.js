@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { Button } from "semantic-ui-react";
+import { Button, Grid, GridColumn, Segment } from "semantic-ui-react";
 import config from "../config";
+import './Songs.css';
 
 export default class Songs extends Component {
 
@@ -30,7 +31,7 @@ export default class Songs extends Component {
             })
     }
 
-    openUploadDialog(){
+    openUploadDialog() {
         this.refs.input.click();
     }
 
@@ -39,22 +40,14 @@ export default class Songs extends Component {
             return null;
         }
         return (
-            <div className={'ui segments'}>
-                <div className={'ui grid container'}>
-                    <div className={'ui seven column grid'}>
+            <Segment id="song-grid">
                         {this.props.category.songs.map((song) =>
-                            <div className={'column'}>
-                                <Button key={song.name} value={song.name}
+                                <Button id="song-button" key={song.name} value={song.name}
                                     onClick={(event) => this.playSong(event)}>{song.name}</Button>
-                            </div>
                         )}
-                        <div className='column'>
-                                <input ref="input" name="songs" type="file" onChange={this.uploadSongs} style={{ display: 'none' }} />
-                                <Button basic color='green' onClick={this.openUploadDialog} key='add'>+</Button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                            <input ref="input" name="songs" type="file" onChange={this.uploadSongs} style={{ display: 'none' }} />
+                            <Button id="song-button" basic color='green' onClick={this.openUploadDialog} key='add'>+</Button>
+            </Segment>
         );
     }
 }
