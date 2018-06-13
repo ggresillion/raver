@@ -1,0 +1,42 @@
+<mat-toolbar color="primary">
+  <h1>Discord Sound Board</h1>
+</mat-toolbar>
+
+<mat-sidenav-container class="example-container">
+  <mat-sidenav mode="side" opened>
+    <button mat-button style="margin-top: 10px;">
+      <mat-icon class="sidenav-icon" svgIcon="songs"></mat-icon>
+    </button>
+    <br>
+    <button mat-button>
+      <mat-icon class="sidenav-icon" svgIcon="youtube"></mat-icon>
+    </button>
+    <br>
+    <button mat-button>
+      <mat-icon class="sidenav-icon" svgIcon="settings"></mat-icon>
+    </button>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <mat-card>
+      <mat-card-content>
+        <mat-tab-group>
+          <div *ngFor="let category of categories">
+            <mat-tab label="{{category.name}}">
+              <div class="song-grid">
+                <div *ngFor="let song of category.songs">
+                  <button class="song-button" mat-raised-button (click)="playSong(song.name, category.name)">
+                    {{song.name}}
+                  </button>
+                </div>
+                <input type="file" #file style="display: none" (change)="onFilesAdded()" multiple/>
+                <button class="song-button" mat-raised-button (click)="addSong(category.name)">
+                  <mat-icon svgIcon="add"></mat-icon>
+                </button>
+              </div>
+            </mat-tab>
+          </div>
+        </mat-tab-group>
+      </mat-card-content>
+    </mat-card>
+  </mat-sidenav-content>
+</mat-sidenav-container>
