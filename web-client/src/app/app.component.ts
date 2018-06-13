@@ -3,7 +3,6 @@ import {SongService} from './services/song/song.service';
 import Category from './model/Category';
 import {DomSanitizer} from '@angular/platform-browser';
 import {MatIconRegistry} from '@angular/material';
-import Song from './model/Song';
 
 @Component({
   selector: 'app-root',
@@ -16,9 +15,10 @@ export class AppComponent implements OnInit {
   public files: Set<File> = new Set();
   public categories: Category[] = [];
   public selectedCategory: string;
+  public progress;
 
-  constructor(private songService: SongService
-    , private matIconRegistry: MatIconRegistry,
+  constructor(private songService: SongService,
+              private matIconRegistry: MatIconRegistry,
               private domSanitizer: DomSanitizer) {
     matIconRegistry.addSvgIcon('songs', this.domSanitizer.bypassSecurityTrustResourceUrl('../assets/music-player.svg'));
     matIconRegistry.addSvgIcon('youtube', this.domSanitizer.bypassSecurityTrustResourceUrl('../assets/youtube.svg'));
@@ -45,8 +45,12 @@ export class AppComponent implements OnInit {
     for (const key in files) {
       if (!isNaN(parseInt(key, 10))) {
         this.files.add(files[key]);
-        this.songService.uploadSong(this.selectedCategory, this.files);
+        this.progress = this.songService.uploadSong(this.selectedCategory, this.files);
       }
     }
+  }
+
+  createCategory() {
+
   }
 }

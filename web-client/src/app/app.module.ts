@@ -8,7 +8,7 @@ import {
   MatExpansionModule,
   MatFormFieldModule,
   MatIconModule, MatInputModule,
-  MatMenuModule,
+  MatMenuModule, MatProgressBarModule,
   MatSidenavModule, MatTabsModule,
   MatToolbarModule
 } from '@angular/material';
@@ -33,6 +33,7 @@ import {HttpClientModule} from '@angular/common/http';
     MatCardModule,
     MatInputModule,
     BrowserAnimationsModule,
+    MatProgressBarModule,
     HttpClientModule
   ],
   providers: [],

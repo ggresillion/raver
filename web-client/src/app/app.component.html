@@ -21,20 +21,32 @@
       <mat-card-content>
         <mat-tab-group>
           <div *ngFor="let category of categories">
-            <mat-tab label="{{category.name}}">
+            <mat-tab [id]="'category'" label="{{category.name}}">
               <div class="song-grid">
                 <div *ngFor="let song of category.songs">
-                  <button class="song-button" mat-raised-button (click)="playSong(song.name, category.name)">
+                  <button class="song-button" [id]="song.name" mat-raised-button
+                          (click)="playSong(song.name, category.name)">
                     {{song.name}}
                   </button>
                 </div>
                 <input type="file" #file style="display: none" (change)="onFilesAdded()" multiple/>
                 <button class="song-button" mat-raised-button (click)="addSong(category.name)">
-                  <mat-icon svgIcon="add"></mat-icon>
+                  <mat-icon style="color: #67b363;">add_circle</mat-icon>
                 </button>
+              </div>
+              <div *ngFor="let uploadingSong of files">
+                <mat-progress-bar *ngIf="progress" mode="determinate"
+                                  [value]="progress[file.name].progress | async"></mat-progress-bar>
               </div>
             </mat-tab>
           </div>
+          <mat-tab disabled>
+            <ng-template mat-tab-label>
+              <button mat-icon-button (click)="createCategory()">
+                <mat-icon style="color: green;">add_circle</mat-icon>
+              </button>
+            </ng-template>
+          </mat-tab>
         </mat-tab-group>
       </mat-card-content>
     </mat-card>
