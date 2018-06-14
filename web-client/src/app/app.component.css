@@ -4,7 +4,7 @@ mat-card {
 
 .song-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill,minmax(120px,1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   grid-gap: 10px;
   grid-auto-flow: dense;
   list-style: none;
@@ -20,7 +20,42 @@ mat-card {
   height: 100%;
 }
 
-.sidenav-icon {
+.round {
+  border-radius: 50%;
   width: 50px;
   height: 50px;
+  font-size: 50px;
 }
+
+.guild-icon {
+  cursor: pointer;
+}
+
+.no-img-guild {
+  background: grey;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 50px;
+  font-size: 20px;
+  color: white;
+}
+
+.add-guild-span {
+  font-size: 40px;
+  font-family: initial;
+}
+
+.add-guild {
+  margin-top: 5px;
+}
+
+.selected-guild:before {
+  border-radius: 20px;
+  content: " ";
+  height: 50px;
+  left: -5px;
+  position: absolute;
+  width: 10px;
+  background-color: crimson;
+}
+

@@ -4,17 +4,30 @@
 
 <mat-sidenav-container class="example-container">
   <mat-sidenav mode="side" opened>
-    <button mat-button style="margin-top: 10px;">
-      <mat-icon class="sidenav-icon" svgIcon="songs"></mat-icon>
-    </button>
-    <br>
-    <button mat-button>
-      <mat-icon class="sidenav-icon" svgIcon="youtube"></mat-icon>
-    </button>
-    <br>
-    <button mat-button>
-      <mat-icon class="sidenav-icon" svgIcon="settings"></mat-icon>
-    </button>
+    <div *ngFor="let guild of guilds">
+      <div *ngIf="guild.icon"
+           (click)="selectGuild(guild)"
+           [class]="guild.id === this.selectedGuildId ? 'selected-guild' : ''">
+        <img class="round guild-icon"
+             [src]="'https://cdn.discordapp.com/icons/' + guild.id + '/' + guild.icon">
+      </div>
+      <div *ngIf="!guild.icon" (click)="selectGuild(guild)"
+           [class]="guild.id === this.selectedGuildId ? 'selected-guild no-img-guild round guild-icon' : 'no-img-guild round guild-icon'">
+        <span>{{guild.name.charAt(0).toUpperCase()}}</span>
+      </div>
+    </div>
+    <div class="no-img-guild round add-guild guild-icon"><span class="add-guild-span">+</span></div>
+    <!--<button mat-button style="margin-top: 10px;">-->
+    <!--<mat-icon class="sidenav-icon" svgIcon="songs"></mat-icon>-->
+    <!--</button>-->
+    <!--<br>-->
+    <!--<button mat-button>-->
+    <!--<mat-icon class="sidenav-icon" svgIcon="youtube"></mat-icon>-->
+    <!--</button>-->
+    <!--<br>-->
+    <!--<button mat-button>-->
+    <!--<mat-icon class="sidenav-icon" svgIcon="settings"></mat-icon>-->
+    <!--</button>-->
   </mat-sidenav>
   <mat-sidenav-content>
     <mat-card>

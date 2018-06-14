@@ -4,6 +4,7 @@ import Category from './model/Category';
 import {MatIconRegistry, MatSnackBar} from "@angular/material";
 import {DomSanitizer} from "@angular/platform-browser";
 import {forkJoin} from "rxjs/index";
+import {BotService} from "./services/bot/bot.service";
 
 @Component({
   selector: 'app-root',
@@ -17,11 +18,14 @@ export class AppComponent implements OnInit {
   public categories: Category[] = [];
   public selectedCategory: string;
   public progress;
+  public guilds = [];
+  public selectedGuildId = 0;
 
   constructor(private songService: SongService,
               private matIconRegistry: MatIconRegistry,
               private domSanitizer: DomSanitizer,
-              private snackBar: MatSnackBar) {
+              private snackBar: MatSnackBar,
+              private botService: BotService) {
     matIconRegistry.addSvgIcon('songs', this.domSanitizer.bypassSecurityTrustResourceUrl('../assets/music-player.svg'));
     matIconRegistry.addSvgIcon('youtube', this.domSanitizer.bypassSecurityTrustResourceUrl('../assets/youtube.svg'));
     matIconRegistry.addSvgIcon('settings', this.domSanitizer.bypassSecurityTrustResourceUrl('../assets/settings.svg'));
@@ -34,6 +38,7 @@ export class AppComponent implements OnInit {
 
   refresh() {
     this.songService.getSongs().subscribe((categories) => this.categories = categories);
+    this.botService.getGuilds().subscribe((guilds) => this.guilds = guilds);
   }
 
   playSong(song: string, category: string) {
@@ -65,6 +70,23 @@ export class AppComponent implements OnInit {
         duration: 3000
       });
     });
+  }
+
+  selectGuild(guild) {
+    this.selectedGuildId = guild.id;
+  }
+
+  getGuildIconClass(guild){
+    const icon = 'round guild-icon';
+    const selectedIcon = 'selected-guild round guild-icon';
+    if(!this.selectedGuildId){
+      return icon;
+    }
+    if(guild.id === this.selectedGuildId){
+      return selectedIcon;
+    } else {
+      return icon;
+    }
   }
 
   createCategory() {

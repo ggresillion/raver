@@ -7,8 +7,17 @@ body {
   height: 100%;
   width: 100%;
   position: absolute;
+  overflow: hidden;
 }
 
 .basic-container {
   padding: 30px;
+}
+
+.mat-sidenav-container {
+  height: 100%;
+}
+
+.mat-sidenav {
+  padding: 10px;
 }
