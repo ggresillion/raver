@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpEventType, HttpRequest, HttpResponse} from '@angular/common/http';
-import {Observable, Subject} from 'rxjs';
 import Category from '../../model/Category';
 import {environment} from '../../../environments/environment';
+import {Observable, Subject} from "rxjs/index";
 
 @Injectable({
   providedIn: 'root'
@@ -25,8 +25,6 @@ export class SongService {
 
     files.forEach(file => {
       const formData: FormData = new FormData();
-      console.log(category)
-      console.log(files)
       formData.append('category', category);
       formData.append('songs', file, file.name);
 
@@ -38,12 +36,9 @@ export class SongService {
 
       this.http.request(req).subscribe(event => {
         if (event.type === HttpEventType.UploadProgress) {
-
           const percentDone = Math.round(100 * event.loaded / event.total);
-
           progress.next(percentDone);
-        } else if (event instanceof HttpResponse) {
-
+        } else if (event.type ===3) {
           progress.complete();
         }
       });

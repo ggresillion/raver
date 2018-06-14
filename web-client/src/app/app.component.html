@@ -29,14 +29,19 @@
                     {{song.name}}
                   </button>
                 </div>
+                <div *ngFor="let file of files">
+                  <button class="song-button" mat-raised-button>
+                    {{file.name | removeExtension}}
+                    <mat-progress-bar style="bottom: 0;  position: absolute;  left: 0;"
+                                      *ngIf="progress"
+                                      mode="determinate"
+                                      [value]="progress[file.name].progress | async"></mat-progress-bar>
+                  </button>
+                </div>
                 <input type="file" #file style="display: none" (change)="onFilesAdded()" multiple/>
                 <button class="song-button" mat-raised-button (click)="addSong(category.name)">
                   <mat-icon style="color: #67b363;">add_circle</mat-icon>
                 </button>
-              </div>
-              <div *ngFor="let uploadingSong of files">
-                <mat-progress-bar *ngIf="progress" mode="determinate"
-                                  [value]="progress[file.name].progress | async"></mat-progress-bar>
               </div>
             </mat-tab>
           </div>
