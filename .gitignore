@@ -4,3 +4,5 @@ web-client/lib/
 .idea/
 dist/
 songs/
+package-lock.json
+web-client/package-lock.json

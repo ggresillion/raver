@@ -1,6 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import Bot from '../discord/bot';
+import Manage from './routes/Manage';
 import Songs from './routes/Songs';
 import Categories from "./routes/Categories";
 
@@ -28,6 +28,7 @@ class Server {
     bindRoutes() {
         this.app.use('/api/songs', Songs);
         this.app.use('/api/categories', Categories);
+        this.app.use('/api/manage', Manage);
     }
 
     start() {

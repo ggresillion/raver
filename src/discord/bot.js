@@ -68,6 +68,22 @@ class Bot {
             });
         });
     }
+
+    getActiveGuilds() {
+        let guilds = [];
+        this.client.voiceConnections.forEach((value, key) => {
+            guilds.push(value.channel.guild);
+        });
+        return guilds;
+    }
+
+    getGuilds(){
+        let guilds = [];
+        this.client.guilds.forEach((value, key) => {
+            guilds.push(value);
+        });
+        return guilds;
+    }
 }
 
 export default new Bot();
