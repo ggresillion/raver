@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon src/server/Server.js --exec babel-node",
     "start_off": "babel-node src/server/Server.js",
-    "start_prod": "forever start dist/server/Server.js",
+    "start_prod": "forever start -c 'node -r babel-register' src/server/Server.js",
     "install_prod": "npm install & (cd web-client && npm install)",
     "build_prod": "babel src/ -d dist/ & (cd web-client && npm run build)",
     "stop_prod": "forever stopall"

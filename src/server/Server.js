@@ -14,7 +14,7 @@ class Server {
 
     init() {
         this.app = express();
-        this.app.use(express.static('web-client/build'));
+        this.app.use(express.static('web-client/dist/DiscordSoundBoard'));
         this.app.use((req, res, next) => {
             res.header("Access-Control-Allow-Origin", "*");
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
