@@ -8,7 +8,6 @@ import {Observable, Subject} from "rxjs/index";
   providedIn: 'root'
 })
 export class SongService {
-
   constructor(private http: HttpClient) {
   }
 
@@ -17,7 +16,15 @@ export class SongService {
   }
 
   playSong(song: string, category: string) {
-    return this.http.get(environment.apiEndpoint + '/songs/play?song=' + song + '&category=' + category);
+    return this.http.get(environment.apiEndpoint + '/songs/play?song=' + song + '&category=' + category, {
+      responseType: 'text'
+    });
+  }
+
+  changeSongCategory(song: string, category: string) {
+    return this.http.put(environment.apiEndpoint + '/songs?song=' + song + '&category=' + category, null, {
+      responseType: 'text'
+    });
   }
 
   public uploadSong(category: string, files: Set<File>): { [key: string]: Observable<number> } {
@@ -38,7 +45,7 @@ export class SongService {
         if (event.type === HttpEventType.UploadProgress) {
           const percentDone = Math.round(100 * event.loaded / event.total);
           progress.next(percentDone);
-        } else if (event.type ===3) {
+        } else if (event.type === 3) {
           progress.complete();
         }
       });

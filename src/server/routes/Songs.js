@@ -56,6 +56,10 @@ router.post('/', upload.single('songs'), (req, res) => {
 router.put('/', (req, res) => {
     if (req.query.category && req.query.song) {
         let songs = Finder.from(SONG_DIR).findFiles(req.query.song + '.*');
+        if (!songs || songs.length === 0) {
+            res.sendStatus(404);
+            return;
+        }
         try {
             let oldPath = songs[0];
             let newPath = SONG_DIR + req.query.category + '/' + req.query.song + extractExtension(songs[0]);

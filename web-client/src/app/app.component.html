@@ -37,13 +37,13 @@
             <mat-tab [id]="'category'" label="{{category.name}}">
               <div class="song-grid">
                 <div *ngFor="let song of category.songs">
-                  <button class="song-button" [id]="song.name" mat-raised-button
+                  <button (dragend)="onSongDrop($event, song)" draggable="true" class="song-button draggable" [id]="song.name" mat-raised-button
                           (click)="playSong(song.name, category.name)">
                     {{song.name}}
                   </button>
                 </div>
                 <div *ngFor="let file of files">
-                  <button class="song-button" mat-raised-button>
+                  <button class="song-button" mat-raised-button #songButtons>
                     {{file.name | removeExtension}}
                     <mat-progress-bar style="bottom: 0;  position: absolute;  left: 0;"
                                       *ngIf="progress"

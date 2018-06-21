@@ -1,4 +1,4 @@
 export default class Song {
-  public name: String;
-  public path: String;
+  public name: string;
+  public path: string;
 }

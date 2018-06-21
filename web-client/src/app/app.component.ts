@@ -1,10 +1,10 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {SongService} from './services/song/song.service';
 import Category from './model/Category';
 import {MatIconRegistry, MatSnackBar} from "@angular/material";
 import {DomSanitizer} from "@angular/platform-browser";
 import {forkJoin} from "rxjs/index";
-import {BotService} from "./services/bot/bot.service";
+import Song from "./model/Song";
 
 @Component({
   selector: 'app-root',
@@ -24,8 +24,7 @@ export class AppComponent implements OnInit {
   constructor(private songService: SongService,
               private matIconRegistry: MatIconRegistry,
               private domSanitizer: DomSanitizer,
-              private snackBar: MatSnackBar,
-              private botService: BotService) {
+              private snackBar: MatSnackBar) {
     matIconRegistry.addSvgIcon('songs', this.domSanitizer.bypassSecurityTrustResourceUrl('../assets/music-player.svg'));
     matIconRegistry.addSvgIcon('youtube', this.domSanitizer.bypassSecurityTrustResourceUrl('../assets/youtube.svg'));
     matIconRegistry.addSvgIcon('settings', this.domSanitizer.bypassSecurityTrustResourceUrl('../assets/settings.svg'));
@@ -36,9 +35,24 @@ export class AppComponent implements OnInit {
     this.refresh();
   }
 
+  onSongDrop(e: DragEvent, song: Song) {
+    let x = e.pageX;
+    let y = e.pageY;
+    let target: any = document.elementFromPoint(x, y);
+    let newCategory: string = target.innerText;
+    if (target.className.includes("mat-tab-label") && !!newCategory) {
+      this.songService.changeSongCategory(song.name, newCategory).subscribe(() => {
+        console.log("refresh")
+        this.refresh();
+      });
+    }
+  }
+
   refresh() {
-    this.songService.getSongs().subscribe((categories) => this.categories = categories);
-    this.botService.getGuilds().subscribe((guilds) => this.guilds = guilds);
+    this.songService.getSongs().subscribe((categories) => {
+      this.categories = categories;
+    });
+    //this.botService.getGuilds().subscribe((guilds) => this.guilds = guilds);
   }
 
   playSong(song: string, category: string) {
@@ -76,13 +90,13 @@ export class AppComponent implements OnInit {
     this.selectedGuildId = guild.id;
   }
 
-  getGuildIconClass(guild){
+  getGuildIconClass(guild) {
     const icon = 'round guild-icon';
     const selectedIcon = 'selected-guild round guild-icon';
-    if(!this.selectedGuildId){
+    if (!this.selectedGuildId) {
       return icon;
     }
-    if(guild.id === this.selectedGuildId){
+    if (guild.id === this.selectedGuildId) {
       return selectedIcon;
     } else {
       return icon;
