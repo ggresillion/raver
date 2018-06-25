@@ -17,17 +17,6 @@
       </div>
     </div>
     <div class="no-img-guild round add-guild guild-icon"><span class="add-guild-span">+</span></div>
-    <!--<button mat-button style="margin-top: 10px;">-->
-    <!--<mat-icon class="sidenav-icon" svgIcon="songs"></mat-icon>-->
-    <!--</button>-->
-    <!--<br>-->
-    <!--<button mat-button>-->
-    <!--<mat-icon class="sidenav-icon" svgIcon="youtube"></mat-icon>-->
-    <!--</button>-->
-    <!--<br>-->
-    <!--<button mat-button>-->
-    <!--<mat-icon class="sidenav-icon" svgIcon="settings"></mat-icon>-->
-    <!--</button>-->
   </mat-sidenav>
   <mat-sidenav-content>
     <mat-card>
@@ -52,9 +41,20 @@
                   </button>
                 </div>
                 <input type="file" #file style="display: none" (change)="onFilesAdded()" multiple/>
-                <button class="song-button" mat-raised-button (click)="addSong(category.name)">
+
+                <button class="song-button" mat-raised-button [matMenuTriggerFor]="addMenu">
                   <mat-icon style="color: #67b363;">add_circle</mat-icon>
                 </button>
+                <mat-menu #addMenu="matMenu">
+                  <button mat-menu-item (click)="addSong(category.name)">
+                    <mat-icon>cloud_upload</mat-icon>
+                    <span>From Disk</span>
+                  </button>
+                  <button mat-menu-item (click)="openAddFromYoutubeDialog(category.name)">
+                    <mat-icon>youtube_searched_for</mat-icon>
+                    <span>From Youtube</span>
+                  </button>
+                </mat-menu>
               </div>
             </mat-tab>
           </div>

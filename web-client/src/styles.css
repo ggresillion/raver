@@ -21,3 +21,9 @@ body {
 .mat-sidenav {
   padding: 10px;
 }
+
+mat-spinner {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100px;
+}

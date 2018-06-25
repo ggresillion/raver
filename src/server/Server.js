@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import Manage from './routes/Manage';
 import Songs from './routes/Songs';
 import Categories from "./routes/Categories";
+import Youtube from "./routes/Youtube";
 
 class Server {
     constructor() {
@@ -29,6 +30,7 @@ class Server {
         this.app.use('/api/songs', Songs);
         this.app.use('/api/categories', Categories);
         this.app.use('/api/manage', Manage);
+        this.app.use('/api/youtube', Youtube)
     }
 
     start() {

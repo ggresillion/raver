@@ -1,10 +1,12 @@
 import {AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {SongService} from './services/song/song.service';
 import Category from './model/Category';
-import {MatIconRegistry, MatSnackBar} from "@angular/material";
+import {MatDialog, MatIconRegistry, MatSnackBar} from "@angular/material";
 import {DomSanitizer} from "@angular/platform-browser";
 import {forkJoin} from "rxjs/index";
 import Song from "./model/Song";
+import {AddFromYoutubeDialogComponent} from "./dialogs/add-from-youtube-dialog/add-from-youtube-dialog.component";
+import {CreateCategoryDialogComponent} from "./dialogs/create-category-dialog/create-category-dialog.component";
 
 @Component({
   selector: 'app-root',
@@ -24,7 +26,8 @@ export class AppComponent implements OnInit {
   constructor(private songService: SongService,
               private matIconRegistry: MatIconRegistry,
               private domSanitizer: DomSanitizer,
-              private snackBar: MatSnackBar) {
+              private snackBar: MatSnackBar,
+              private dialog: MatDialog) {
     matIconRegistry.addSvgIcon('songs', this.domSanitizer.bypassSecurityTrustResourceUrl('../assets/music-player.svg'));
     matIconRegistry.addSvgIcon('youtube', this.domSanitizer.bypassSecurityTrustResourceUrl('../assets/youtube.svg'));
     matIconRegistry.addSvgIcon('settings', this.domSanitizer.bypassSecurityTrustResourceUrl('../assets/settings.svg'));
@@ -42,7 +45,6 @@ export class AppComponent implements OnInit {
     let newCategory: string = target.innerText;
     if (target.className.includes("mat-tab-label") && !!newCategory) {
       this.songService.changeSongCategory(song.name, newCategory).subscribe(() => {
-        console.log("refresh")
         this.refresh();
       });
     }
@@ -104,6 +106,14 @@ export class AppComponent implements OnInit {
   }
 
   createCategory() {
+    let dialogRef = this.dialog.open(CreateCategoryDialogComponent);
+    dialogRef.afterClosed().subscribe(() => this.refresh());
+  }
 
+  openAddFromYoutubeDialog(category: string) {
+    let dialogRef = this.dialog.open(AddFromYoutubeDialogComponent, {data: {category: category}});
+    dialogRef.afterClosed().subscribe(() => {
+      this.refresh();
+    });
   }
 }

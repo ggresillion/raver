@@ -57,4 +57,16 @@ export class SongService {
 
     return status;
   }
+
+  public searchYoutube(videoURL: string) {
+    return this.http.get(environment.apiEndpoint + '/youtube/search?url=' + videoURL);
+  }
+
+  public uploadFromYoutube(videoURL: string, category: string, name: string) {
+    return this.http.get(environment.apiEndpoint + '/youtube/upload?url=' + videoURL
+      + '&category=' + category
+      + '&name=' + name, {
+      responseType: 'text'
+    });
+  }
 }
