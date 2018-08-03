@@ -1,7 +1,6 @@
 import Discord from 'discord.js';
 import fs from 'fs';
 
-const token;
 const songsDir = 'songs/';
 
 class Bot {
