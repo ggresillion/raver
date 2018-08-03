@@ -2,6 +2,7 @@ import Discord from 'discord.js';
 import fs from 'fs';
 
 const token;
+const songsDir = 'songs/';
 
 class Bot {
 
@@ -45,13 +46,13 @@ class Bot {
         this.client.login(process.env.BOT_SECRET)
     }
 
-    play(song) {
+    play(category, song) {
         if (this.connections.length === 0) {
             throw new Error('No connection !');
         }
-        const songsDir = './src/songs/';
-        fs.readdir(songsDir, (err, items) => {
-            const filepath = songsDir + items.find((el) => {
+        const dir = songsDir + category;
+        fs.readdir(dir, (err, items) => {
+            const filepath = dir + '/' + items.find((el) => {
                 return el.toString().startsWith(song);
             });
             fs.stat(filepath, (err, stats) => {
@@ -69,6 +70,22 @@ class Bot {
 
             });
         });
+    }
+
+    getActiveGuilds() {
+        let guilds = [];
+        this.client.voiceConnections.forEach((value, key) => {
+            guilds.push(value.channel.guild);
+        });
+        return guilds;
+    }
+
+    getGuilds(){
+        let guilds = [];
+        this.client.guilds.forEach((value, key) => {
+            guilds.push(value);
+        });
+        return guilds;
     }
 }
 
