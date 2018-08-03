@@ -32,9 +32,9 @@ class Server {
     }
 
     start() {
-        this.app.listen(4000, () => {
+        this.app.listen(process.env.PORT || 4000, () => {
             console.log('Server listening');
-        })
+        });
     }
 }
 
