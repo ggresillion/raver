@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
 import fs from 'fs';
 
-const token = 'NDIzNTgwOTkzMzU0NzI3NDM0.DYsawQ.x9r0hgNg7H7J5v7y_pEJOPoXF68';
+const token;
 
 class Bot {
 
@@ -38,8 +38,11 @@ class Bot {
                 }
             }
         });
-
-        this.client.login(token)
+        if(!process.env.BOT_SECRET){
+            console.log("Please define BOT_SECRET env variable");
+            return;
+        }
+        this.client.login(process.env.BOT_SECRET)
     }
 
     play(song) {
