@@ -21,6 +21,7 @@ class Server {
         });
         this.app.use(bodyParser.urlencoded({ extended: true }));
         this.app.use(bodyParser.json());
+        this.app.use(express.static('../../web-client/lib'));
     }
 
     bindRoutes() {
