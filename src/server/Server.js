@@ -34,7 +34,7 @@ class Server {
     }
 
     start() {
-        this.app.listen(4000, () => {
+        this.app.listen(3000, () => {
             console.log('Server listening');
         })
     }
