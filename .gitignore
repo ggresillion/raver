@@ -1,8 +1,7 @@
 node_modules/
 web-client/node_modules/
-web-client/lib/
 .idea/
 dist/
-songs/
+uploads/
 package-lock.json
 web-client/package-lock.json

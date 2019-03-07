@@ -1,0 +1,35 @@
+{
+  "name": "discordsoundboard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon src/server/Server.js --exec babel-node",
+    "start_off": "babel-node src/server/Server.js",
+    "start_prod": "forever start -c 'node -r babel-register' src/server/Server.js",
+    "install_prod": "npm install & (cd web-client && npm install)",
+    "build_prod": "babel src/ -d dist/ & (cd web-client && npm run build)",
+    "stop_prod": "forever stopall"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babel-preset-env": "^1.7.0",
+    "discord.js": "^11.4.2",
+    "express": "^4.16.4",
+    "forever": "^0.15.3",
+    "fs": "^0.0.1-security",
+    "fs-finder": "^1.8.1",
+    "multer": "^1.4.1",
+    "node-opus": "^0.3.1",
+    "semantic-ui-css": "^2.4.1",
+    "youtube-dl": "^1.12.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "babel-register": "^6.26.0",
+    "nodemon": "^1.18.9"
+  }
+}
