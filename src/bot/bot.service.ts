@@ -16,6 +16,10 @@ export class BotService {
     this.bindToEvents();
   }
 
+  public playSound(id: number) {
+    // TODO
+  }
+
   private bindToEvents() {
     this.client.on('ready', () => {
       this.logger.log('Bot ready !');
@@ -24,7 +28,6 @@ export class BotService {
       const command = message.content;
       switch (command) {
         case Command.JOIN:
-          this.logger.log('JOINING');
           if (message.member.voiceChannel) {
             message.member.voiceChannel.join()
               .then(connection => {

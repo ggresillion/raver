@@ -4,6 +4,12 @@ services:
   api:
     build: .
 
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - '27017:27017'
+
   nginx:
     image: nginx
     volumes:
