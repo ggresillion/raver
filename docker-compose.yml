@@ -19,7 +19,7 @@ services:
       - '80:80'
 
   front:
-    build: ./web-client/
+    build: web-old/web-client/
     volumes:
       - app-volume:/var/www/
 

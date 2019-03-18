@@ -5,9 +5,10 @@ import {StorageModule} from '../storage/storage.module';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import {Sound} from './sound.entity';
 import {BotModule} from '../bot/bot.module';
+import {AuthModule} from '../auth/auth.module';
 
 @Module({
-  imports: [StorageModule, BotModule, TypeOrmModule.forFeature([Sound])],
+  imports: [StorageModule, BotModule, TypeOrmModule.forFeature([Sound]), AuthModule],
   providers: [SoundService],
   controllers: [SoundController],
 })
