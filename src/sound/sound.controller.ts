@@ -4,6 +4,7 @@ import {Sound} from './sound.entity';
 import {AuthGuard} from '@nestjs/passport';
 
 @Controller('sounds')
+@UseGuards(AuthGuard())
 export class SoundController {
 
   constructor(
@@ -12,7 +13,6 @@ export class SoundController {
   }
 
   @Get()
-  @UseGuards(AuthGuard())
   public async getSounds(): Promise<Sound[]> {
     return await this.soundService.getSounds();
   }
