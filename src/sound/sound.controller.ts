@@ -1,6 +1,7 @@
-import {Controller, FileInterceptor, Get, Param, Post, UploadedFile, UseInterceptors} from '@nestjs/common';
+import {Controller, FileInterceptor, Get, Param, Post, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
 import {SoundService} from './sound.service';
 import {Sound} from './sound.entity';
+import {AuthGuard} from '@nestjs/passport';
 
 @Controller('sounds')
 export class SoundController {
@@ -11,6 +12,7 @@ export class SoundController {
   }
 
   @Get()
+  @UseGuards(AuthGuard())
   public async getSounds(): Promise<Sound[]> {
     return await this.soundService.getSounds();
   }
