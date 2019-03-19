@@ -1,9 +1,7 @@
 import {Injectable} from '@nestjs/common';
 import {UserService} from '../user/user.service';
 import {JwtService} from '@nestjs/jwt';
-import {LoginDto} from './dto/login.dto';
-import {CreateUserDto} from '../user/dto/create-user.dto';
-import {GetUserDTO} from '../user/dto/get-user.dto';
+import fetch from 'node-fetch';
 
 @Injectable()
 export class AuthService {
@@ -14,17 +12,26 @@ export class AuthService {
   ) {
   }
 
-  public async login(email: string, password: string): Promise<LoginDto> {
-    const user = await this.userService.findOneByEmailAndPassword(email, password);
-    return this.getTokenForUser(user);
+  /**
+   * Get user informations from the discord API
+   * @param token
+   */
+  public static async getDiscordUser(token: string) {
+    return fetch('http://discordapp.com/api/users/@me', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then(res => res.json());
   }
 
-  public async register(userDto: CreateUserDto) {
-    const user = await this.userService.createUser(userDto);
-    return this.getTokenForUser(user);
-  }
-
-  private getTokenForUser(user: GetUserDTO) {
-    return {token: this.jwtService.sign({user}), expiresIn: 3600, user};
+  public async generateToken(discordToken: string, discordRefreshToken: string) {
+    const user = AuthService.getDiscordUser(discordToken);
+    return {
+      token: this.jwtService.sign({
+        token: discordToken,
+        refreshToken: discordRefreshToken,
+        ...user,
+      }), expiresIn: 3600,
+    };
   }
 }

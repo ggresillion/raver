@@ -18,10 +18,8 @@ export class AuthController {
   public async login(@Res() res: Response, @Req() req: Request): Promise<any> {
 
     const redirect = this.getRedirectURI(req);
-
     res.redirect(`https://discordapp.com/oauth2/authorize?client_id=${this.CLIENT_ID}&scope=${this.scopes.join()}` +
       `&response_type=code&redirect_uri=${redirect}`);
-    // return await this.authService.login(credentials.email, credentials.password);
   }
 
   @Get('callback')
@@ -31,23 +29,21 @@ export class AuthController {
     }
     const redirect = this.getRedirectURI(req);
     const creds = Buffer.from(`${this.CLIENT_ID}:${this.CLIENT_SECRET}`).toString('base64');
-    const response = await fetch(`https://discordapp.com/api/oauth2/token?code=${code}&redirect_uri=${redirect}&scope=${this.scopes.join()}` +
-      `&grant_type=authorization_code`,
+    const response = await fetch(`https://discordapp.com/api/oauth2/token?grant_type=authorization_code&code=${code}` +
+      `&redirect_uri=${redirect}&scope=${this.scopes.join()}`,
       {
         method: 'POST',
         headers: {
           Authorization: `Basic ${creds}`,
         },
       });
-    return await response.json();
+    const body = await response.json();
+    const token = body.access_token;
+    const refreshToken = body.refresh_token;
+    return this.authService.generateToken(token, refreshToken);
   }
 
   private getRedirectURI(req: Request) {
     return req.protocol + '://' + req.get('Host') + '/' + this.redirectEndpoint;
   }
-
-  // @Post('register')
-  // public async register(@Body()userDto: CreateUserDto) {
-  //   return await this.authService.register(userDto);
-  // }
 }
