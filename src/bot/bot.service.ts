@@ -6,7 +6,7 @@ import {Command} from './command.enum';
 export class BotService {
 
   private readonly logger = new Logger(BotService.name);
-  private readonly token = process.env.BOT_SECRET;
+  private readonly token = process.env.CLIENT_SECRET;
   private client;
   private connections: VoiceConnection[] = [];
 
@@ -44,7 +44,7 @@ export class BotService {
 
   private connect() {
     if (!this.token) {
-      this.logger.error('Please define BOT_SECRET env variable');
+      this.logger.error('Please define CLIENT_SECRET env variable');
     }
     this.client.login(this.token);
   }
