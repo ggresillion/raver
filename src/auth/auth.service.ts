@@ -31,7 +31,8 @@ export class AuthService {
         token: discordToken,
         refreshToken: discordRefreshToken,
         ...user,
-      }), expiresIn: 3600,
+      }),
+      expiresIn: 3600,
     };
   }
 }
