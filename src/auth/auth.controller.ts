@@ -17,7 +17,7 @@ export class AuthController {
   @Get('login')
   public async login(@Res() res: Response, @Req() req: Request): Promise<any> {
 
-    const redirect = this.getRedirectURI(req);
+    const redirect = this.getRedirectURI(req) + '/login';
     res.redirect(`https://discordapp.com/oauth2/authorize?client_id=${this.CLIENT_ID}&scope=${this.scopes.join()}` +
       `&response_type=code&redirect_uri=${redirect}`);
   }
@@ -40,10 +40,10 @@ export class AuthController {
     const body = await response.json();
     const token = body.access_token;
     const refreshToken = body.refresh_token;
-    return this.authService.generateToken(token, refreshToken);
+    const jwtToken = this.authService.generateToken(token, refreshToken);
   }
 
   private getRedirectURI(req: Request) {
-    return req.protocol + '://' + req.get('Host') + '/' + this.redirectEndpoint;
+    return req.protocol + '://' + req.get('Host');
   }
 }
