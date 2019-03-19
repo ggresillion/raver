@@ -1,0 +1,50 @@
+<mat-card>
+  <mat-card-content>
+    <mat-tab-group>
+      <div *ngFor="let category of categories">
+        <mat-tab [id]="'category'" label="{{category.name}}">
+          <div class="song-grid">
+            <div *ngFor="let song of category.songs">
+              <button (click)="playSong(song.name, category.name)" (dragend)="onSongDrop($event, song)" [id]="song.name"
+                      class="song-button draggable" draggable="true"
+                      mat-raised-button>
+                {{song.name}}
+              </button>
+            </div>
+            <div *ngFor="let file of files">
+              <button #songButtons class="song-button" mat-raised-button>
+                {{file.name | removeExtension}}
+                <mat-progress-bar *ngIf="progress"
+                                  [value]="progress[file.name].progress | async"
+                                  mode="determinate"
+                                  style="bottom: 0;  position: absolute;  left: 0;"></mat-progress-bar>
+              </button>
+            </div>
+            <input #file (change)="onFilesAdded()" multiple style="display: none" type="file"/>
+
+            <button [matMenuTriggerFor]="addMenu" class="song-button" mat-raised-button>
+              <mat-icon style="color: #67b363;">add_circle</mat-icon>
+            </button>
+            <mat-menu #addMenu="matMenu">
+              <button (click)="addSong(category.name)" mat-menu-item>
+                <mat-icon>cloud_upload</mat-icon>
+                <span>From Disk</span>
+              </button>
+              <button (click)="openAddFromYoutubeDialog(category.name)" mat-menu-item>
+                <mat-icon>youtube_searched_for</mat-icon>
+                <span>From Youtube</span>
+              </button>
+            </mat-menu>
+          </div>
+        </mat-tab>
+      </div>
+      <mat-tab disabled>
+        <ng-template mat-tab-label>
+          <button (click)="createCategory()" mat-icon-button>
+            <mat-icon style="color: green;">add_circle</mat-icon>
+          </button>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card-content>
+</mat-card>
