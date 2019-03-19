@@ -21,6 +21,10 @@ export class AuthService {
     window.location.href = environment.api + '/auth/login';
   }
 
+  public getToken(code: string) {
+    console.log(code);
+  }
+
   private getStorage() {
     return localStorage;
   }
