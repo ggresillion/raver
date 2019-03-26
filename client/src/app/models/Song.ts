@@ -1,4 +1,4 @@
-export default class Song {
+export class Song {
   public name: string;
   public path: string;
 }

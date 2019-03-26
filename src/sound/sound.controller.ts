@@ -1,10 +1,10 @@
 import {Controller, FileInterceptor, Get, Param, Post, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
 import {SoundService} from './sound.service';
 import {Sound} from './sound.entity';
-import {AuthGuard} from '@nestjs/passport';
+import {UserGuard} from 'src/auth/guards/user.guard';
 
 @Controller('sounds')
-@UseGuards(AuthGuard())
+@UseGuards(UserGuard)
 export class SoundController {
 
   constructor(

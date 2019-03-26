@@ -1,6 +1,6 @@
-import Song from './Song';
+import {Song} from './Song';
 
-export default class Category {
+export class Category {
   public name: string;
   public songs: Song[];
 }
