@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {AuthService} from '../../services/auth/auth.service';
-import {User} from '../../../../../src/user/user.entity';
+import {AuthService} from '../auth/auth.service';
+import {User} from '../models/User';
 
 @Component({
   selector: 'app-home',
@@ -15,7 +15,7 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    // this.connectedUser = this.authService.getConnectedUser();
+    this.authService.getConnectedUser().subscribe(user => this.connectedUser = user);
     console.log(this.connectedUser);
   }
 

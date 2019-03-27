@@ -1,4 +1,4 @@
-import {BadRequestException, Controller, Get, Query, Req, Res} from '@nestjs/common';
+import {BadRequestException, Controller, Get, Query, Req, Res, UnauthorizedException} from '@nestjs/common';
 import {Request, Response} from 'express';
 import {AuthService} from './auth.service';
 import fetch from 'node-fetch';
@@ -42,10 +42,10 @@ export class AuthController {
       });
     const body = await response.json();
     if (!response.ok) {
-      return res.json({client: this.CLIENT_ID, secret: this.CLIENT_SECRET});
+      throw new UnauthorizedException();
     }
     const accessToken = body.access_token;
     const refreshToken = body.refresh_token;
-    res.redirect(`${this.configService.get('app.clientUrl')}login?access_token=${accessToken}&refreshToken=${refreshToken}`);
+    res.redirect(`${this.configService.get('app.clientUrl')}login?accessToken=${accessToken}&refreshToken=${refreshToken}`);
   }
 }

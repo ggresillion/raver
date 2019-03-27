@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpEventType, HttpRequest} from '@angular/common/http';
-import Category from '../../models/Category';
-import {environment} from '../../../environments/environment';
+import {Category} from '../models/Category';
+import {environment} from '../../environments/environment';
 import {Observable, Subject} from 'rxjs';
 
 @Injectable({

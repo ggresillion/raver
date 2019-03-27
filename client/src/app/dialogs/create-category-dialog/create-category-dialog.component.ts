@@ -1,7 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {CategoryService} from "../../services/category/category.service";
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
-import {AddFromYoutubeDialogComponent} from "../add-from-youtube-dialog/add-from-youtube-dialog.component";
+import {CategoryService} from '../../category/category.service';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 
 @Component({
   selector: 'app-create-category-dialog',

@@ -13,7 +13,7 @@
             </div>
             <div *ngFor="let file of files">
               <button #songButtons class="song-button" mat-raised-button>
-                {{file.name | removeExtension}}
+                {{file.name}}
                 <mat-progress-bar *ngIf="progress"
                                   [value]="progress[file.name].progress | async"
                                   mode="determinate"

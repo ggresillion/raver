@@ -1,6 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
-import {SongService} from "../../services/song/song.service";
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {SongService} from '../../song/song.service';
 
 @Component({
   selector: 'app-add-from-youtube-dialog',

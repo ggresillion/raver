@@ -1,9 +1,12 @@
 import {ExecutionContext, Injectable, UnauthorizedException} from '@nestjs/common';
-import {AuthService} from '../auth.service';
 import {Request} from 'express';
+import {DiscordService} from '../../discord/discord.service';
 
 @Injectable()
 export class UserGuard {
+
+  constructor(private readonly discordService: DiscordService) {
+  }
 
   public async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<Request>();
@@ -11,14 +14,11 @@ export class UserGuard {
     if (!authorizationHeader) {
       throw new UnauthorizedException('Missing Authorization header');
     }
-    if (!authorizationHeader.startsWith('Basic ')) {
+    if (!authorizationHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException('Wrong Authorization header');
     }
-    const token = authorizationHeader.slice(6);
-    const user = await AuthService.getDiscordUser(token);
-    if (!user) {
-      throw new UnauthorizedException('Failed to contact Discord API');
-    }
+    const token = authorizationHeader.slice(7);
+    const user = await this.discordService.getUser(token);
     request.params.user = user;
     return !!user;
   }

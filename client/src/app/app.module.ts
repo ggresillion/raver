@@ -1,8 +1,7 @@
 import {NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
-import {HttpClientModule} from '@angular/common/http';
-import {RemoveExtensionPipe} from './pipes/remove-extension/remove-extension.pipe';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import {
   MatButtonModule,
   MatCardModule,
@@ -25,21 +24,21 @@ import {BrowserModule} from '@angular/platform-browser';
 import {AddFromYoutubeDialogComponent} from './dialogs/add-from-youtube-dialog/add-from-youtube-dialog.component';
 import {FormsModule} from '@angular/forms';
 import {CreateCategoryDialogComponent} from './dialogs/create-category-dialog/create-category-dialog.component';
-import {LoginComponent} from './components/login/login.component';
+import {LoginComponent} from './login/login.component';
 import {AppRoutingModule} from './app-routing.module';
-import {HomeComponent} from './components/home/home.component';
-import { SongsComponent } from './components/home/songs/songs.component';
-import { GuildsComponent } from './components/home/guilds/guilds.component';
+import {HomeComponent} from './home/home.component';
+import {SongComponent} from './song/song.component';
+import {GuildsComponent} from './guilds/guilds.component';
+import {TokenInterceptor} from './auth/token.interceptor';
 
 @NgModule({
   declarations: [
     AppComponent,
-    RemoveExtensionPipe,
     AddFromYoutubeDialogComponent,
     CreateCategoryDialogComponent,
     LoginComponent,
     HomeComponent,
-    SongsComponent,
+    SongComponent,
     GuildsComponent
   ],
   imports: [
@@ -64,7 +63,7 @@ import { GuildsComponent } from './components/home/guilds/guilds.component';
     MatProgressSpinnerModule,
     AppRoutingModule
   ],
-  providers: [],
+  providers: [{provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true}],
   bootstrap: [AppComponent],
   entryComponents: [
     AddFromYoutubeDialogComponent,

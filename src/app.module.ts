@@ -7,13 +7,14 @@ import {TypeOrmModule} from '@nestjs/typeorm';
 import {UserModule} from './user/user.module';
 import {AuthModule} from './auth/auth.module';
 import {ConfigModule} from 'nestjs-config';
+import {DiscordModule} from './discord/discord.module';
 import * as path from 'path';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(),
     ConfigModule.load(path.resolve(__dirname, 'config', '**/!(*.d).{ts,js}')),
-    BotModule, SoundModule, StorageModule, UserModule, AuthModule,
+    BotModule, SoundModule, StorageModule, UserModule, AuthModule, DiscordModule,
   ],
   controllers: [AppController],
   providers: [],

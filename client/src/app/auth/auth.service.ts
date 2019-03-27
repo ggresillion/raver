@@ -1,13 +1,15 @@
 import {Injectable} from '@angular/core';
-import {environment} from '../../../environments/environment';
-import {User} from '../../models/User';
+import {environment} from '../../environments/environment';
+import {User} from '../models/User';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  constructor() {
+  constructor(private readonly httpClient: HttpClient) {
   }
 
   public setAccessToken(accessToken: string) {
@@ -18,10 +20,6 @@ export class AuthService {
     this.getStorage().setItem('refreshToken', refreshToken);
   }
 
-  public setConnectedUser(user: User) {
-    this.getStorage().setItem('connectedUser', JSON.stringify(user));
-  }
-
   public getAccessToken() {
     return this.getStorage().getItem('accessToken');
   }
@@ -30,8 +28,8 @@ export class AuthService {
     return !!this.getAccessToken();
   }
 
-  public getConnectedUser(): User {
-    return JSON.parse(this.getStorage().getItem('connectedUser'));
+  public getConnectedUser(): Observable<User> {
+    return this.httpClient.get<User>(environment.api + '/users/me');
   }
 
   public login() {

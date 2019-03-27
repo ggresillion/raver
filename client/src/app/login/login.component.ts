@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {AuthService} from '../../services/auth/auth.service';
+import {AuthService} from '../auth/auth.service';
 import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
@@ -21,8 +21,8 @@ export class LoginComponent implements OnInit {
       this.router.navigate(['/']);
     }
     this.route.queryParams.subscribe((params) => {
-      const accessToken = params.access_token;
-      const refreshToken = params.refresh_token;
+      const accessToken = params.accessToken;
+      const refreshToken = params.refreshToken;
       if (accessToken && refreshToken) {
         this.authService.setAccessToken(accessToken);
         this.authService.setRefreshToken(refreshToken);
