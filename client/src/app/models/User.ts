@@ -1,3 +1,5 @@
 export class User {
-  public name: string;
+  public readonly id: number;
+  public readonly name: string;
+  public readonly avatar: string;
 }

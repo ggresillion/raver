@@ -1,18 +1,18 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpEventType, HttpRequest} from '@angular/common/http';
-import {Category} from '../models/Category';
 import {environment} from '../../environments/environment';
 import {Observable, Subject} from 'rxjs';
+import {Sound} from '../models/Sound';
 
 @Injectable({
   providedIn: 'root'
 })
-export class SongService {
+export class SoundService {
   constructor(private http: HttpClient) {
   }
 
-  getSongs(): Observable<Category[]> {
-    return this.http.get<Category[]>(environment.api + '/sounds');
+  getSounds(): Observable<Sound[]> {
+    return this.http.get<Sound[]>(environment.api + '/sounds');
   }
 
   playSong(song: string, category: string) {

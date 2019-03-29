@@ -1,6 +1,6 @@
-import {Song} from './Song';
+import {Sound} from './Sound';
 
 export class Category {
   public name: string;
-  public songs: Song[];
+  public songs: Sound[];
 }

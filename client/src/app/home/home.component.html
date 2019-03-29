@@ -1,5 +1,7 @@
 <mat-toolbar color="primary">
-  <!--<h1>Discord Sound Board</h1>-->
-  <h1>{{connectedUser.username}}</h1>
+  <h1>Discord Sound Board</h1>
+  <span class="fill"></span>
+  <p class="username">{{connectedUser.username}}</p>
+  <img [src]="'https://cdn.discordapp.com/avatars/' + connectedUser.id + '/' + connectedUser.avatar" class="avatar">
 </mat-toolbar>
-<app-songs></app-songs>
+<app-sound></app-sound>

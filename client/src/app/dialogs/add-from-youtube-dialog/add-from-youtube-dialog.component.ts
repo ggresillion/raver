@@ -1,6 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
-import {SongService} from '../../song/song.service';
+import {SoundService} from '../../sound/sound.service';
 
 @Component({
   selector: 'app-add-from-youtube-dialog',
@@ -16,7 +16,7 @@ export class AddFromYoutubeDialogComponent implements OnInit {
 
   constructor(public dialogRef: MatDialogRef<AddFromYoutubeDialogComponent>,
               @Inject(MAT_DIALOG_DATA) public data: any,
-              private songService: SongService) {
+              private songService: SoundService) {
   }
 
   ngOnInit() {
