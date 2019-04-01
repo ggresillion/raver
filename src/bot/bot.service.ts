@@ -1,6 +1,7 @@
 import {Injectable, Logger} from '@nestjs/common';
 import {Client, Message, VoiceConnection} from 'discord.js';
 import {Command} from './command.enum';
+import {StorageService} from '../storage/storage.service';
 
 @Injectable()
 export class BotService {
@@ -10,14 +11,18 @@ export class BotService {
   private client;
   private connections: VoiceConnection[] = [];
 
-  constructor() {
+  constructor(
+    private readonly storageService: StorageService,
+  ) {
     this.client = new Client();
     this.connect();
     this.bindToEvents();
   }
 
-  public playSound(id: number) {
-    // TODO
+  public playFile(uuid: string) {
+    this.connections.forEach(co => {
+      co.playFile(this.storageService.getPathFromUUID(uuid));
+    });
   }
 
   private bindToEvents() {

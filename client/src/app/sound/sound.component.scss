@@ -1,0 +1,13 @@
+.container {
+  display: flex;
+  align-items: center;
+
+  & * {
+    margin: 12px;
+  }
+
+  .sound-button {
+    height: 100px;
+    width: 100px;
+  }
+}

@@ -1,0 +1,17 @@
+<h1 mat-dialog-title>Upload a sound</h1>
+<div id="form" mat-dialog-content>
+  <input matInput type="file" accept="image/*" #file>
+  <!--<button (click)="file.click()" mat-raised-button>-->
+  <!--<mat-icon>attach_file</mat-icon>-->
+  <!--Choose a file-->
+  <!--</button>-->
+  <mat-form-field class="example-full-width">
+    <label>
+      <input matInput placeholder="Name" [(ngModel)]="name">
+    </label>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button>Cancel</button>
+  <button mat-button (click)="upload()">Upload</button>
+</div>

@@ -2,6 +2,7 @@ import {Controller, FileInterceptor, Get, Param, Post, UploadedFile, UseGuards, 
 import {SoundService} from './sound.service';
 import {Sound} from './sound.entity';
 import {UserGuard} from 'src/auth/guards/user.guard';
+import {ObjectID} from 'typeorm';
 
 @Controller('sounds')
 @UseGuards(UserGuard)

@@ -3,9 +3,9 @@ import {MatCardModule, MatIconModule, MatTabsModule, MatToolbarModule} from '@an
 import {CommonModule} from '@angular/common';
 
 @NgModule({
-  declarations: [],
   exports: [
     CommonModule,
+    FormsModule,
     MatCardModule,
     MatIconModule,
     MatTabsModule,

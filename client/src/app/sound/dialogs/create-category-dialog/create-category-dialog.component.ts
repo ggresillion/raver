@@ -1,11 +1,11 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {CategoryService} from '../../category/category.service';
+import {CategoryService} from '../../../category/category.service';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 
 @Component({
   selector: 'app-create-category-dialog',
   templateUrl: './create-category-dialog.component.html',
-  styleUrls: ['./create-category-dialog.component.css']
+  styleUrls: ['./create-category-dialog.component.scss']
 })
 export class CreateCategoryDialogComponent implements OnInit {
 
