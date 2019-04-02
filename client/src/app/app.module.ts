@@ -7,6 +7,7 @@ import {TokenInterceptor} from './auth/token.interceptor';
 import {HomeModule} from './home/home.module';
 import {LoginModule} from './login/login.module';
 import {BrowserModule} from '@angular/platform-browser';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [

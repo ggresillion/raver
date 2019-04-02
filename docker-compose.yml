@@ -1,8 +1,15 @@
-version: '2'
+version: '3'
 services:
 
   api:
     build: .
+    volumes:
+      - uploads-volume:/uploads
+    environment:
+      - CLIENT_ID
+      - CLIENT_SECRET
+      - BOT_TOKEN
+      - NODE_ENV=production
 
   mongo:
     image: mongo
@@ -11,17 +18,14 @@ services:
       - '27017:27017'
 
   nginx:
-    image: nginx
+    image: nginx:alpine
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - app-volume:/var/www/
     ports:
       - '80:80'
 
   front:
-    build: web-old/web-client/
-    volumes:
-      - app-volume:/var/www/
+    build: client/
 
 volumes:
-    app-volume:
+  uploads-volume:

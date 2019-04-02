@@ -1,5 +1,6 @@
 {
   "type": "mongodb",
+  "host": "mongo",
   "database": "dsb",
   "entities": [
     "src/**/**.entity{.ts,.js}"

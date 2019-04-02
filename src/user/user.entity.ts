@@ -1,5 +1,4 @@
-import {BeforeInsert, BeforeUpdate, Column, Entity, Index, ObjectIdColumn} from 'typeorm';
-import {hash} from 'bcrypt';
+import {Column, Entity, Index, ObjectIdColumn} from 'typeorm';
 
 @Entity()
 export class User {
@@ -16,13 +15,4 @@ export class User {
 
   @Column()
   public password: string;
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  private cipherPassword() {
-    if (this.password) {
-      return hash(this.password, 10)
-        .then(hPassword => this.password = hPassword);
-    }
-  }
 }
