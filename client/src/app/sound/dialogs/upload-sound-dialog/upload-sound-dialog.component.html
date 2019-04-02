@@ -1,10 +1,11 @@
 <h1 mat-dialog-title>Upload a sound</h1>
 <div id="form" mat-dialog-content>
-  <input matInput type="file" accept="image/*" #file>
-  <!--<button (click)="file.click()" mat-raised-button>-->
-  <!--<mat-icon>attach_file</mat-icon>-->
-  <!--Choose a file-->
-  <!--</button>-->
+  <input style="visibility: hidden" (change)="onFileSelection($event)" type="file" accept="image/*" #file>
+  <button (click)="file.click()" mat-raised-button>
+    <mat-icon>attach_file</mat-icon>
+    Choose a file
+  </button>
+  <span id="file-name">{{file.files && file.files.length > 0 ? file.files[0].name : null}}</span>
   <mat-form-field class="example-full-width">
     <label>
       <input matInput placeholder="Name" [(ngModel)]="name">

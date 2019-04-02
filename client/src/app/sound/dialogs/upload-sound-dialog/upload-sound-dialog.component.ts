@@ -1,5 +1,5 @@
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {MatDialogRef} from '@angular/material';
 import {SoundService} from '../../sound.service';
 
 @Component({
@@ -10,9 +10,9 @@ import {SoundService} from '../../sound.service';
 export class UploadSoundDialogComponent implements OnInit {
 
   public name = '';
+  @ViewChild('file') fileInput: ElementRef;
 
   constructor(public dialogRef: MatDialogRef<UploadSoundDialogComponent>,
-              @Inject(MAT_DIALOG_DATA) public data: any,
               private songService: SoundService) {
   }
 
@@ -20,6 +20,19 @@ export class UploadSoundDialogComponent implements OnInit {
   }
 
   public upload() {
+
+    const file = this.fileInput.nativeElement.files[0];
+    // this.songService.uploadSong(null, file);
     this.dialogRef.close();
+  }
+
+  public onFileSelection(e) {
+    const file = e.target.files[0];
+    if (!!file) {
+      this.name = file.name.split('.').slice(0, -1).join('.');
+      if (this.name.length > 30) {
+        this.name = this.name.slice(0, 30);
+      }
+    }
   }
 }
