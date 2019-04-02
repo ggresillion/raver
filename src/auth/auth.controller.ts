@@ -30,7 +30,8 @@ export class AuthController {
     if (!code) {
       throw new BadRequestException();
     }
-    const redirect = req.protocol + '://' + req.get('Host') + '/api/auth/token';
+    const host = `${req.protocol}://${req.get('Host')}/`;
+    const redirect = host + 'api/auth/token';
     const creds = Buffer.from(`${this.CLIENT_ID}:${this.CLIENT_SECRET}`).toString('base64');
     const response = await fetch(`https://discordapp.com/api/oauth2/token?grant_type=authorization_code&code=${code}` +
       `&redirect_uri=${redirect}&scope=${this.scopes.join()}`,
@@ -46,6 +47,7 @@ export class AuthController {
     }
     const accessToken = body.access_token;
     const refreshToken = body.refresh_token;
-    res.redirect(`${this.configService.get('app.clientUrl')}login?accessToken=${accessToken}&refreshToken=${refreshToken}`);
+    res.redirect(`${this.configService.get('app.clientUrl') ? this.configService.get('app.clientUrl') : `${host}/#/`}` +
+      `login?accessToken=${accessToken}&refreshToken=${refreshToken}`);
   }
 }
