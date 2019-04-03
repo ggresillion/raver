@@ -9,15 +9,19 @@ import {BotService} from '../bot/bot.service';
 export class SoundService {
 
   constructor(
-    private readonly storageService: StorageService,
-    private readonly botService: BotService,
     @InjectRepository(Sound)
     private readonly soundRepository: MongoRepository<Sound>,
+    private readonly storageService: StorageService,
+    private readonly botService: BotService,
   ) {
   }
 
   public async getSounds(): Promise<Sound[]> {
     return this.soundRepository.find();
+  }
+
+  public async getSoundById(id: ObjectID): Promise<Sound> {
+    return this.soundRepository.findOne(id);
   }
 
   public async saveSound(name: string, buffer: Buffer) {
@@ -33,7 +37,13 @@ export class SoundService {
     }
   }
 
-  public async playSound(id: number) {
-    return this.botService.playSound(id);
+  public async playSound(id: ObjectID): Promise<Sound> {
+    return this.getSoundById(id).then(sound => {
+      if (!sound) {
+        throw new NotFoundException('sound not found');
+      }
+      this.botService.playFile(sound.uuid);
+      return sound;
+    });
   }
 }
