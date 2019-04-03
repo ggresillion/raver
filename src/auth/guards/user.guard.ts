@@ -18,7 +18,8 @@ export class UserGuard {
       throw new UnauthorizedException('Wrong Authorization header');
     }
     const token = authorizationHeader.slice(7);
-    const user = await this.discordService.getUser(token);
+    this.discordService.setToken(token);
+    const user = await this.discordService.getUser();
     request.params.user = user;
     return !!user;
   }

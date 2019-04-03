@@ -1,6 +1,6 @@
 import {Injectable, NotFoundException, UnprocessableEntityException} from '@nestjs/common';
 import {StorageService} from '../storage/storage.service';
-import {MongoRepository, ObjectID} from 'typeorm';
+import {ObjectID, Repository} from 'typeorm';
 import {Sound} from './sound.entity';
 import {InjectRepository} from '@nestjs/typeorm';
 import {BotService} from '../bot/bot.service';
@@ -10,7 +10,7 @@ export class SoundService {
 
   constructor(
     @InjectRepository(Sound)
-    private readonly soundRepository: MongoRepository<Sound>,
+    private readonly soundRepository: Repository<Sound>,
     private readonly storageService: StorageService,
     private readonly botService: BotService,
   ) {

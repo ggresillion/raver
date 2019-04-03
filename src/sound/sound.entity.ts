@@ -1,10 +1,10 @@
-import {Column, Entity, Index, ObjectID, ObjectIdColumn} from 'typeorm';
+import {Column, Entity, Index, ObjectID, PrimaryGeneratedColumn} from 'typeorm';
 import {v4 as uuid} from 'uuid';
 
 @Entity()
 export class Sound {
 
-  @ObjectIdColumn()
+  @PrimaryGeneratedColumn()
   public id: ObjectID;
 
   @Column()
@@ -13,8 +13,5 @@ export class Sound {
   @Column()
   @Index({unique: true})
   public name: string;
-
-  @Column()
-  public category: string;
 
 }
