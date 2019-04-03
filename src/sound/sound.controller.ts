@@ -1,8 +1,9 @@
-import {Controller, FileInterceptor, Get, Param, Post, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
+import {BadRequestException, Controller, Get, Param, Post, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
 import {SoundService} from './sound.service';
 import {Sound} from './sound.entity';
 import {UserGuard} from 'src/auth/guards/user.guard';
 import {ObjectID} from 'typeorm';
+import {FileInterceptor} from '@nestjs/platform-express';
 
 @Controller('sounds')
 @UseGuards(UserGuard)
@@ -21,6 +22,9 @@ export class SoundController {
   @Post()
   @UseInterceptors(FileInterceptor('sound'))
   public async createSound(@UploadedFile()file): Promise<Sound> {
+    if (!file) {
+      throw new BadRequestException('missing file');
+    }
     return await this.soundService.saveSound(file.originalname, file.buffer);
   }
 

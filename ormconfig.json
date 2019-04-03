@@ -1,7 +1,10 @@
 {
-  "type": "mongodb",
-  "host": "mongo",
+  "type": "postgres",
+  "host": "localhost",
+  "port": 7654,
   "database": "dsb",
+  "username": "dsb",
+  "password": "dsb",
   "entities": [
     "src/**/**.entity{.ts,.js}"
   ],
