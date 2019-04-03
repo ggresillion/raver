@@ -9,7 +9,7 @@ import {User} from '../models/User';
 })
 export class HomeComponent implements OnInit {
 
-  private connectedUser: User;
+  public connectedUser: User;
 
   constructor(private readonly authService: AuthService) {
   }

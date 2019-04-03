@@ -2,12 +2,20 @@
   flex: 1 1 auto;
 }
 
-.avatar {
-  border-radius: 999px;
-  max-height: 80%;
-  cursor: pointer;
-}
+.user {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 
-.username {
-  margin-right: 14px;
+  .avatar {
+    border-radius: 999px;
+    max-height: 80%;
+    cursor: pointer;
+  }
+
+  .username {
+    margin-right: 14px;
+  }
+
 }

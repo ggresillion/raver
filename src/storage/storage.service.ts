@@ -35,4 +35,8 @@ export class StorageService {
         return err ? reject(err) : resolve();
       }));
   }
+
+  public getPathFromUUID(uuid: string) {
+    return this.STORAGE_PATH + uuid;
+  }
 }

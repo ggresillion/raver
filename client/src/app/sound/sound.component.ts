@@ -13,11 +13,22 @@ export class SoundComponent implements OnInit {
 
   public sounds: Sound[] = [];
 
-  constructor(private readonly songService: SoundService) {
+  constructor(
+    private readonly soundService: SoundService,
+    public readonly dialog: MatDialog,
+  ) {
   }
 
   ngOnInit() {
-    this.songService.getSounds().subscribe(sounds => this.sounds = sounds);
+    this.soundService.getSounds().subscribe(sounds => this.sounds = sounds);
   }
 
+  onSoundClick(id: number) {
+    this.soundService.playSound(id).subscribe(() => {
+    });
+  }
+
+  uploadSound() {
+    this.dialog.open(UploadSoundDialogComponent);
+  }
 }

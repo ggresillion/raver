@@ -15,10 +15,8 @@ export class SoundService {
     return this.http.get<Sound[]>(environment.api + '/sounds');
   }
 
-  playSong(song: string, category: string) {
-    return this.http.get(environment.api + '/songs/play?song=' + song + '&category=' + category, {
-      responseType: 'text'
-    });
+  playSound(id: number) {
+    return this.http.post(`${environment.api}/sounds/${id}/play`, null);
   }
 
   changeSongCategory(song: string, category: string) {

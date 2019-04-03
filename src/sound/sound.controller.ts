@@ -25,7 +25,7 @@ export class SoundController {
   }
 
   @Post('/:id/play')
-  public async playSound(@Param()id: number) {
+  public async playSound(@Param()id: ObjectID) {
     return await this.soundService.playSound(id);
   }
 }

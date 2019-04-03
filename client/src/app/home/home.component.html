@@ -1,7 +1,9 @@
 <mat-toolbar color="primary">
   <h1>Discord Sound Board</h1>
   <span class="fill"></span>
-  <p class="username">{{connectedUser.username}}</p>
-  <img [src]="'https://cdn.discordapp.com/avatars/' + connectedUser.id + '/' + connectedUser.avatar" class="avatar">
+  <div *ngIf="!!connectedUser" class="user">
+    <p class="username">{{connectedUser.username}}</p>
+    <img [src]="'https://cdn.discordapp.com/avatars/' + connectedUser.id + '/' + connectedUser.avatar" class="avatar">
+  </div>
 </mat-toolbar>
 <app-sound></app-sound>
