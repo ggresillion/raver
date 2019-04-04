@@ -1,7 +1,7 @@
 {
   "type": "postgres",
-  "host": "localhost",
-  "port": 7654,
+  "host": "postgres",
+  "port": 5432,
   "database": "dsb",
   "username": "dsb",
   "password": "dsb",
