@@ -19,41 +19,26 @@ export class SoundService {
     return this.http.post(`${environment.api}/sounds/${id}/play`, null);
   }
 
-  changeSongCategory(song: string, category: string) {
-    return this.http.put(environment.api + '/songs?song=' + song + '&category=' + category, null, {
-      responseType: 'text'
-    });
-  }
+  public uploadSound(category: string, file: File): Observable<number> {
+    const formData: FormData = new FormData();
+    formData.append('category', category);
+    formData.append('sound', file, file.name);
 
-  public uploadSong(category: string, files: Set<File>): { [key: string]: Observable<number> } {
-    const status = {};
-
-    files.forEach(file => {
-      const formData: FormData = new FormData();
-      formData.append('category', category);
-      formData.append('songs', file, file.name);
-
-      const req = new HttpRequest('POST', environment.api + '/songs', formData, {
-        reportProgress: true
-      });
-
-      const progress = new Subject<number>();
-
-      this.http.request(req).subscribe(event => {
-        if (event.type === HttpEventType.UploadProgress) {
-          const percentDone = Math.round(100 * event.loaded / event.total);
-          progress.next(percentDone);
-        } else if (event.type === 3) {
-          progress.complete();
-        }
-      });
-
-      status[file.name] = {
-        progress: progress.asObservable()
-      };
+    const req = new HttpRequest('POST', environment.api + '/sounds', formData, {
+      reportProgress: true
     });
 
-    return status;
+    const progress = new Subject<number>();
+    this.http.request(req).subscribe(event => {
+      if (event.type === HttpEventType.UploadProgress) {
+        const percentDone = Math.round(100 * event.loaded / event.total);
+        progress.next(percentDone);
+      } else if (event.type === 3) {
+        progress.complete();
+      }
+    });
+
+    return progress.asObservable();
   }
 
   public searchYoutube(videoURL: string) {

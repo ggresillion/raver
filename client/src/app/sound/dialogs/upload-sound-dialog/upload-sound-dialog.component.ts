@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, ViewChild} from '@angular/core';
 import {MatDialogRef} from '@angular/material';
 import {SoundService} from '../../sound.service';
 
@@ -7,23 +7,22 @@ import {SoundService} from '../../sound.service';
   templateUrl: './upload-sound-dialog.component.html',
   styleUrls: ['./upload-sound-dialog.component.scss']
 })
-export class UploadSoundDialogComponent implements OnInit {
+export class UploadSoundDialogComponent {
 
-  public name = '';
   @ViewChild('file') fileInput: ElementRef;
+  public name = '';
+  public uploadProgress;
 
   constructor(public dialogRef: MatDialogRef<UploadSoundDialogComponent>,
               private songService: SoundService) {
   }
 
-  ngOnInit() {
-  }
-
   public upload() {
-
     const file = this.fileInput.nativeElement.files[0];
-    // this.songService.uploadSong(null, file);
-    this.dialogRef.close();
+    this.uploadProgress = this.songService.uploadSound(null, file);
+    this.uploadProgress.subscribe(null, null, () => {
+      this.dialogRef.close();
+    });
   }
 
   public onFileSelection(e) {

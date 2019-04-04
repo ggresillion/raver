@@ -19,16 +19,21 @@ export class SoundComponent implements OnInit {
   ) {
   }
 
-  ngOnInit() {
-    this.soundService.getSounds().subscribe(sounds => this.sounds = sounds);
+  public ngOnInit() {
+    this.getSounds();
   }
 
-  onSoundClick(id: number) {
+  public onSoundClick(id: number) {
     this.soundService.playSound(id).subscribe(() => {
     });
   }
 
-  uploadSound() {
-    this.dialog.open(UploadSoundDialogComponent);
+  public uploadSound() {
+    this.dialog.open(UploadSoundDialogComponent)
+      .afterClosed().subscribe(this.getSounds);
+  }
+
+  private getSounds() {
+    this.soundService.getSounds().subscribe(sounds => this.sounds = sounds);
   }
 }
