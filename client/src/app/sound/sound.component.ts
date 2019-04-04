@@ -3,6 +3,7 @@ import {Sound} from '../models/Sound';
 import {SoundService} from './sound.service';
 import {MatDialog} from '@angular/material';
 import {UploadSoundDialogComponent} from './dialogs/upload-sound-dialog/upload-sound-dialog.component';
+import {AddFromYoutubeDialogComponent} from './dialogs/add-from-youtube-dialog/add-from-youtube-dialog.component';
 
 @Component({
   selector: 'app-sound',
@@ -30,6 +31,11 @@ export class SoundComponent implements OnInit {
 
   public uploadSound() {
     this.dialog.open(UploadSoundDialogComponent)
+      .afterClosed().subscribe(this.getSounds);
+  }
+
+  public uploadFromYoutube() {
+    this.dialog.open(AddFromYoutubeDialogComponent)
       .afterClosed().subscribe(this.getSounds);
   }
 

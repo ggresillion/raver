@@ -38,7 +38,7 @@ export class BotService {
               .then(connection => {
                 this.connections.push(connection);
               })
-              .catch(this.logger.error);
+              .catch((err) => this.logger.error(err.message));
           } else {
             message.reply('You need to join a voice channel first!');
           }
