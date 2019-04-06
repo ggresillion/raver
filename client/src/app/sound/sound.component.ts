@@ -13,6 +13,7 @@ import {AddFromYoutubeDialogComponent} from './dialogs/add-from-youtube-dialog/a
 export class SoundComponent implements OnInit {
 
   public sounds: Sound[] = [];
+  public categories = [{id: null, name: 'All'}];
 
   constructor(
     private readonly soundService: SoundService,
@@ -29,13 +30,13 @@ export class SoundComponent implements OnInit {
     });
   }
 
-  public uploadSound() {
-    this.dialog.open(UploadSoundDialogComponent)
+  public uploadSound(categoryId: number) {
+    this.dialog.open(UploadSoundDialogComponent, {data: {categoryId}})
       .afterClosed().subscribe(this.getSounds);
   }
 
-  public uploadFromYoutube() {
-    this.dialog.open(AddFromYoutubeDialogComponent)
+  public uploadFromYoutube(categoryId: number) {
+    this.dialog.open(AddFromYoutubeDialogComponent, {data: {categoryId}})
       .afterClosed().subscribe(this.getSounds);
   }
 

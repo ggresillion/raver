@@ -3,6 +3,7 @@ import {HttpClient, HttpEventType, HttpRequest} from '@angular/common/http';
 import {environment} from '../../environments/environment';
 import {Observable, Subject} from 'rxjs';
 import {Sound} from '../models/Sound';
+import {VideoInfos} from './model/video-infos';
 
 @Injectable({
   providedIn: 'root'
@@ -42,7 +43,7 @@ export class SoundService {
   }
 
   public searchYoutube(videoURL: string) {
-    return this.http.get(environment.api + '/youtube/search?url=' + videoURL);
+    return this.http.get<VideoInfos>(environment.api + '/youtube/search?url=' + videoURL);
   }
 
   public uploadFromYoutube(videoURL: string, category: string, name: string) {

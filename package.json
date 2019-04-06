@@ -29,6 +29,7 @@
     "@types/bcrypt": "^3.0.0",
     "@types/node-fetch": "^2.1.7",
     "@types/uuid": "^3.4.4",
+    "@types/youtube-dl": "^1.12.2",
     "class-transformer": "^0.2.0",
     "class-validator": "^0.9.1",
     "discord.js": "^11.4.2",
@@ -44,7 +45,8 @@
     "rxjs": "^6.2.2",
     "typeorm": "^0.2.16",
     "typescript": "^3.4.1",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "youtube-dl": "^1.13.1"
   },
   "devDependencies": {
     "@nestjs/testing": "^5.1.0",

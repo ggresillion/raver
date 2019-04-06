@@ -1,5 +1,5 @@
-import {Component, ElementRef, ViewChild} from '@angular/core';
-import {MatDialogRef} from '@angular/material';
+import {Component, ElementRef, Inject, ViewChild} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 import {SoundService} from '../../sound.service';
 
 @Component({
@@ -14,12 +14,13 @@ export class UploadSoundDialogComponent {
   public uploadProgress;
 
   constructor(public dialogRef: MatDialogRef<UploadSoundDialogComponent>,
+              @Inject(MAT_DIALOG_DATA) public data: any,
               private songService: SoundService) {
   }
 
   public upload() {
     const file = this.fileInput.nativeElement.files[0];
-    this.uploadProgress = this.songService.uploadSound(null, file);
+    this.uploadProgress = this.songService.uploadSound(this.data.categoryId, file);
     this.uploadProgress.subscribe(null, null, () => {
       this.dialogRef.close();
     });
