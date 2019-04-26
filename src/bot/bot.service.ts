@@ -21,7 +21,8 @@ export class BotService {
 
   public playFile(uuid: string) {
     this.connections.forEach(co => {
-      co.playFile(this.storageService.getPathFromUUID(uuid));
+      const dispacher = co.playFile(this.storageService.getPathFromUUID(uuid));
+      dispacher.on('error', this.logger.error);
     });
   }
 
@@ -41,6 +42,11 @@ export class BotService {
               .catch((err) => this.logger.error(err.message));
           } else {
             message.reply('You need to join a voice channel first!');
+          }
+          break;
+        case Command.LEAVE:
+          if (message.member.voiceChannel) {
+            message.member.voiceChannel.leave();
           }
           break;
       }
