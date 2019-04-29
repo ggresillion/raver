@@ -21,7 +21,7 @@ export class BotService {
 
   public playFile(uuid: string) {
     this.connections.forEach(co => {
-      const dispacher = co.playFile(this.storageService.getPathFromUUID(uuid));
+      const dispacher = co.play(this.storageService.getPathFromUUID(uuid));
       dispacher.on('error', this.logger.error);
     });
   }
@@ -34,8 +34,8 @@ export class BotService {
       const command = message.content;
       switch (command) {
         case Command.JOIN:
-          if (message.member.voiceChannel) {
-            message.member.voiceChannel.join()
+          if (message.member.voice.channel) {
+            message.member.voice.channel.join()
               .then(connection => {
                 this.connections.push(connection);
               })
@@ -45,8 +45,8 @@ export class BotService {
           }
           break;
         case Command.LEAVE:
-          if (message.member.voiceChannel) {
-            message.member.voiceChannel.leave();
+          if (message.member.voice.channel) {
+            message.member.voice.channel.leave();
           }
           break;
       }

@@ -46,11 +46,8 @@ export class SoundService {
     return this.http.get<VideoInfos>(environment.api + '/youtube/search?url=' + videoURL);
   }
 
-  public uploadFromYoutube(videoURL: string, category: string, name: string) {
-    return this.http.get(environment.api + '/youtube/upload?url=' + videoURL
-      + '&category=' + category
-      + '&name=' + name, {
-      responseType: 'text'
-    });
+  public uploadFromYoutube(url: string, categoryId: number, name: string) {
+    return this.http.post(environment.api + '/youtube/upload',
+      {url, name, categoryId});
   }
 }

@@ -1,10 +1,9 @@
 <mat-card>
   <mat-card-content>
     <mat-tab-group>
-      <div *ngFor="let category of categories">
-      <mat-tab [id]="category" [label]="category.name">
+      <mat-tab *ngFor="let category of [{name: 'Default'}].concat(categories)" [id]="category" [label]="category.name">
         <div class="container">
-          <div *ngFor="let sound of sounds">
+          <div *ngFor="let sound of getSoundsForCategory(category.id)">
             <button (click)="onSoundClick(sound.id)" class="sound-button" mat-raised-button>
               {{sound.name}}
             </button>
@@ -20,8 +19,8 @@
           <!--</div>-->
           <!--<input #file (change)="onFilesAdded()" multiple style="display: none" type="file"/>-->
 
-          <button [matMenuTriggerFor]="addMenu" class="sound-button" mat-raised-button>
-            <mat-icon style="color: #67b363;">add_circle</mat-icon>
+          <button [matMenuTriggerFor]="addMenu" class="sound-button add-button" mat-raised-button>
+            <mat-icon>add_circle</mat-icon>
           </button>
           <mat-menu #addMenu="matMenu">
             <button (click)="uploadSound(category.id)" mat-menu-item>
@@ -37,12 +36,11 @@
       </mat-tab>
       <mat-tab disabled>
         <ng-template mat-tab-label>
-          <button mat-icon-button>
+          <button (click)="openCreateCategoryDialog()" mat-icon-button>
             <mat-icon style="color: green;">add_circle</mat-icon>
           </button>
         </ng-template>
       </mat-tab>
-      </div>
     </mat-tab-group>
   </mat-card-content>
 </mat-card>

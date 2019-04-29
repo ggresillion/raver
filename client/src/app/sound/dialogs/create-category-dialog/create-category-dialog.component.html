@@ -3,6 +3,6 @@
   <input matInput [(ngModel)]="categoryName" placeholder="Enter a name">
 </mat-form-field>
 <div mat-dialog-actions>
-  <button mat-button>Cancel</button>
-  <button mat-button (click)="createCategory()">Upload</button>
+  <button mat-button (click)="dialogRef.close()">Cancel</button>
+  <button mat-button (click)="createCategory()">Create</button>
 </div>

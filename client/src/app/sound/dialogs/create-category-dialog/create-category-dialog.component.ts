@@ -9,7 +9,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 })
 export class CreateCategoryDialogComponent implements OnInit {
 
-  public categoryName: string = "";
+  public categoryName = '';
 
   constructor(public dialogRef: MatDialogRef<CreateCategoryDialogComponent>,
               @Inject(MAT_DIALOG_DATA) public data: any,

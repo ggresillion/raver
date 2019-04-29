@@ -9,5 +9,14 @@
   .sound-button {
     white-space: normal;
     flex-grow: 1;
+    z-index: 999;
+  }
+
+  .add-button {
+    max-width: 100px;
+
+    mat-icon {
+      color: #67b363;
+    }
   }
 }

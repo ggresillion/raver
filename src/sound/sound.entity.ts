@@ -1,4 +1,4 @@
-import {Column, Entity, Index, ManyToOne, ObjectID, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, Index, ManyToOne, ObjectID, PrimaryGeneratedColumn, RelationId} from 'typeorm';
 import {v4 as uuid} from 'uuid';
 import {Category} from '../category/category.entity';
 
@@ -17,5 +17,8 @@ export class Sound {
 
   @ManyToOne(type => Category)
   public category: Category;
+
+  @RelationId((sound: Sound) => sound.category)
+  categoryId: number;
 
 }

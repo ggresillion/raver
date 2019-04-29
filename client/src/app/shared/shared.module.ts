@@ -15,6 +15,7 @@ import {
   MatTabsModule,
   MatToolbarModule
 } from '@angular/material';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 
 @NgModule({
   exports: [
@@ -33,6 +34,7 @@ import {
     MatDialogModule,
     MatInputModule,
     MatSidenavModule,
+    DragDropModule,
   ]
 })
 export class SharedModule {

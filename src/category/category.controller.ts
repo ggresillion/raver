@@ -2,7 +2,7 @@ import {Body, Controller, Get, Post} from '@nestjs/common';
 import {Category} from './category.entity';
 import {CategoryService} from './category.service';
 
-@Controller('category')
+@Controller('categories')
 export class CategoryController {
 
   constructor(
@@ -16,7 +16,7 @@ export class CategoryController {
   }
 
   @Post()
-  public async createCategory(@Body()category: Category): Promise<Category> {
+  public async createCategory(@Body()category: Category): Promise<any> {
     return this.categoryService.createCategory(category);
   }
 }
