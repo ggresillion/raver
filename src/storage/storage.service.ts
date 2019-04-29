@@ -9,7 +9,7 @@ export class StorageService {
 
   constructor() {
     fs.mkdir('uploads', () => {
-        this.logger.log('Storage directories have been created');
+      this.logger.log('Storage directories have been created');
     });
   }
 
@@ -38,5 +38,9 @@ export class StorageService {
 
   public getPathFromUUID(uuid: string) {
     return this.STORAGE_PATH + uuid;
+  }
+
+  public getUploadDir() {
+    return this.STORAGE_PATH;
   }
 }

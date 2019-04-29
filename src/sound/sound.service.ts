@@ -17,11 +17,11 @@ export class SoundService {
   }
 
   public async getSounds(): Promise<Sound[]> {
-    return this.soundRepository.find();
+    return this.soundRepository.find({relations: ['category']});
   }
 
   public async getSoundById(id: ObjectID): Promise<Sound> {
-    return this.soundRepository.findOne(id);
+    return this.soundRepository.findOne(id, {relations: ['category']});
   }
 
   public async saveSound(name: string, buffer: Buffer) {
@@ -45,5 +45,13 @@ export class SoundService {
       this.botService.playFile(sound.uuid);
       return sound;
     });
+  }
+
+  public createNewSoundEntity(name: string, categoryId: number): Sound {
+    return this.soundRepository.create({name, categoryId});
+  }
+
+  public async saveNewSoundEntity(sound: Sound): Promise<Sound> {
+    return await this.soundRepository.save(sound);
   }
 }

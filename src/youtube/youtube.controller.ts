@@ -1,6 +1,8 @@
-import {Controller, Get, Query} from '@nestjs/common';
+import {Controller, Get, Post, Query} from '@nestjs/common';
 import {YoutubeService} from './youtube.service';
 import {Info} from 'youtube-dl';
+import {Body} from '@nestjs/common/decorators/http/route-params.decorator';
+import {UploadDto} from './dto/upload.dto';
 
 @Controller('youtube')
 export class YoutubeController {
@@ -13,5 +15,10 @@ export class YoutubeController {
   @Get('search')
   public async getFromYoutube(@Query('url') url: string): Promise<Info> {
     return await this.youtubeService.searchYoutube(url);
+  }
+
+  @Post('upload')
+  public async uploadFromYoutube(@Body()upload: UploadDto): Promise<any> {
+    return await this.youtubeService.uploadFromYoutube(upload.url, upload.name, upload.categoryId);
   }
 }

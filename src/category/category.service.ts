@@ -17,6 +17,6 @@ export class CategoryService {
   }
 
   public async createCategory(category: Category) {
-    return this.categoryRepository.create(category);
+    return this.categoryRepository.insert(category);
   }
 }
