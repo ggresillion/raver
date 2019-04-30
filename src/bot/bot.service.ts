@@ -1,14 +1,14 @@
-import {Injectable, Logger} from '@nestjs/common';
+import {Injectable, Logger, OnApplicationShutdown} from '@nestjs/common';
 import {Client, Message, VoiceConnection} from 'discord.js';
 import {Command} from './command.enum';
 import {StorageService} from '../storage/storage.service';
 
 @Injectable()
-export class BotService {
+export class BotService implements OnApplicationShutdown {
 
   private readonly logger = new Logger(BotService.name);
   private readonly token = process.env.BOT_TOKEN;
-  private client;
+  private client: Client;
   private connections: VoiceConnection[] = [];
 
   constructor(
@@ -19,10 +19,16 @@ export class BotService {
     this.bindToEvents();
   }
 
+  public onApplicationShutdown(signal?: string): any {
+    this.client.voice.connections.forEach(co => co.disconnect());
+  }
+
   public playFile(uuid: string) {
-    this.connections.forEach(co => {
+    this.client.voice.connections.forEach(co => {
       const dispacher = co.play(this.storageService.getPathFromUUID(uuid));
+      dispacher.on('debug', this.logger.debug);
       dispacher.on('error', this.logger.error);
+      dispacher.on('start', () => this.logger.debug(`Playing file ` + uuid));
     });
   }
 
@@ -34,23 +40,35 @@ export class BotService {
       const command = message.content;
       switch (command) {
         case Command.JOIN:
-          if (message.member.voice.channel) {
-            message.member.voice.channel.join()
-              .then(connection => {
-                this.connections.push(connection);
-              })
-              .catch((err) => this.logger.error(err.message));
-          } else {
-            message.reply('You need to join a voice channel first!');
-          }
+          this.onJoinCommand(message);
           break;
         case Command.LEAVE:
-          if (message.member.voice.channel) {
-            message.member.voice.channel.leave();
-          }
+          this.onLeaveCommand(message);
           break;
       }
     });
+  }
+
+  private onJoinCommand(message: Message) {
+    const channel = message.member.voice.channel;
+    if (channel) {
+      channel.join()
+        .then(connection => {
+          this.logger.debug(`Bot connected in channel ${channel.name} (${channel.id})`);
+          this.connections.push(connection);
+        })
+        .catch((err) => this.logger.error(err.message));
+    } else {
+      message.reply('You need to join a voice channel first!');
+    }
+  }
+
+  private onLeaveCommand(message: Message) {
+    const voice = message.guild.voiceConnection;
+    if (voice) {
+      this.logger.debug(`Bot disconnected from channel ${voice.channel.name} (${voice.channel.id})`);
+      voice.disconnect();
+    }
   }
 
   private connect() {

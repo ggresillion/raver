@@ -15,7 +15,7 @@ export class Sound {
   @Index({unique: true})
   public name: string;
 
-  @ManyToOne(type => Category)
+  @ManyToOne(() => Category)
   public category: Category;
 
   @RelationId((sound: Sound) => sound.category)
