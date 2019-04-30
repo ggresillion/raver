@@ -9,6 +9,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api');
   app.enableCors();
+  app.enableShutdownHooks();
   await app.listen(app.get('ConfigService').get('app.port'));
 }
 bootstrap();

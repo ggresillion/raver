@@ -28,7 +28,7 @@ export class YoutubeService {
       const sound = this.soundService.createNewSoundEntity(name, categoryId);
       exec(
         url,
-        ['-x', '--audio-format', 'mp3', '-o', sound.uuid + '.%(ext)s'],
+        ['-x', '--audio-format', 'mp3', '-o', sound.uuid],
         {cwd: this.storageService.getUploadDir()},
         async (err) => {
           if (err) {
