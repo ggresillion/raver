@@ -1,16 +1,16 @@
-import {Injectable, Logger} from '@nestjs/common';
+import {Injectable, Logger, OnModuleInit} from '@nestjs/common';
 import * as fs from 'fs';
 
 @Injectable()
-export class StorageService {
+export class StorageService implements OnModuleInit {
 
   private readonly STORAGE_PATH = 'uploads/';
   private readonly logger = new Logger(StorageService.name);
 
-  constructor() {
-    fs.mkdir('uploads', () => {
-      this.logger.log('Storage directories have been created');
-    });
+  public onModuleInit() {
+    if (!fs.existsSync(this.STORAGE_PATH)) {
+      fs.mkdir(this.STORAGE_PATH, (err) => this.logger.error(err));
+    }
   }
 
   public async getFile(filename: string): Promise<Buffer> {

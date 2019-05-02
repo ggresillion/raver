@@ -9,14 +9,23 @@ import {VideoInfos} from './model/video-infos';
   providedIn: 'root'
 })
 export class SoundService {
+
+  private songsSubject = new Subject<Sound[]>();
+
   constructor(private http: HttpClient) {
   }
 
-  getSounds(): Observable<Sound[]> {
-    return this.http.get<Sound[]>(environment.api + '/sounds');
+  public getSounds(): Observable<Sound[]> {
+    this.refreshSounds();
+    return this.songsSubject.asObservable();
   }
 
-  playSound(id: number) {
+  public refreshSounds() {
+    this.http.get<Sound[]>(`${environment.api}/sounds`)
+      .subscribe(sounds => this.songsSubject.next(sounds));
+  }
+
+  public playSound(id: number) {
     return this.http.post(`${environment.api}/sounds/${id}/play`, null);
   }
 
@@ -25,7 +34,7 @@ export class SoundService {
     formData.append('category', category);
     formData.append('sound', file, file.name);
 
-    const req = new HttpRequest('POST', environment.api + '/sounds', formData, {
+    const req = new HttpRequest('POST', `${environment.api}/sounds`, formData, {
       reportProgress: true
     });
 
@@ -43,11 +52,15 @@ export class SoundService {
   }
 
   public searchYoutube(videoURL: string) {
-    return this.http.get<VideoInfos>(environment.api + '/youtube/search?url=' + videoURL);
+    return this.http.get<VideoInfos>(`${environment.api}/youtube/search?url=${videoURL}`);
   }
 
   public uploadFromYoutube(url: string, categoryId: number, name: string) {
-    return this.http.post(environment.api + '/youtube/upload',
+    return this.http.post(`${environment.api}/youtube/upload`,
       {url, name, categoryId});
+  }
+
+  public changeCategory(soundId: number, categoryId: number) {
+    return this.http.put(`${environment.api}/sounds/${soundId}`, {categoryId});
   }
 }

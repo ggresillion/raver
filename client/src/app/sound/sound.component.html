@@ -1,24 +1,18 @@
 <mat-card>
   <mat-card-content>
     <mat-tab-group>
-      <mat-tab *ngFor="let category of [{name: 'Default'}].concat(categories)" [id]="category" [label]="category.name">
+      <mat-tab *ngFor="let category of [{id: null, name: 'Default'}].concat(categories)" [id]="category" [label]="category.name">
+        <ng-template mat-tab-label>
+          <div appDropper [id]="category.id" class="mat-tab-label-content">
+            {{category.name}}
+          </div>
+        </ng-template>
         <div class="container">
           <div *ngFor="let sound of getSoundsForCategory(category.id)">
-            <button (click)="onSoundClick(sound.id)" class="sound-button" mat-raised-button>
+            <button appDraggable [id]="sound.id" (click)="onSoundClick(sound.id)" class="sound-button" mat-raised-button>
               {{sound.name}}
             </button>
           </div>
-          <!--<div *ngFor="let file of files">-->
-          <!--<button #soundButtons class="sound-button" mat-raised-button>-->
-          <!--{{file.name}}-->
-          <!--<mat-progress-bar *ngIf="progress"-->
-          <!--[value]="progress[file.name].progress | async"-->
-          <!--mode="determinate"-->
-          <!--style="bottom: 0;  position: absolute;  left: 0;"></mat-progress-bar>-->
-          <!--</button>-->
-          <!--</div>-->
-          <!--<input #file (change)="onFilesAdded()" multiple style="display: none" type="file"/>-->
-
           <button [matMenuTriggerFor]="addMenu" class="sound-button add-button" mat-raised-button>
             <mat-icon>add_circle</mat-icon>
           </button>
