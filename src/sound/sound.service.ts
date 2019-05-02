@@ -4,6 +4,7 @@ import {ObjectID, Repository} from 'typeorm';
 import {Sound} from './sound.entity';
 import {InjectRepository} from '@nestjs/typeorm';
 import {BotService} from '../bot/bot.service';
+import {SoundDto} from './sound.dto';
 
 @Injectable()
 export class SoundService {
@@ -26,15 +27,24 @@ export class SoundService {
 
   public async saveSound(name: string, buffer: Buffer) {
     try {
-      const sound = await this.soundRepository.save(this.soundRepository.create({name}));
+      const sound = this.soundRepository.create({name});
       await this.storageService.saveFile(sound.uuid, buffer);
-      return sound;
+      return await this.soundRepository.save(sound);
     } catch (e) {
       if (e.code === 11000) {
         throw new UnprocessableEntityException('name already exists');
       }
       throw e;
     }
+  }
+
+  public async editSound(id: number, data: SoundDto) {
+    const sound = await this.soundRepository.findOne(id);
+    if (!sound) {
+      throw new NotFoundException('sound not found');
+    }
+    const updatedSound = Object.assign(sound, data);
+    return await this.soundRepository.save(updatedSound);
   }
 
   public async playSound(id: ObjectID): Promise<Sound> {

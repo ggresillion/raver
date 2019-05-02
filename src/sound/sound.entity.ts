@@ -18,7 +18,7 @@ export class Sound {
   @ManyToOne(() => Category)
   public category: Category;
 
-  @RelationId((sound: Sound) => sound.category)
-  categoryId: number;
+  @Column({nullable: true})
+  public categoryId: number | null;
 
 }
