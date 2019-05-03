@@ -15,7 +15,7 @@ export class Sound {
   @Index({unique: true})
   public name: string;
 
-  @ManyToOne(() => Category)
+  @ManyToOne(() => Category, {onDelete: 'SET NULL'})
   public category: Category;
 
   @Column({nullable: true})

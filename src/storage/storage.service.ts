@@ -36,6 +36,13 @@ export class StorageService implements OnModuleInit {
       }));
   }
 
+  public async removeFile(filename: string): Promise<void> {
+    return new Promise((resolve, reject) =>
+      fs.unlink(this.STORAGE_PATH + filename, (err) => {
+        return err ? reject(err) : resolve();
+      }));
+  }
+
   public getPathFromUUID(uuid: string) {
     return this.STORAGE_PATH + uuid;
   }

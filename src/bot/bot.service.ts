@@ -1,5 +1,5 @@
 import {Injectable, Logger, OnApplicationShutdown} from '@nestjs/common';
-import {Client, Message, VoiceConnection} from 'discord.js';
+import {Client, Message} from 'discord.js';
 import {Command} from './command.enum';
 import {StorageService} from '../storage/storage.service';
 
@@ -9,7 +9,6 @@ export class BotService implements OnApplicationShutdown {
   private readonly logger = new Logger(BotService.name);
   private readonly token = process.env.BOT_TOKEN;
   private client: Client;
-  private connections: VoiceConnection[] = [];
 
   constructor(
     private readonly storageService: StorageService,
@@ -53,9 +52,8 @@ export class BotService implements OnApplicationShutdown {
     const channel = message.member.voice.channel;
     if (channel) {
       channel.join()
-        .then(connection => {
+        .then(() => {
           this.logger.debug(`Bot connected in channel ${channel.name} (${channel.id})`);
-          this.connections.push(connection);
         })
         .catch((err) => this.logger.error(err.message));
     } else {
