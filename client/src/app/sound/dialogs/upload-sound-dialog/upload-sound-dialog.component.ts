@@ -20,7 +20,7 @@ export class UploadSoundDialogComponent {
 
   public upload() {
     const file = this.fileInput.nativeElement.files[0];
-    this.uploadProgress = this.songService.uploadSound(this.data.categoryId, file);
+    this.uploadProgress = this.songService.uploadSound(this.name, this.data.categoryId, file);
     this.uploadProgress.subscribe(null, null, () => {
       this.dialogRef.close();
     });

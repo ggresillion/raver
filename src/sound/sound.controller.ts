@@ -1,4 +1,4 @@
-import {BadRequestException, Body, Controller, Get, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
+import {BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors} from '@nestjs/common';
 import {SoundService} from './sound.service';
 import {Sound} from './sound.entity';
 import {UserGuard} from 'src/auth/guards/user.guard';
@@ -25,15 +25,21 @@ export class SoundController {
     if (!file) {
       throw new BadRequestException('missing file');
     }
-    return await this.soundService.saveSound(file.originalname, file.buffer);
+    const name = soundData.name && soundData.name !== '' ? soundData.name : file.originalname;
+    return await this.soundService.saveSound(name, soundData.categoryId, file.buffer);
   }
 
-  @Put('/:id')
+  @Delete(':id')
+  public async deleteSound(@Param('id')id: number): Promise<Sound> {
+    return await this.soundService.deleteSound(id);
+  }
+
+  @Put(':id')
   public async editSound(@Param('id')id: number, @Body() soundData: SoundDto): Promise<Sound> {
     return await this.soundService.editSound(id, soundData);
   }
 
-  @Post('/:id/play')
+  @Post(':id/play')
   public async playSound(@Param()id: ObjectID) {
     return await this.soundService.playSound(id);
   }

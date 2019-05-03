@@ -5,6 +5,7 @@ import {SharedModule} from '../shared/shared.module';
 import {UploadSoundDialogComponent} from './dialogs/upload-sound-dialog/upload-sound-dialog.component';
 import {AddFromYoutubeDialogComponent} from './dialogs/add-from-youtube-dialog/add-from-youtube-dialog.component';
 import {CreateCategoryDialogComponent} from './dialogs/create-category-dialog/create-category-dialog.component';
+import {RenameCategoryDialogComponent} from './dialogs/rename-category-dialog/rename-category-dialog.component';
 
 @NgModule({
   declarations: [
@@ -12,6 +13,7 @@ import {CreateCategoryDialogComponent} from './dialogs/create-category-dialog/cr
     UploadSoundDialogComponent,
     AddFromYoutubeDialogComponent,
     CreateCategoryDialogComponent,
+    RenameCategoryDialogComponent,
   ],
   imports: [
     SharedModule,
@@ -22,6 +24,7 @@ import {CreateCategoryDialogComponent} from './dialogs/create-category-dialog/cr
     UploadSoundDialogComponent,
     AddFromYoutubeDialogComponent,
     CreateCategoryDialogComponent,
+    RenameCategoryDialogComponent,
   ],
 })
 export class SoundModule {

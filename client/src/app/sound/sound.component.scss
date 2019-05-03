@@ -1,3 +1,29 @@
+@keyframes slidein {
+  from {
+    right: 100%;
+  }
+
+  to {
+    right: 0;
+  }
+}
+
+@keyframes fadeout {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.edit-container {
+  * {
+    margin: 0 12px 0 12px;
+  }
+}
+
 .container {
   display: flex;
   align-items: center;
@@ -10,6 +36,41 @@
     white-space: normal;
     flex-grow: 1;
     z-index: 999;
+
+    &.sound-button-editing {
+      position: relative;
+
+      .remove-icon {
+        font-size: 21px;
+        margin: 0;
+        display: none;
+      }
+
+      &:hover {
+        * {
+          animation-fill-mode: forwards;
+          -webkit-animation-duration: 0.2s;
+          -moz-animation-duration: 0.2s;
+          -o-animation-duration: 0.2s;
+          animation-duration: 0.2s;
+        }
+
+        span {
+          animation-name: fadeout;
+        }
+
+        .remove-icon {
+          animation-name: slidein;
+          display: block;
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          margin: auto;
+        }
+      }
+    }
   }
 
   .add-button {
@@ -19,4 +80,11 @@
       color: #67b363;
     }
   }
+}
+
+#edit-button {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 1;
 }

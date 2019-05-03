@@ -1,6 +1,6 @@
 <h1 mat-dialog-title>Upload a sound</h1>
 <div id="form" mat-dialog-content>
-  <input style="visibility: hidden" (change)="onFileSelection($event)" type="file" accept="image/*" #file>
+  <input style="visibility: hidden" (change)="onFileSelection($event)" type="file" accept="audio/*" #file>
   <button (click)="file.click()" mat-raised-button>
     <mat-icon>attach_file</mat-icon>
     Choose a file

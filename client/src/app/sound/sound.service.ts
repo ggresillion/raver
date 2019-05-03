@@ -29,9 +29,12 @@ export class SoundService {
     return this.http.post(`${environment.api}/sounds/${id}/play`, null);
   }
 
-  public uploadSound(category: string, file: File): Observable<number> {
+  public uploadSound(name: string, categoryId: number, file: File): Observable<number> {
     const formData: FormData = new FormData();
-    formData.append('category', category);
+    formData.append('name', name);
+    if (categoryId) {
+      formData.append('categoryId', categoryId.toString());
+    }
     formData.append('sound', file, file.name);
 
     const req = new HttpRequest('POST', `${environment.api}/sounds`, formData, {
@@ -62,5 +65,9 @@ export class SoundService {
 
   public changeCategory(soundId: number, categoryId: number) {
     return this.http.put(`${environment.api}/sounds/${soundId}`, {categoryId});
+  }
+
+  public deleteSound(soundId: number) {
+    return this.http.delete(`${environment.api}/sounds/${soundId}`);
   }
 }

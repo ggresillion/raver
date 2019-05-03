@@ -13,12 +13,20 @@ export class CategoryService {
   }
 
   public getCategories(): Observable<Category[]> {
-    return this.http.get<Category[]>(environment.api + '/categories');
+    return this.http.get<Category[]>(`${environment.api}/categories`);
   }
 
   public createCategory(categoryName: string) {
-    return this.http.post(environment.api + '/categories', {name: categoryName}, {
+    return this.http.post(`${environment.api}/categories`, {name: categoryName}, {
       responseType: 'text'
     });
+  }
+
+  public renameCategory(categoryId: number, name: string) {
+    return this.http.put(`${environment.api}/categories/${categoryId}`, {name});
+  }
+
+  public deleteCategory(categoryId: number) {
+    return this.http.delete(`${environment.api}/categories/${categoryId}`);
   }
 }

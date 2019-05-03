@@ -25,9 +25,9 @@ export class SoundService {
     return this.soundRepository.findOne(id, {relations: ['category']});
   }
 
-  public async saveSound(name: string, buffer: Buffer) {
+  public async saveSound(name: string, categoryId: number, buffer: Buffer) {
     try {
-      const sound = this.soundRepository.create({name});
+      const sound = this.soundRepository.create({name, categoryId});
       await this.storageService.saveFile(sound.uuid, buffer);
       return await this.soundRepository.save(sound);
     } catch (e) {
@@ -63,5 +63,14 @@ export class SoundService {
 
   public async saveNewSoundEntity(sound: Sound): Promise<Sound> {
     return await this.soundRepository.save(sound);
+  }
+
+  public async deleteSound(soundId: number) {
+    const sound = await this.soundRepository.findOne(soundId);
+    if (!sound) {
+      throw new NotFoundException('sound not found');
+    }
+    await this.storageService.removeFile(sound.uuid);
+    return await this.soundRepository.remove(sound);
   }
 }

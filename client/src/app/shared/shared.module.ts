@@ -12,6 +12,8 @@ import {
   MatProgressBarModule,
   MatProgressSpinnerModule,
   MatSidenavModule,
+  MatSliderModule,
+  MatSlideToggleModule,
   MatTabsModule,
   MatToolbarModule
 } from '@angular/material';
@@ -39,6 +41,7 @@ import { DropperDirective } from './directives/dropper.directive';
     DragDropModule,
     DraggableDirective,
     DropperDirective,
+    MatSlideToggleModule,
   ],
   declarations: [DraggableDirective, DropperDirective]
 })

@@ -1,16 +1,31 @@
 <mat-card>
   <mat-card-content>
     <mat-tab-group>
-      <mat-tab *ngFor="let category of [{id: null, name: 'Default'}].concat(categories)" [id]="category" [label]="category.name">
+      <mat-tab *ngFor="let category of [{id: null, name: 'Default'}].concat(categories)" [id]="category"
+               [label]="category.name">
         <ng-template mat-tab-label>
           <div appDropper [id]="category.id" class="mat-tab-label-content">
             {{category.name}}
           </div>
         </ng-template>
+        <mat-toolbar color="accent" [@openClose]="isEditing ? 'open' : 'closed'" class="edit-container">
+          <button mat-raised-button [disabled]="!category.id" (click)="renameCategory(category)">
+            Rename category
+          </button>
+          <button mat-raised-button [disabled]="!category.id" (click)="deleteCategory(category.id)" color="warn">
+            Remove category
+          </button>
+        </mat-toolbar>
         <div class="container">
           <div *ngFor="let sound of getSoundsForCategory(category.id)">
-            <button appDraggable [id]="sound.id" (click)="onSoundClick(sound.id)" class="sound-button" mat-raised-button>
-              {{sound.name}}
+            <button *ngIf="!isEditing" appDraggable [id]="sound.id" (click)="onSoundClick(sound.id)"
+                    class="sound-button" mat-raised-button>
+              <span>{{sound.name}}</span>
+            </button>
+            <button *ngIf="isEditing" appDraggable [id]="sound.id" (click)="deleteSound(sound.id)"
+                    class="sound-button sound-button-editing" mat-raised-button>
+              <span>{{sound.name}}</span>
+              <mat-icon class="remove-icon">delete_outline</mat-icon>
             </button>
           </div>
           <button [matMenuTriggerFor]="addMenu" class="sound-button add-button" mat-raised-button>
@@ -36,5 +51,6 @@
         </ng-template>
       </mat-tab>
     </mat-tab-group>
+    <mat-slide-toggle [(ngModel)]="isEditing" id="edit-button" color="primary">Edit</mat-slide-toggle>
   </mat-card-content>
 </mat-card>
