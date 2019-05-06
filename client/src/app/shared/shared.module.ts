@@ -12,14 +12,15 @@ import {
   MatProgressBarModule,
   MatProgressSpinnerModule,
   MatSidenavModule,
-  MatSliderModule,
   MatSlideToggleModule,
   MatTabsModule,
   MatToolbarModule
 } from '@angular/material';
 import {DragDropModule} from '@angular/cdk/drag-drop';
-import { DraggableDirective } from './directives/draggable.directive';
-import { DropperDirective } from './directives/dropper.directive';
+import {DraggableDirective} from './directives/draggable.directive';
+import {DropperDirective} from './directives/dropper.directive';
+import {CategoryService} from './services/category.service';
+import {BotService} from './services/bot.service';
 
 @NgModule({
   exports: [
@@ -43,7 +44,8 @@ import { DropperDirective } from './directives/dropper.directive';
     DropperDirective,
     MatSlideToggleModule,
   ],
-  declarations: [DraggableDirective, DropperDirective]
+  declarations: [DraggableDirective, DropperDirective],
+  providers: [CategoryService, BotService],
 })
 export class SharedModule {
 }

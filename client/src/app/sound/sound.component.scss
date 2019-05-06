@@ -1,21 +1,12 @@
-@keyframes slidein {
-  from {
-    right: 100%;
-  }
-
-  to {
-    right: 0;
-  }
+::ng-deep .mat-tab-header {
+  margin-right: 100px;
 }
 
-@keyframes fadeout {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
+#edit-button {
+  position: fixed;
+  top: 78px;
+  right: 12px;
+  z-index: 1;
 }
 
 .edit-container {
@@ -55,6 +46,27 @@
           animation-duration: 0.2s;
         }
 
+
+        @keyframes slidein {
+          from {
+            right: 100%;
+          }
+
+          to {
+            right: 0;
+          }
+        }
+
+        @keyframes fadeout {
+          from {
+            opacity: 1;
+          }
+
+          to {
+            opacity: 0;
+          }
+        }
+
         span {
           animation-name: fadeout;
         }
@@ -80,11 +92,4 @@
       color: #67b363;
     }
   }
-}
-
-#edit-button {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 1;
 }

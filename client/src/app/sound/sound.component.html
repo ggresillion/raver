@@ -1,56 +1,54 @@
-<mat-card>
-  <mat-card-content>
-    <mat-tab-group>
-      <mat-tab *ngFor="let category of [{id: null, name: 'Default'}].concat(categories)" [id]="category"
-               [label]="category.name">
-        <ng-template mat-tab-label>
-          <div appDropper [id]="category.id" class="mat-tab-label-content">
-            {{category.name}}
-          </div>
-        </ng-template>
-        <mat-toolbar color="accent" [@openClose]="isEditing ? 'open' : 'closed'" class="edit-container">
-          <button mat-raised-button [disabled]="!category.id" (click)="renameCategory(category)">
-            Rename category
-          </button>
-          <button mat-raised-button [disabled]="!category.id" (click)="deleteCategory(category.id)" color="warn">
-            Remove category
-          </button>
-        </mat-toolbar>
-        <div class="container">
-          <div *ngFor="let sound of getSoundsForCategory(category.id)">
-            <button *ngIf="!isEditing" appDraggable [id]="sound.id" (click)="onSoundClick(sound.id)"
-                    class="sound-button" mat-raised-button>
-              <span>{{sound.name}}</span>
-            </button>
-            <button *ngIf="isEditing" appDraggable [id]="sound.id" (click)="deleteSound(sound.id)"
-                    class="sound-button sound-button-editing" mat-raised-button>
-              <span>{{sound.name}}</span>
-              <mat-icon class="remove-icon">delete_outline</mat-icon>
-            </button>
-          </div>
-          <button [matMenuTriggerFor]="addMenu" class="sound-button add-button" mat-raised-button>
-            <mat-icon>add_circle</mat-icon>
-          </button>
-          <mat-menu #addMenu="matMenu">
-            <button (click)="uploadSound(category.id)" mat-menu-item>
-              <mat-icon>cloud_upload</mat-icon>
-              <span>From Disk</span>
-            </button>
-            <button (click)="uploadFromYoutube(category.id)" mat-menu-item>
-              <mat-icon>youtube_searched_for</mat-icon>
-              <span>From Youtube</span>
-            </button>
-          </mat-menu>
+<mat-card-content>
+  <mat-tab-group>
+    <mat-tab *ngFor="let category of [{id: null, name: 'Default'}].concat(categories)" [id]="category"
+             [label]="category.name">
+      <ng-template mat-tab-label>
+        <div appDropper [id]="category.id" class="mat-tab-label-content">
+          {{category.name}}
         </div>
-      </mat-tab>
-      <mat-tab disabled>
-        <ng-template mat-tab-label>
-          <button (click)="openCreateCategoryDialog()" mat-icon-button>
-            <mat-icon style="color: green;">add_circle</mat-icon>
+      </ng-template>
+      <mat-toolbar color="accent" *ngIf="isEditing" @openClose class="edit-container">
+        <button mat-raised-button [disabled]="!category.id" (click)="renameCategory(category)">
+          Rename category
+        </button>
+        <button mat-raised-button [disabled]="!category.id" (click)="deleteCategory(category.id)" color="warn">
+          Remove category
+        </button>
+      </mat-toolbar>
+      <div class="container">
+        <div *ngFor="let sound of getSoundsForCategory(category.id)">
+          <button *ngIf="!isEditing" appDraggable [id]="sound.id" (click)="onSoundClick(sound.id)"
+                  class="sound-button" mat-raised-button>
+            <span>{{sound.name}}</span>
           </button>
-        </ng-template>
-      </mat-tab>
-    </mat-tab-group>
-    <mat-slide-toggle [(ngModel)]="isEditing" id="edit-button" color="primary">Edit</mat-slide-toggle>
-  </mat-card-content>
-</mat-card>
+          <button *ngIf="isEditing" appDraggable [id]="sound.id" (click)="deleteSound(sound.id)"
+                  class="sound-button sound-button-editing" mat-raised-button>
+            <span>{{sound.name}}</span>
+            <mat-icon class="remove-icon">delete_outline</mat-icon>
+          </button>
+        </div>
+        <button [matMenuTriggerFor]="addMenu" class="sound-button add-button" mat-raised-button>
+          <mat-icon>add_circle</mat-icon>
+        </button>
+        <mat-menu #addMenu="matMenu">
+          <button (click)="uploadSound(category.id)" mat-menu-item>
+            <mat-icon>cloud_upload</mat-icon>
+            <span>From Disk</span>
+          </button>
+          <button (click)="uploadFromYoutube(category.id)" mat-menu-item>
+            <mat-icon>youtube_searched_for</mat-icon>
+            <span>From Youtube</span>
+          </button>
+        </mat-menu>
+      </div>
+    </mat-tab>
+    <mat-tab disabled>
+      <ng-template mat-tab-label>
+        <button (click)="openCreateCategoryDialog()" mat-icon-button>
+          <mat-icon style="color: green;">add_circle</mat-icon>
+        </button>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+</mat-card-content>
+<mat-slide-toggle [(ngModel)]="isEditing" id="edit-button" color="primary">Edit</mat-slide-toggle>

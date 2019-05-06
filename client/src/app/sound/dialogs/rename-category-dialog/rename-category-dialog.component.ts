@@ -1,8 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
-import {SoundService} from '../../sound.service';
-import {VideoInfos} from '../../model/video-infos';
-import {CategoryService} from '../../../category/category.service';
+import {CategoryService} from '../../../shared/services/category.service';
 import {Category} from '../../../models/Category';
 
 @Component({
@@ -24,7 +22,7 @@ export class RenameCategoryDialogComponent implements OnInit {
   }
 
   public rename() {
-    return this.categoryService.renameCategory(this.category.id, name)
+    return this.categoryService.renameCategory(this.category.id, this.name)
       .subscribe(() => this.dialogRef.close());
   }
 }

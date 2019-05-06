@@ -3,6 +3,12 @@ import {Client, Message} from 'discord.js';
 import {Command} from './command.enum';
 import {StorageService} from '../storage/storage.service';
 
+export enum BotStatus {
+  IN_VOICE_CHANNEL = 'inVoiceChannel',
+  CONNECTED = 'connected',
+  DISCONNECTED = 'disconnected',
+}
+
 @Injectable()
 export class BotService implements OnApplicationShutdown {
 
@@ -20,6 +26,18 @@ export class BotService implements OnApplicationShutdown {
 
   public onApplicationShutdown(signal?: string): any {
     this.client.voice.connections.forEach(co => co.disconnect());
+  }
+
+  public getInfos() {
+    if (!this.client.user) {
+      return {status: BotStatus.DISCONNECTED};
+    }
+    return {
+      status: this.client.voice.connections.size > 0 ? BotStatus.IN_VOICE_CHANNEL : BotStatus.CONNECTED,
+      id: this.client.user.id,
+      username: this.client.user.username,
+      avatar: this.client.user.avatar,
+    };
   }
 
   public playFile(uuid: string) {

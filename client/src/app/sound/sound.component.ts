@@ -1,14 +1,13 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Sound} from '../models/Sound';
 import {SoundService} from './sound.service';
 import {MatDialog} from '@angular/material';
 import {UploadSoundDialogComponent} from './dialogs/upload-sound-dialog/upload-sound-dialog.component';
 import {AddFromYoutubeDialogComponent} from './dialogs/add-from-youtube-dialog/add-from-youtube-dialog.component';
 import {CreateCategoryDialogComponent} from './dialogs/create-category-dialog/create-category-dialog.component';
-import {CategoryService} from '../category/category.service';
+import {CategoryService} from '../shared/services/category.service';
 import {Category} from '../models/Category';
-import {CdkDragDrop} from '@angular/cdk/typings/esm5/drag-drop';
-import {animate, state, style, transition, trigger} from '@angular/animations';
+import {animate, style, transition, trigger} from '@angular/animations';
 import {RenameCategoryDialogComponent} from './dialogs/rename-category-dialog/rename-category-dialog.component';
 
 @Component({
@@ -17,17 +16,14 @@ import {RenameCategoryDialogComponent} from './dialogs/rename-category-dialog/re
   styleUrls: ['./sound.component.scss'],
   animations: [
     trigger('openClose', [
-      state('open', style({
-        ['margin-top']: '0',
-      })),
-      state('closed', style({
-        ['margin-top']: '-64px',
-      })),
-      transition('open => closed', [
-        animate('200ms')
+      transition(':enter', [
+        style({transform: 'translateY(-100%)'}),
+        animate('200ms ease-out')
       ]),
-      transition('closed => open', [
-        animate('200ms')
+      transition(':leave', [
+        style({transform: 'translateY(0)'}),
+        animate('200ms ease-out',
+          style({transform: 'translateY(-100%)'}))
       ]),
     ]),
   ],
