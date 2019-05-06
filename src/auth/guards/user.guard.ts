@@ -1,14 +1,21 @@
-import {ExecutionContext, Injectable, UnauthorizedException} from '@nestjs/common';
+import {CanActivate, ExecutionContext, Injectable, UnauthorizedException} from '@nestjs/common';
 import {Request} from 'express';
 import {DiscordService} from '../../discord/discord.service';
+import {ConfigService} from 'nestjs-config';
 
 @Injectable()
-export class UserGuard {
+export class UserGuard implements CanActivate {
 
-  constructor(private readonly discordService: DiscordService) {
+  constructor(
+    private readonly discordService: DiscordService,
+    private readonly configService: ConfigService,
+  ) {
   }
 
   public async canActivate(context: ExecutionContext) {
+    if (!this.configService.get('app.isDiscordIntegrationEnabled')) {
+      return true;
+    }
     const request = context.switchToHttp().getRequest<Request>();
     const authorizationHeader = request.headers.authorization as string;
     if (!authorizationHeader) {

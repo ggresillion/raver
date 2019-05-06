@@ -20,6 +20,15 @@ export class CategoryService {
     return this.categoryRepository.insert(category);
   }
 
+  public async editCategory(categoryId: number, data: Category) {
+    const category = await this.categoryRepository.findOne(categoryId);
+    if (!category) {
+      throw new NotFoundException('category not found');
+    }
+    await this.categoryRepository.save({...category, ...data});
+    return category;
+  }
+
   public async deleteCategory(categoryId: number): Promise<Category> {
     const category = await this.categoryRepository.findOne(categoryId);
     if (!category) {

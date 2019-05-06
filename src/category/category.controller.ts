@@ -20,9 +20,9 @@ export class CategoryController {
     return this.categoryService.createCategory(category);
   }
 
-  @Put()
-  public async editCategory(@Body()category: Category): Promise<any> {
-    // return this.categoryService.editCategory(category);
+  @Put(':id')
+  public async editCategory(@Param('id')id: number, @Body()category: Category): Promise<any> {
+    return this.categoryService.editCategory(id, category);
   }
 
   @Delete(':id')

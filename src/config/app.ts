@@ -6,9 +6,11 @@ const config = {
   development: {
     port: 8000,
     clientUrl: 'http://localhost:4200/#/',
+    isDiscordIntegrationEnabled: false,
   },
   production: {
     port: 80,
+    isDiscordIntegrationEnabled: false,
   },
 };
 
