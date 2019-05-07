@@ -1,7 +1,9 @@
-import {ConflictException, Injectable, InternalServerErrorException} from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import {exec, getInfo, Info} from 'youtube-dl';
 import {StorageService} from '../storage/storage.service';
 import {SoundService} from '../sound/sound.service';
+import {BotService} from '../bot/bot.service';
+import youtubedl = require('youtube-dl');
 
 @Injectable()
 export class YoutubeService {
@@ -9,6 +11,7 @@ export class YoutubeService {
   constructor(
     private readonly soundService: SoundService,
     private readonly storageService: StorageService,
+    private readonly botService: BotService,
   ) {
   }
 
@@ -38,5 +41,9 @@ export class YoutubeService {
         },
       );
     });
+  }
+
+  public async playSoundFromYoutube(url: string) {
+    this.botService.playFromStream(youtubedl(url, ['-f worstaudio'], {}));
   }
 }
