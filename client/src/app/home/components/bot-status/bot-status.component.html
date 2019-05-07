@@ -1,4 +1,4 @@
-<div class="bot-status-container">
+<div *ngIf="!!botInfos" class="bot-status-container">
   <div>
     <div class="bot-username">{{botInfos.username}}</div>
     <div class="bot-status">{{botInfos.status}}</div>

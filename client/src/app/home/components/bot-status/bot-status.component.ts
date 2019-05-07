@@ -16,6 +16,7 @@ export class BotStatusComponent implements OnInit {
 
   ngOnInit() {
     this.botService.getInfos().subscribe(infos => this.botInfos = infos);
+    this.botService.getStatus().subscribe(status => this.botInfos.status = status);
   }
 
 }

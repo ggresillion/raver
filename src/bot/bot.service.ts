@@ -2,8 +2,10 @@ import {Injectable, Logger, OnApplicationShutdown} from '@nestjs/common';
 import {Client, Message} from 'discord.js';
 import {Command} from './command.enum';
 import {StorageService} from '../storage/storage.service';
+import {BotGateway} from './bot.gateway';
 
 export enum BotStatus {
+  PLAYING = 'playing',
   IN_VOICE_CHANNEL = 'inVoiceChannel',
   CONNECTED = 'connected',
   DISCONNECTED = 'disconnected',
@@ -18,6 +20,7 @@ export class BotService implements OnApplicationShutdown {
 
   constructor(
     private readonly storageService: StorageService,
+    private readonly botGateway: BotGateway,
   ) {
     this.client = new Client();
     this.connect();
@@ -45,19 +48,30 @@ export class BotService implements OnApplicationShutdown {
       const dispacher = co.play(this.storageService.getPathFromUUID(uuid));
       dispacher.on('debug', this.logger.debug);
       dispacher.on('error', this.logger.error);
-      dispacher.on('start', () => this.logger.debug(`Playing file ` + uuid));
+      dispacher.on('start', () => {
+        this.logger.debug(`Playing file ` + uuid);
+        this.botGateway.sendStatusUpdate(BotStatus.PLAYING);
+      });
+      dispacher.on('end', () => {
+        this.botGateway.sendStatusUpdate(BotStatus.IN_VOICE_CHANNEL);
+      });
     });
+  }
+
+  public playFromStream(stream: any) {
+    this.client.voice.connections.forEach(co => co.play(stream));
   }
 
   private bindToEvents() {
     this.client.on('ready', () => {
       this.logger.log('Bot ready !');
+      this.botGateway.sendStatusUpdate(BotStatus.CONNECTED);
     });
-    this.client.on('message', (message: Message) => {
+    this.client.on('message', async (message: Message) => {
       const command = message.content;
       switch (command) {
         case Command.JOIN:
-          this.onJoinCommand(message);
+          await this.onJoinCommand(message);
           break;
         case Command.LEAVE:
           this.onLeaveCommand(message);
@@ -66,16 +80,18 @@ export class BotService implements OnApplicationShutdown {
     });
   }
 
-  private onJoinCommand(message: Message) {
+  private async onJoinCommand(message: Message) {
     const channel = message.member.voice.channel;
     if (channel) {
-      channel.join()
-        .then(() => {
-          this.logger.debug(`Bot connected in channel ${channel.name} (${channel.id})`);
-        })
-        .catch((err) => this.logger.error(err.message));
+      await channel.join();
+      try {
+        this.logger.debug(`Bot connected in channel ${channel.name} (${channel.id})`);
+        this.botGateway.sendStatusUpdate(BotStatus.IN_VOICE_CHANNEL);
+      } catch (e) {
+        this.logger.error(e.message);
+      }
     } else {
-      message.reply('You need to join a voice channel first!');
+      await message.reply('You need to join a voice channel first!');
     }
   }
 
@@ -83,6 +99,7 @@ export class BotService implements OnApplicationShutdown {
     const voice = message.guild.voiceConnection;
     if (voice) {
       this.logger.debug(`Bot disconnected from channel ${voice.channel.name} (${voice.channel.id})`);
+      this.botGateway.sendStatusUpdate(BotStatus.CONNECTED);
       voice.disconnect();
     }
   }

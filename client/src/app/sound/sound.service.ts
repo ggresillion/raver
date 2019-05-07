@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpEventType, HttpRequest} from '@angular/common/http';
 import {environment} from '../../environments/environment';
-import {Observable, Subject} from 'rxjs';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import {Sound} from '../models/Sound';
 import {VideoInfos} from './model/video-infos';
 
@@ -10,19 +10,23 @@ import {VideoInfos} from './model/video-infos';
 })
 export class SoundService {
 
-  private songsSubject = new Subject<Sound[]>();
+  private soundsSubject = new BehaviorSubject<Sound[]>([]);
+  private sounds: Sound[] = [];
 
   constructor(private http: HttpClient) {
   }
 
   public getSounds(): Observable<Sound[]> {
     this.refreshSounds();
-    return this.songsSubject.asObservable();
+    return this.soundsSubject.asObservable();
   }
 
   public refreshSounds() {
     this.http.get<Sound[]>(`${environment.api}/sounds`)
-      .subscribe(sounds => this.songsSubject.next(sounds));
+      .subscribe(sounds => {
+        this.sounds = sounds;
+        this.soundsSubject.next(sounds);
+      });
   }
 
   public playSound(id: number) {
@@ -69,5 +73,9 @@ export class SoundService {
 
   public deleteSound(soundId: number) {
     return this.http.delete(`${environment.api}/sounds/${soundId}`);
+  }
+
+  public setSearchString(search: string) {
+    this.soundsSubject.next(this.sounds.filter(song => song.name.toLowerCase().includes(search.toLowerCase())));
   }
 }

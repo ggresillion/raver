@@ -1,4 +1,4 @@
-import {Controller, Get, Post, Query} from '@nestjs/common';
+import {BadRequestException, Controller, Get, Post, Query} from '@nestjs/common';
 import {YoutubeService} from './youtube.service';
 import {Info} from 'youtube-dl';
 import {Body} from '@nestjs/common/decorators/http/route-params.decorator';
@@ -20,5 +20,13 @@ export class YoutubeController {
   @Post('upload')
   public async uploadFromYoutube(@Body()upload: UploadDto): Promise<any> {
     return await this.youtubeService.uploadFromYoutube(upload.url, upload.name, upload.categoryId);
+  }
+
+  @Post('play')
+  public async playSoundFromYoutube(@Query('url') url: string) {
+    if (!url || url === '') {
+      throw new BadRequestException();
+    }
+    return await this.youtubeService.playSoundFromYoutube(url);
   }
 }

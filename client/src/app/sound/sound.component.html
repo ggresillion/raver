@@ -16,7 +16,7 @@
         </button>
       </mat-toolbar>
       <div class="container">
-        <div *ngFor="let sound of getSoundsForCategory(category.id)">
+        <ng-container *ngFor="let sound of getSoundsForCategory(category.id)">
           <button *ngIf="!isEditing" appDraggable [id]="sound.id" (click)="onSoundClick(sound.id)"
                   class="sound-button" mat-raised-button>
             <span>{{sound.name}}</span>
@@ -26,7 +26,7 @@
             <span>{{sound.name}}</span>
             <mat-icon class="remove-icon">delete_outline</mat-icon>
           </button>
-        </div>
+        </ng-container>
         <button [matMenuTriggerFor]="addMenu" class="sound-button add-button" mat-raised-button>
           <mat-icon>add_circle</mat-icon>
         </button>

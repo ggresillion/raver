@@ -5,6 +5,15 @@
     flex: 1 1 auto;
   }
 
+  .search-container {
+    display: flex;
+    align-items: center;
+
+    * {
+      margin: 4px;
+    }
+  }
+
   .user {
     display: flex;
     align-items: center;
@@ -24,7 +33,8 @@
 }
 
 app-bot-status {
-  position: absolute;
+  position: fixed;
   right: 0;
   bottom: 0;
+  z-index: 99;
 }
