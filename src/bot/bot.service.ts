@@ -58,8 +58,9 @@ export class BotService implements OnApplicationShutdown {
     });
   }
 
-  public playFromStream(stream: any) {
-    this.client.voice.connections.forEach(co => co.play(stream));
+  public playFromStream(stream: any, onStart: () => void, onEnd: () => void) {
+    onStart();
+    setTimeout(onEnd, 1000);
   }
 
   private bindToEvents() {

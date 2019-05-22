@@ -8,6 +8,7 @@ import {HomeModule} from './home/home.module';
 import {LoginModule} from './login/login.module';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {YoutubeModule} from './youtube/youtube.module';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
     BrowserModule,
     HomeModule,
     LoginModule,
+    YoutubeModule,
   ],
   providers: [{provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true}],
   bootstrap: [AppComponent],
