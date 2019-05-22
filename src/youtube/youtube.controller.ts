@@ -3,6 +3,7 @@ import {YoutubeService} from './youtube.service';
 import {Info} from 'youtube-dl';
 import {Body} from '@nestjs/common/decorators/http/route-params.decorator';
 import {UploadDto} from './dto/upload.dto';
+import {VideoInfos} from '../../client/src/app/sound/model/video-infos';
 
 @Controller('youtube')
 export class YoutubeController {
@@ -13,7 +14,7 @@ export class YoutubeController {
   }
 
   @Get('search')
-  public async getFromYoutube(@Query('url') url: string): Promise<Info> {
+  public async getFromYoutube(@Query('url') url: string): Promise<VideoInfos> {
     return await this.youtubeService.searchYoutube(url);
   }
 
