@@ -5,3 +5,5 @@ dist/
 uploads/
 package-lock.json
 web-client/package-lock.json
+.env
+settings.json

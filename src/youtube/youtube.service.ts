@@ -1,28 +1,44 @@
-import {HttpService, Injectable} from '@nestjs/common';
-import {exec} from 'youtube-dl';
-import {StorageService} from '../storage/storage.service';
-import {SoundService} from '../sound/sound.service';
-import {BotService} from '../bot/bot.service';
-import {YoutubeGateway} from './youtube-gateway';
-import {Status} from './model/status';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { exec } from 'youtube-dl';
+import { StorageService } from '../storage/storage.service';
+import { SoundService } from '../sound/sound.service';
+import { BotService, BotStatus } from '../bot/bot.service';
+import { YoutubeGateway } from './youtube-gateway';
+import { PlayerStatus } from './model/player-status';
 import * as ytdl from 'ytdl-core';
-import {TrackInfos} from './dto/track-infos';
+import * as ytdlDiscord from 'ytdl-core-discord';
+import { TrackInfos } from './dto/track-infos';
+import { YoutubeDataAPI } from 'youtube-v3-api';
 
 @Injectable()
 export class YoutubeService {
+
+  private ytApi = new YoutubeDataAPI(process.env.YOUTUBE_API_KEY);
+  private playlist: TrackInfos[] = [];
+  private status: PlayerStatus;
 
   constructor(
     private readonly soundService: SoundService,
     private readonly storageService: StorageService,
     private readonly botService: BotService,
+    @Inject(forwardRef(() => YoutubeGateway))
     private readonly youtubeGateway: YoutubeGateway,
-    private readonly httpService: HttpService,
   ) {
+    const botStatus = this.botService.getInfos().status;
+    this.status = botStatus === BotStatus.CONNECTED || botStatus === BotStatus.IN_VOICE_CHANNEL
+      ? PlayerStatus.IDLE : PlayerStatus.NA;
+    this.botService.onBotStatusUpdate(status => this.onBotStatusUpdate(status));
+    this.youtubeGateway.onAddToPlaylist(track => this.onAddToPlaylist(track));
   }
 
-  public async searchYoutube(url: string): Promise<TrackInfos> {
-    const infos = (await this.httpService.get<any>(`https://noembed.com/embed?url=${url}`).toPromise()).data;
-    return ({url: infos.url, title: infos.title, thumbnail: infos.thumbnail_url});
+  public async fetchVideoInfos(id: string): Promise<TrackInfos> {
+    return await this.ytApi.searchVideo(id, 10) as TrackInfos;
+
+  }
+
+  public async searchVideos(q: string): Promise<TrackInfos[]> {
+    const rawVideos = (await this.ytApi.searchAll(q, 10) as any).items;
+    return rawVideos.map(rawVideo => ({ id: rawVideo.id.videoId, ...rawVideo.snippet }));
   }
 
   public async uploadFromYoutube(url: string, name: string, categoryId: number): Promise<any> {
@@ -31,7 +47,7 @@ export class YoutubeService {
       exec(
         url,
         ['-x', '--audio-format', 'mp3', '-o', sound.uuid],
-        {cwd: this.storageService.getUploadDir()},
+        { cwd: this.storageService.getUploadDir() },
         async (err) => {
           if (err) {
             return reject(err);
@@ -42,13 +58,52 @@ export class YoutubeService {
     });
   }
 
-  public async playSoundFromYoutube(url: string): Promise<TrackInfos> {
-    const infos = await this.searchYoutube(url);
-    this.botService.playFromStream(ytdl(
-      url,
-      {filter: 'audioonly'}),
-      () => this.youtubeGateway.sendStatusUpdate({status: Status.PLAYING, track: infos}),
-      () => this.youtubeGateway.sendStatusUpdate({status: Status.PAUSED, track: infos}));
-    return infos;
+  public async playSoundFromYoutube(id: string) {
+    this.botService.playFromStream(await ytdlDiscord(
+      `http://youtube.com/watch?v=${id}`),
+      () => this.youtubeGateway.sendStatusUpdate(PlayerStatus.PLAYING),
+      () => this.youtubeGateway.sendStatusUpdate(PlayerStatus.PAUSED));
+  }
+
+  public getPlaylist() {
+    return this.playlist;
+  }
+
+  public getStatus() {
+    return this.status;
+  }
+
+  public play() {
+    if (this.botService.isPlaying()) {
+      this.botService.resumeStream();
+    } else {
+      this.playSoundFromYoutube(this.playlist[0].id);
+    }
+    this.youtubeGateway.sendStatusUpdate(PlayerStatus.PLAYING);
+  }
+
+  public pause() {
+    this.botService.pauseStream();
+    this.youtubeGateway.sendStatusUpdate(PlayerStatus.PAUSED);
+  }
+
+  private onBotStatusUpdate(status: BotStatus) {
+    switch (status) {
+      case BotStatus.IN_VOICE_CHANNEL:
+        this.status = PlayerStatus.IDLE;
+        break;
+      case BotStatus.CONNECTED:
+        this.status = PlayerStatus.NA;
+        break;
+      case BotStatus.DISCONNECTED:
+        this.status = PlayerStatus.NA;
+        break;
+    }
+    this.youtubeGateway.sendStatusUpdate(this.status);
+  }
+
+  private onAddToPlaylist(track: TrackInfos) {
+    this.playlist.push(track);
+    this.youtubeGateway.sendAddToPlaylist(track);
   }
 }

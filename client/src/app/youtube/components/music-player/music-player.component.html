@@ -1,33 +1,30 @@
 <mat-card class="player-container">
-  {{status.status}}
-  <button mat-button style="border-left: 1px solid #ddd;" (click)='previousSong();'
-          [disabled]="status.status === 'idle'">
+  <button mat-button style="border-left: 1px solid #ddd;"
+    [disabled]="true">
     <mat-icon aria-hidden="true">skip_previous</mat-icon>
   </button>
-  <button mat-button (click)='playBtnHandler();'
-          style="border-left: 2px solid #ccc; border-right: 2px solid #ccc;"
-          [disabled]="status.status === 'idle'">
-    <mat-icon *ngIf="status.status === 'playing' || status.status === 'idle'">play_arrow</mat-icon>
-    <mat-icon *ngIf="status.status === 'paused'">pause</mat-icon>
+  <button mat-button (click)='playPause()' style="border-left: 2px solid #ccc; border-right: 2px solid #ccc;"
+    [disabled]="status === 'na'">
+    <mat-icon *ngIf="status !== 'playing'">play_arrow</mat-icon>
+    <mat-icon *ngIf="status === 'playing'">pause</mat-icon>
   </button>
   <button mat-button style="border-right: 1px solid #ddd;" (click)='nextSong();'
-          [disabled]="status.status === 'idle'">
+    [disabled]="status === 'na'">
     <mat-icon aria-hidden="true">skip_next</mat-icon>
   </button>
 
   <div class="player-progress">
     <span *ngIf="duration !== 0.01">{{currentTime | secondsToMinutes}}</span>
     <mat-slider style="width: 100%" min="0" max="{{duration}}" value="{{currentTime}}"
-                (change)="currTimePosChanged($event)"></mat-slider>
+      (change)="currTimePosChanged($event)"></mat-slider>
     <span *ngIf="duration !== 0.01">-{{duration - currentTime | secondsToMinutes }}</span>
   </div>
 </mat-card>
 
-<mat-card *ngIf="displayTitle" style="border: 1px solid #ddd; box-shadow: none;">
+<mat-card *ngIf="displayTitle && !!playlist[0]" style="border: 1px solid #ddd; box-shadow: none;">
   <div style="text-align: center;">
     <div style="padding:1px 3px;">
-      <span *ngIf="!isPlaying">{{ playlistTrack[1].title }}</span>
-      <marquee *ngIf="isPlaying" behavior="scroll" direction="left">{{ playlistTrack[1].title }}</marquee>
+      <span>{{ playlist[0].title }}</span>
     </div>
     <div class="clear"></div>
   </div>
@@ -41,12 +38,12 @@
     <table class="playlist-content" mat-table [dataSource]="dataSource">
       <ng-container matColumnDef="title">
         <th mat-header-cell *matHeaderCellDef> Title</th>
-        <td mat-cell *matCellDef="let element" (click)="selectTrack(element.index)"> {{element.title}} </td>
+        <td mat-cell *matCellDef="let element"> {{element.title}} </td>
       </ng-container>
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element">
-          <div class="playlist-play" *ngIf="playlistTrack[1].title === element.title">
+          <div class="playlist-play" *ngIf="playlist[1].title === element.title">
             <mat-icon *ngIf="isPlaying">loader</mat-icon>
             <mat-icon *ngIf="!isPlaying">play_arrow</mat-icon>
           </div>

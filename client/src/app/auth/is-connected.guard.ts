@@ -16,7 +16,7 @@ export class IsConnectedGuard implements CanActivate {
   public canActivate(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    if (environment.isDiscordIntegrationEnabled) {
+    if (!environment.isDiscordIntegrationEnabled) {
       return true;
     }
     const isConnected = this.authService.isConnected();

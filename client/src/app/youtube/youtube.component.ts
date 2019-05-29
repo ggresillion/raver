@@ -1,13 +1,16 @@
 import {Component, OnInit} from '@angular/core';
+import {YoutubeService} from './youtube.service';
 
 @Component({
   selector: 'app-youtube',
   templateUrl: './youtube.component.html',
-  styleUrls: ['./youtube.component.sass']
+  styleUrls: ['./youtube.component.scss']
 })
 export class YoutubeComponent implements OnInit {
-  
-  constructor() {
+
+  constructor(
+    private readonly playlistService: YoutubeService,
+  ) {
   }
 
   ngOnInit() {

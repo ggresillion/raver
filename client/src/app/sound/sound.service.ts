@@ -59,7 +59,7 @@ export class SoundService {
   }
 
   public searchYoutube(videoURL: string) {
-    return this.http.get<VideoInfos>(`${environment.api}/youtube/search?url=${videoURL}`);
+    return this.http.get<VideoInfos>(`${environment.api}/youtube/infos?url=${videoURL}`);
   }
 
   public uploadFromYoutube(url: string, categoryId: number, name: string) {

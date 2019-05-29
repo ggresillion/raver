@@ -5,9 +5,10 @@ import {MatExpansionModule, MatIconModule, MatPaginatorModule, MatSliderModule, 
 import {SecondsToMinutesPipe} from './seconds-to-minutes.pipe';
 import {MusicPlayerComponent} from './components/music-player/music-player.component';
 import {YoutubeService} from './youtube.service';
+import { SearchYoutubeComponent } from './components/search-youtube/search-youtube.component';
 
 @NgModule({
-  declarations: [YoutubeComponent, SecondsToMinutesPipe, MusicPlayerComponent],
+  declarations: [YoutubeComponent, SecondsToMinutesPipe, MusicPlayerComponent, SearchYoutubeComponent],
   imports: [
     SharedModule,
     MatSliderModule,

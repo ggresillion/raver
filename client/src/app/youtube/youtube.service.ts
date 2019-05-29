@@ -1,87 +1,95 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import * as io from 'socket.io-client';
-import {environment} from '../../environments/environment';
+import { environment } from '../../environments/environment';
 import Socket = SocketIOClient.Socket;
-import {PlayerStatus} from './model/player-status';
-import {Status} from './model/status';
-
+import { PlayerStatus } from './model/player-status';
+import { TrackInfos } from '../../../../src/youtube/dto/track-infos';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { ClientEvents } from './model/client-events.enum';
+import { ServerEvents } from './model/server-events.enum';
 @Injectable({
   providedIn: 'root'
 })
 export class YoutubeService {
 
-  playlist: any[] = [];
+  private playlistSubject: BehaviorSubject<TrackInfos[]> = new BehaviorSubject([]);
+  public indexSong = 0;
+  private statusSubject: BehaviorSubject<PlayerStatus> = new BehaviorSubject(PlayerStatus.IDLE);
+  private currentTime = 0;
+  private duration = 0;
+  private socket: Socket;
 
-  indexSong = 0;
-  currentTrackSubject: BehaviorSubject<{}> = new BehaviorSubject(this.playlist[this.indexSong]);
-  statusSubject: BehaviorSubject<PlayerStatus> = new BehaviorSubject({status: Status.IDLE});
-  currentTime = 0;
-  duration = 0;
-  socket: Socket;
-
-  constructor() {
+  constructor(
+    private http: HttpClient,
+  ) {
     this.socket = io(environment.websocket + 'player');
     this.bindToEvents();
   }
 
-  init(): void {
-    this.updateCurrentSong();
+  public addToPlaylist(track: TrackInfos) {
+    this.socket.emit(ClientEvents.ADD_TO_PLAYLIST, { track });
   }
 
-  nextSong(): void {
-    if ((this.indexSong + 1) >= this.playlist.length) {
+  public getPlaylist() {
+    return this.playlistSubject.asObservable();
+  }
+
+  public nextSong(): void {
+    if ((this.indexSong + 1) >= this.playlistSubject.value.length) {
       this.indexSong = 0;
     } else {
       this.indexSong++;
     }
-    this.updateCurrentSong();
   }
 
-  previousSong(): void {
+  public previousSong(): void {
     if ((this.indexSong - 1) < 0) {
-      this.indexSong = (this.playlist.length - 1);
+      this.indexSong = (this.playlistSubject.value.length - 1);
     } else {
       this.indexSong--;
     }
-    this.updateCurrentSong();
   }
 
-  resetPlaylist(): void {
+  public resetPlaylist(): void {
     this.indexSong = 0;
-    this.updateCurrentSong();
   }
 
-  selectATrack(index: number): void {
+  public selectATrack(index: number): void {
     this.indexSong = index - 1;
-    this.updateCurrentSong();
-  }
-
-  updateCurrentSong(): void {
-    const current = this.playlist[this.indexSong];
-    const previous = ((this.indexSong - 1) >= 0) ? this.playlist[this.indexSong - 1] : this.playlist[this.playlist.length - 1];
-    const next = ((this.indexSong + 1) >= this.playlist.length) ? this.playlist[0] : this.playlist[this.indexSong + 1];
-
-    this.currentTrackSubject.next([
-      previous,
-      current,
-      next
-    ]);
-  }
-
-  getSubjectCurrentTrack(): BehaviorSubject<{}> {
-    return this.currentTrackSubject;
-  }
-
-  private bindToEvents() {
-    this.socket.on('status', status => this.updateStatus(status));
-  }
-
-  private updateStatus(status: PlayerStatus) {
-    this.statusSubject.next(status);
   }
 
   public getStatus() {
     return this.statusSubject.asObservable();
+  }
+
+  public searchYoutube(searchString: string): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.api}/youtube/search?q=${searchString}`);
+  }
+
+  public play() {
+    this.socket.emit(ClientEvents.PLAY);
+  }
+
+  public pause() {
+    this.socket.emit(ClientEvents.PAUSE);
+  }
+
+  private bindToEvents() {
+    this.socket.on(ServerEvents.SYNC, infos => {
+      this.statusSubject.next(infos.status);
+      this.playlistSubject.next(infos.playlist);
+    });
+    this.socket.on(ServerEvents.STATUS_UPDATED, data => this.onStatusUpdate(data.status));
+    this.socket.on(ServerEvents.ADD_TO_PLAYLIST, data => this.onAddToPlaylist(data.track));
+    this.socket.on(ServerEvents.GET_PLAYLIST, playlist => this.playlistSubject.next(playlist));
+  }
+
+  private onStatusUpdate(status: PlayerStatus) {
+    this.statusSubject.next(status);
+  }
+
+  private onAddToPlaylist(track) {
+    this.playlistSubject.next([...this.playlistSubject.value, track]);
   }
 }

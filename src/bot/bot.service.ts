@@ -1,8 +1,9 @@
-import {Injectable, Logger, OnApplicationShutdown} from '@nestjs/common';
-import {Client, Message} from 'discord.js';
-import {Command} from './command.enum';
-import {StorageService} from '../storage/storage.service';
-import {BotGateway} from './bot.gateway';
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
+import { Client, Message, BroadcastDispatcher, StreamDispatcher } from 'discord.js';
+import { Command } from './command.enum';
+import { StorageService } from '../storage/storage.service';
+import { BotGateway } from './bot.gateway';
+import { Stream, Readable } from 'stream';
 
 export enum BotStatus {
   PLAYING = 'playing',
@@ -17,6 +18,8 @@ export class BotService implements OnApplicationShutdown {
   private readonly logger = new Logger(BotService.name);
   private readonly token = process.env.BOT_TOKEN;
   private client: Client;
+  private dispatcher: StreamDispatcher;
+  private onStatusChangeListeners = [];
 
   constructor(
     private readonly storageService: StorageService,
@@ -33,7 +36,7 @@ export class BotService implements OnApplicationShutdown {
 
   public getInfos() {
     if (!this.client.user) {
-      return {status: BotStatus.DISCONNECTED};
+      return { status: BotStatus.DISCONNECTED };
     }
     return {
       status: this.client.voice.connections.size > 0 ? BotStatus.IN_VOICE_CHANNEL : BotStatus.CONNECTED,
@@ -45,28 +48,64 @@ export class BotService implements OnApplicationShutdown {
 
   public playFile(uuid: string) {
     this.client.voice.connections.forEach(co => {
-      const dispacher = co.play(this.storageService.getPathFromUUID(uuid));
-      dispacher.on('debug', this.logger.debug);
-      dispacher.on('error', this.logger.error);
-      dispacher.on('start', () => {
+      this.dispatcher = co.play(this.storageService.getPathFromUUID(uuid));
+      this.dispatcher.on('debug', this.logger.debug);
+      this.dispatcher.on('error', this.logger.error);
+      this.dispatcher.on('start', () => {
         this.logger.debug(`Playing file ` + uuid);
-        this.botGateway.sendStatusUpdate(BotStatus.PLAYING);
+        this.botStatusUpdate(BotStatus.PLAYING);
       });
-      dispacher.on('end', () => {
-        this.botGateway.sendStatusUpdate(BotStatus.IN_VOICE_CHANNEL);
+      this.dispatcher.on('end', () => {
+        this.dispatcher = null;
+        this.botStatusUpdate(BotStatus.IN_VOICE_CHANNEL);
       });
     });
   }
 
-  public playFromStream(stream: any, onStart: () => void, onEnd: () => void) {
-    onStart();
-    setTimeout(onEnd, 1000);
+  public playFromStream(stream: Readable, onStart: () => void, onEnd: () => void) {
+    this.client.voice.connections.forEach(co => {
+      this.dispatcher = co.play(stream, {type: 'opus'});
+      this.dispatcher.on('debug', this.logger.debug);
+      this.dispatcher.on('error', this.logger.error);
+      this.dispatcher.on('start', () => {
+        this.logger.debug('Playing from stream');
+        onStart();
+      });
+      this.dispatcher.on('end', () => {
+        this.botStatusUpdate(BotStatus.IN_VOICE_CHANNEL);
+        this.dispatcher = null;
+        onEnd();
+      });
+    });
+  }
+
+  public pauseStream() {
+    this.dispatcher.pause();
+    this.logger.debug('Paused stream');
+  }
+
+  public resumeStream() {
+    this.dispatcher.resume();
+    this.logger.debug('Resumed stream');
+  }
+
+  public isPlaying(): boolean {
+    return !!this.dispatcher;
+  }
+
+  public onBotStatusUpdate(cb: (status: BotStatus) => void) {
+    this.onStatusChangeListeners.push(cb);
+  }
+
+  private botStatusUpdate(status: BotStatus) {
+    this.onStatusChangeListeners.forEach(cb => cb(status));
+    this.botGateway.sendStatusUpdate(status);
   }
 
   private bindToEvents() {
     this.client.on('ready', () => {
       this.logger.log('Bot ready !');
-      this.botGateway.sendStatusUpdate(BotStatus.CONNECTED);
+      this.botStatusUpdate(BotStatus.CONNECTED);
     });
     this.client.on('message', async (message: Message) => {
       const command = message.content;
@@ -84,10 +123,10 @@ export class BotService implements OnApplicationShutdown {
   private async onJoinCommand(message: Message) {
     const channel = message.member.voice.channel;
     if (channel) {
-      await channel.join();
       try {
+        await channel.join();
         this.logger.debug(`Bot connected in channel ${channel.name} (${channel.id})`);
-        this.botGateway.sendStatusUpdate(BotStatus.IN_VOICE_CHANNEL);
+        this.botStatusUpdate(BotStatus.IN_VOICE_CHANNEL);
       } catch (e) {
         this.logger.error(e.message);
       }
@@ -100,7 +139,7 @@ export class BotService implements OnApplicationShutdown {
     const voice = message.guild.voiceConnection;
     if (voice) {
       this.logger.debug(`Bot disconnected from channel ${voice.channel.name} (${voice.channel.id})`);
-      this.botGateway.sendStatusUpdate(BotStatus.CONNECTED);
+      this.botStatusUpdate(BotStatus.CONNECTED);
       voice.disconnect();
     }
   }

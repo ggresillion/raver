@@ -1,5 +1,6 @@
-import {Status} from './status';
-
-export interface PlayerStatus {
-  status: Status;
+export enum PlayerStatus {
+  PLAYING = 'playing',
+  PAUSED = 'paused',
+  IDLE = 'idle',
+  NA = 'na',
 }

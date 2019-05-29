@@ -1,7 +1,6 @@
-import {Status} from './status';
-import {TrackInfos} from '../dto/track-infos';
-
-export interface PlayerStatus {
-  status: Status;
-  track: TrackInfos;
+export enum PlayerStatus {
+  PLAYING = 'playing',
+  PAUSED = 'paused',
+  IDLE = 'idle',
+  NA = 'na',
 }

@@ -1,7 +1,8 @@
-import {Component, OnInit, Input, ViewChild, ElementRef} from '@angular/core';
-import {MatSlider, MatPaginator, MatTableDataSource} from '@angular/material';
-import {YoutubeService} from '../../youtube.service';
-import {Status} from '../../model/status';
+import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
+import { MatSlider, MatPaginator, MatTableDataSource } from '@angular/material';
+import { YoutubeService } from '../../youtube.service';
+import { TrackInfos } from '../../model/track-infos';
+import { PlayerStatus } from '../../model/player-status';
 
 @Component({
   selector: 'app-music-player',
@@ -11,10 +12,10 @@ import {Status} from '../../model/status';
 export class MusicPlayerComponent implements OnInit {
 
   @Input()
-  displayTitle = false;
+  displayTitle = true;
 
   @Input()
-  displayPlaylist = false;
+  displayPlaylist = true;
 
   @Input()
   pageSizeOptions = [10, 20, 30];
@@ -26,39 +27,31 @@ export class MusicPlayerComponent implements OnInit {
 
   displayedColumns: string[] = ['title', 'status'];
 
-  dataSource = new MatTableDataSource<any>();
+  dataSource = new MatTableDataSource<TrackInfos>();
 
   paginator: MatPaginator;
 
-  playlistData: any[];
-
-  playlistTrack: any;
+  playlist: TrackInfos[];
   loaderDisplay = false;
   isPlaying = false;
   currentTime = 0;
   duration = 0.01;
 
-  public status = {status: Status.IDLE};
+  public status = PlayerStatus.IDLE;
 
   constructor(private playlistService: YoutubeService) {
-    this.playlistService.getStatus().subscribe((status) => {
-      this.status = status;
-    });
   }
 
   ngOnInit() {
     this.setDataSourceAttributes();
-    this.bindPlayerEvent();
-    this.player.nativeElement.addEventListener('ended', () => {
-      if (this.checkIfSongHasStartedSinceAtleastTwoSeconds()) {
-        this.nextSong();
-      }
+    this.playlistService.getPlaylist().subscribe((playlist) => {
+      this.playlist = playlist;
+      this.setDataSourceAttributes();
     });
-    this.playlistService.getSubjectCurrentTrack().subscribe((playlistTrack) => {
-      this.playlistTrack = playlistTrack;
+    this.playlistService.getStatus().subscribe((status) => {
+      console.log(status)
+      this.status = status;
     });
-    this.player.nativeElement.currentTime = 0;
-    this.playlistService.init();
   }
 
   @ViewChild(MatPaginator) set matPaginator(mp: MatPaginator) {
@@ -67,12 +60,10 @@ export class MusicPlayerComponent implements OnInit {
   }
 
   setDataSourceAttributes() {
-    let index = 1;
-    if (this.playlistData) {
-      this.playlistData.forEach(data => {
-        data.index = index++;
-      });
-      this.dataSource = new MatTableDataSource<any>(this.playlistData);
+    if (this.playlist) {
+      const data = [...this.playlist];
+      data.pop();
+      this.dataSource = new MatTableDataSource<TrackInfos>(data);
       this.dataSource.paginator = this.paginator;
     }
   }
@@ -89,7 +80,6 @@ export class MusicPlayerComponent implements OnInit {
     this.currentTime = 0;
     this.duration = 0.01;
     this.playlistService.nextSong();
-    this.play();
   }
 
   previousSong(): void {
@@ -106,13 +96,7 @@ export class MusicPlayerComponent implements OnInit {
       }
       this.playlistService.previousSong();
     } else {
-      this.resetSong();
     }
-    this.play();
-  }
-
-  resetSong(): void {
-    this.player.nativeElement.src = this.playlistTrack[1].link;
   }
 
   selectTrack(index: number): void {
@@ -125,12 +109,6 @@ export class MusicPlayerComponent implements OnInit {
 
   checkIfSongHasStartedSinceAtleastTwoSeconds(): boolean {
     return this.player.nativeElement.currentTime > 2;
-  }
-
-  @Input()
-  set playlist(playlist: any[]) {
-    this.playlistData = playlist;
-    this.ngOnInit();
   }
 
   currTimePosChanged(event) {
@@ -157,21 +135,11 @@ export class MusicPlayerComponent implements OnInit {
     });
   }
 
-  playBtnHandler(): void {
-    if (this.loaderDisplay) {
-      return;
-    }
-    if (this.player.nativeElement.paused) {
-      this.player.nativeElement.play(this.currentTime);
+  playPause() {
+    if (this.status === PlayerStatus.PLAYING) {
+      this.playlistService.pause();
     } else {
-      this.currentTime = this.player.nativeElement.currentTime;
-      this.player.nativeElement.pause();
+      this.playlistService.play();
     }
-  }
-
-  play(): void {
-    setTimeout(() => {
-      this.player.nativeElement.play();
-    }, 0);
   }
 }

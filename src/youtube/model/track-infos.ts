@@ -1,5 +1,5 @@
 export interface TrackInfos {
-  id: string;
+  url: string;
   title: string;
   thumbnail: string;
 }
