@@ -13,9 +13,15 @@ export class YoutubeController {
   ) {
   }
 
-  @Get('search')
+  @Get('infos')
   public async getFromYoutube(@Query('url') url: string): Promise<VideoInfos> {
-    return await this.youtubeService.searchYoutube(url);
+    const id = url.split('v=')[1];
+    return await this.youtubeService.fetchVideoInfos(id);
+  }
+
+  @Get('search')
+  public async searchOnYoutube(@Query('q') q: string): Promise<VideoInfos[]> {
+    return await this.youtubeService.searchVideos(q);
   }
 
   @Post('upload')

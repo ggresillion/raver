@@ -47,7 +47,9 @@
     "typescript": "^3.4.1",
     "uuid": "^3.3.2",
     "youtube-dl": "^1.13.1",
-    "ytdl-core": "^0.29.1"
+    "youtube-v3-api": "^1.1.1",
+    "ytdl-core": "^0.29.1",
+    "ytdl-core-discord": "^1.0.3"
   },
   "devDependencies": {
     "@nestjs/testing": "^5.1.0",
