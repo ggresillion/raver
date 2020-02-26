@@ -2,7 +2,7 @@ import {BadRequestException, Controller, Get, Query, Req, Res, UnauthorizedExcep
 import {Request, Response} from 'express';
 import {AuthService} from './auth.service';
 import fetch from 'node-fetch';
-import {ConfigService} from 'nestjs-config';
+import {ConfigService} from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
@@ -47,7 +47,7 @@ export class AuthController {
     }
     const accessToken = body.access_token;
     const refreshToken = body.refresh_token;
-    res.redirect(`${this.configService.get('app.clientUrl') ? this.configService.get('app.clientUrl') : `${host}/#/`}` +
+    res.redirect(`${this.configService.get('clientUrl') ? this.configService.get('clientUrl') : `${host}/#/`}` +
       `login?accessToken=${accessToken}&refreshToken=${refreshToken}`);
   }
 }

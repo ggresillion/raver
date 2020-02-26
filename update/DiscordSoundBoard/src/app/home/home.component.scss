@@ -1,0 +1,40 @@
+.mat-toolbar {
+  color: white;
+
+  .fill {
+    flex: 1 1 auto;
+  }
+
+  .search-container {
+    display: flex;
+    align-items: center;
+
+    * {
+      margin: 4px;
+    }
+  }
+
+  .user {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+
+    .avatar {
+      border-radius: 999px;
+      max-height: 80%;
+      cursor: pointer;
+    }
+
+    .username {
+      margin-right: 14px;
+    }
+  }
+}
+
+app-bot-status {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+}

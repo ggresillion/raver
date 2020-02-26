@@ -1,0 +1,14 @@
+.container {
+    display: flex;
+    justify-content: center;
+    flex: 1 1 0;
+
+    * {
+        width: 100%;
+        margin: 20px;
+
+        &:first-child {
+            margin-right: 0;
+        }
+    }
+}

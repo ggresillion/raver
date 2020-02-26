@@ -1,9 +1,10 @@
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { Client, Message, BroadcastDispatcher, StreamDispatcher } from 'discord.js';
-import { Command } from './command.enum';
-import { StorageService } from '../storage/storage.service';
-import { BotGateway } from './bot.gateway';
-import { Stream, Readable } from 'stream';
+import {Injectable, Logger, OnApplicationShutdown} from '@nestjs/common';
+import {Client, Message, StreamDispatcher} from 'discord.js';
+import {Command} from './command.enum';
+import {StorageService} from '../storage/storage.service';
+import {BotGateway} from './bot.gateway';
+import {Readable} from 'stream';
+import * as fs from 'fs';
 
 export enum BotStatus {
   PLAYING = 'playing',
@@ -36,7 +37,7 @@ export class BotService implements OnApplicationShutdown {
 
   public getInfos() {
     if (!this.client.user) {
-      return { status: BotStatus.DISCONNECTED };
+      return {status: BotStatus.DISCONNECTED};
     }
     return {
       status: this.client.voice.connections.size > 0 ? BotStatus.IN_VOICE_CHANNEL : BotStatus.CONNECTED,
@@ -49,6 +50,12 @@ export class BotService implements OnApplicationShutdown {
   public playFile(uuid: string) {
     this.client.voice.connections.forEach(co => {
       this.dispatcher = co.play(this.storageService.getPathFromUUID(uuid));
+      // Workaround to prevent stream to end unexpectedly
+      (this.dispatcher as any)._setSpeaking(1);
+      // tslint:disable-next-line:no-empty
+      (this.dispatcher as any)._setSpeaking = () => {
+      };
+      // --
       this.dispatcher.on('debug', this.logger.debug);
       this.dispatcher.on('error', this.logger.error);
       this.dispatcher.on('start', () => {
@@ -65,6 +72,12 @@ export class BotService implements OnApplicationShutdown {
   public playFromStream(stream: Readable, onStart: () => void, onEnd: () => void) {
     this.client.voice.connections.forEach(co => {
       this.dispatcher = co.play(stream, {type: 'opus'});
+      // Workaround to prevent stream to end unexpectedly
+      (this.dispatcher as any)._setSpeaking(1);
+      // tslint:disable-next-line:no-empty
+      (this.dispatcher as any)._setSpeaking = () => {
+      };
+      // --
       this.dispatcher.on('debug', this.logger.debug);
       this.dispatcher.on('error', this.logger.error);
       this.dispatcher.on('start', () => {
@@ -98,6 +111,7 @@ export class BotService implements OnApplicationShutdown {
   }
 
   private botStatusUpdate(status: BotStatus) {
+    this.logger.debug(`Bot status: ${status}`);
     this.onStatusChangeListeners.forEach(cb => cb(status));
     this.botGateway.sendStatusUpdate(status);
   }
@@ -106,6 +120,12 @@ export class BotService implements OnApplicationShutdown {
     this.client.on('ready', () => {
       this.logger.log('Bot ready !');
       this.botStatusUpdate(BotStatus.CONNECTED);
+    });
+    this.client.on('debug', (m) => {
+      this.logger.debug(m);
+    });
+    this.client.on('error', (m) => {
+      this.logger.error(m);
     });
     this.client.on('message', async (message: Message) => {
       const command = message.content;
@@ -136,17 +156,18 @@ export class BotService implements OnApplicationShutdown {
   }
 
   private onLeaveCommand(message: Message) {
-    const voice = message.guild.voiceConnection;
-    if (voice) {
-      this.logger.debug(`Bot disconnected from channel ${voice.channel.name} (${voice.channel.id})`);
-      this.botStatusUpdate(BotStatus.CONNECTED);
-      voice.disconnect();
-    }
+    // const voice = message.guild.voiceConnection;
+    // if (voice) {
+    //   this.logger.debug(`Bot disconnected from channel ${voice.channel.name} (${voice.channel.id})`);
+    //   this.botStatusUpdate(BotStatus.CONNECTED);
+    //   voice.disconnect();
+    // }
   }
 
   private connect() {
     if (!this.token) {
       this.logger.error('Please define BOT_TOKEN env variable');
+      return;
     }
     this.client.login(this.token);
   }

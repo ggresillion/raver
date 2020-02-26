@@ -1,0 +1,19 @@
+<mat-toolbar color="primary">
+  <h1>La Boite de Discorde</h1>
+  <span class="fill"></span>
+  <div class="search-container">
+    <mat-icon>search</mat-icon>
+    <mat-form-field>
+      <input matInput type="text" [(ngModel)]="search" (ngModelChange)="onSearchChange()"/>
+      <button mat-button *ngIf="search" matSuffix mat-icon-button aria-label="Clear" (click)="reset()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+  <div *ngIf="!!connectedUser" class="user">
+    <p class="username">{{connectedUser.username}}</p>
+    <img [src]="'https://cdn.discordapp.com/avatars/' + connectedUser.id + '/' + connectedUser.avatar" class="avatar"
+         alt="avatar">
+  </div>
+</mat-toolbar>
+<router-outlet></router-outlet>
