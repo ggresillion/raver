@@ -23,6 +23,7 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {MatSliderModule} from '@angular/material/slider';
 import {MatTableModule} from '@angular/material/table';
 import {MatPaginatorModule} from '@angular/material/paginator';
+import {FlexLayoutModule} from '@angular/flex-layout';
 
 @NgModule({
   exports: [
@@ -48,7 +49,8 @@ import {MatPaginatorModule} from '@angular/material/paginator';
     MatSliderModule,
     MatExpansionModule,
     MatTableModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    FlexLayoutModule
   ],
   declarations: [DraggableDirective, DropperDirective],
   providers: [CategoryService, BotService],

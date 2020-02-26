@@ -79,12 +79,27 @@ export class YoutubeService {
     } else {
       this.playSoundFromYoutube(this.playlist[0].id);
     }
-    this.youtubeGateway.sendStateUpdate({status: PlayerStatus.PLAYING, playlist: this.playlist});
+    this.status = PlayerStatus.PLAYING;
+    this.propagateState();
   }
 
   public pause() {
     this.botService.pauseStream();
-    this.youtubeGateway.sendStatusUpdate(PlayerStatus.PAUSED);
+    this.status = PlayerStatus.PAUSED;
+    this.youtubeGateway.sendStatusUpdate(this.status);
+    this.propagateState();
+  }
+
+  public stop() {
+    this.botService.stopStream();
+    this.propagateState();
+  }
+
+  public next() {
+    this.botService.stopStream();
+    this.playlist.splice(0, 1);
+    this.playSoundFromYoutube(this.playlist[0].id);
+    this.propagateState();
   }
 
   private onBotStatusUpdate(status: BotStatus) {
@@ -104,6 +119,13 @@ export class YoutubeService {
 
   private onAddToPlaylist(track: TrackInfos) {
     this.playlist.push(track);
-    this.youtubeGateway.sendAddToPlaylist(track);
+    if (this.getStatus() === PlayerStatus.IDLE) {
+      this.play();
+    }
+    this.propagateState();
+  }
+
+  private propagateState() {
+    this.youtubeGateway.sendStateUpdate({status: this.status, playlist: this.playlist});
   }
 }
