@@ -37,6 +37,7 @@ export class YoutubeGateway implements OnGatewayConnection {
   }
 
   public sendStateUpdate(state: PlayerState) {
+    this.logger.debug('Sending state update');
     this.server.emit(ServerEvents.STATE_UPDATED, {state});
   }
 
@@ -44,9 +45,9 @@ export class YoutubeGateway implements OnGatewayConnection {
     this.addToPlaylistListeners.push(cb);
   }
 
-  public sendAddToPlaylist(track: TrackInfos) {
-    this.server.emit(ServerEvents.ADD_TO_PLAYLIST, {track});
-  }
+  // public sendAddToPlaylist(track: TrackInfos) {
+  //   this.server.emit(ServerEvents.ADD_TO_PLAYLIST, {track});
+  // }
 
   @SubscribeMessage(ClientEvents.ADD_TO_PLAYLIST)
   private addToPlaylistAction(client: Client, data: { track: TrackInfos }) {
@@ -72,5 +73,11 @@ export class YoutubeGateway implements OnGatewayConnection {
   private plauseAction() {
     this.logger.debug(`Received event : ${ClientEvents.PAUSE}`);
     this.youtubeService.pause();
+  }
+
+  @SubscribeMessage(ClientEvents.NEXT)
+  private nextAction() {
+    this.logger.debug(`Received event : ${ClientEvents.NEXT}`);
+    this.youtubeService.next();
   }
 }

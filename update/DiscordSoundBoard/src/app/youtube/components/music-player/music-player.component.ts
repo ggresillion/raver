@@ -1,7 +1,7 @@
-import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
-import { YoutubeService } from '../../youtube.service';
-import { TrackInfos } from '../../model/track-infos';
-import { PlayerStatus } from '../../model/player-status';
+import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import {YoutubeService} from '../../youtube.service';
+import {TrackInfos} from '../../model/track-infos';
+import {PlayerStatus} from '../../model/player-status';
 import {MatTableDataSource} from '@angular/material/table';
 import {MatPaginator} from '@angular/material/paginator';
 
@@ -26,7 +26,7 @@ export class MusicPlayerComponent implements OnInit {
 
   @ViewChild('audioPlayer') player: ElementRef;
 
-  displayedColumns: string[] = ['title', 'status'];
+  displayedColumns: string[] = ['position', 'thumbnail', 'title'];
 
   dataSource = new MatTableDataSource<TrackInfos>();
 
@@ -46,6 +46,7 @@ export class MusicPlayerComponent implements OnInit {
   ngOnInit() {
     this.setDataSourceAttributes();
     this.playlistService.getPlaylist().subscribe((playlist) => {
+      console.log(playlist);
       this.playlist = playlist;
       this.setDataSourceAttributes();
     });
@@ -62,7 +63,7 @@ export class MusicPlayerComponent implements OnInit {
   setDataSourceAttributes() {
     if (this.playlist) {
       const data = [...this.playlist];
-      data.pop();
+      data.splice(0, 1);
       this.dataSource = new MatTableDataSource<TrackInfos>(data);
       this.dataSource.paginator = this.paginator;
     }

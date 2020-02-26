@@ -4,7 +4,6 @@ import {Command} from './command.enum';
 import {StorageService} from '../storage/storage.service';
 import {BotGateway} from './bot.gateway';
 import {Readable} from 'stream';
-import * as fs from 'fs';
 
 export enum BotStatus {
   PLAYING = 'playing',
@@ -71,6 +70,10 @@ export class BotService implements OnApplicationShutdown {
 
   public playFromStream(stream: Readable, onStart: () => void, onEnd: () => void) {
     this.client.voice.connections.forEach(co => {
+      if (this.dispatcher) {
+        this.dispatcher.end();
+        this.dispatcher = null;
+      }
       this.dispatcher = co.play(stream, {type: 'opus'});
       // Workaround to prevent stream to end unexpectedly
       (this.dispatcher as any)._setSpeaking(1);
@@ -100,6 +103,12 @@ export class BotService implements OnApplicationShutdown {
   public resumeStream() {
     this.dispatcher.resume();
     this.logger.debug('Resumed stream');
+  }
+
+  public stopStream() {
+    this.dispatcher.end();
+    this.dispatcher = null;
+    this.logger.debug('Stopped stream');
   }
 
   public isPlaying(): boolean {

@@ -1,24 +1,48 @@
-.player-container {
-  display: flex;
-  font-size: 12px;
+.container {
+  height: 100%;
+  min-height: 100%;
 
-  .player-progress {
-    width: 100%;
+  .player-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2px;
+    font-size: 12px;
 
-    * {
-      margin: 2px;
+    .player-progress {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2px;
+
+      * {
+        margin: 2px;
+      }
     }
   }
-}
 
-.playlist-content {
-  width: 100%;
+  .current-song, .playlist {
+    margin-top: 16px;
+    padding-top: 12px;
+  }
 
-  .playlist-play {
-    float: right;
+  .playlist {
+
+    .title {
+      font-size: 24px;
+      color: #5a5a5a;
+    }
+
+    .playlist-content {
+      width: 100%;
+
+      .playlist-play {
+        float: right;
+      }
+    }
+  }
+
+  app-youtube-thumbnail {
+    max-height: 100px;
+    max-width: 140px;
+    margin: 6px;
   }
 }

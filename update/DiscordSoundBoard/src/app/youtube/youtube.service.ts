@@ -1,13 +1,14 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject, Observable} from 'rxjs';
 import * as io from 'socket.io-client';
-import { environment } from '../../environments/environment';
-import { PlayerStatus } from './model/player-status';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { ClientEvents } from './model/client-events.enum';
-import { ServerEvents } from './model/server-events.enum';
+import {environment} from '../../environments/environment';
+import {PlayerStatus} from './model/player-status';
+import {HttpClient} from '@angular/common/http';
+import {ClientEvents} from './model/client-events.enum';
+import {ServerEvents} from './model/server-events.enum';
 import {Socket} from 'socket.io';
 import {TrackInfos} from './model/track-infos';
+import {PlayerState} from './model/player-state';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +30,7 @@ export class YoutubeService {
   }
 
   public addToPlaylist(track: TrackInfos) {
-    this.socket.emit(ClientEvents.ADD_TO_PLAYLIST, { track });
+    this.socket.emit(ClientEvents.ADD_TO_PLAYLIST, {track});
   }
 
   public getPlaylist() {
@@ -42,6 +43,7 @@ export class YoutubeService {
     } else {
       this.indexSong++;
     }
+    this.socket.emit(ClientEvents.NEXT);
   }
 
   public previousSong(): void {
@@ -84,10 +86,17 @@ export class YoutubeService {
     this.socket.on(ServerEvents.STATUS_UPDATED, data => this.onStatusUpdate(data.status));
     this.socket.on(ServerEvents.ADD_TO_PLAYLIST, data => this.onAddToPlaylist(data.track));
     this.socket.on(ServerEvents.GET_PLAYLIST, playlist => this.playlistSubject.next(playlist));
+    this.socket.on(ServerEvents.STATE_UPDATED, data => this.onStateUpdate(data.state));
   }
 
   private onStatusUpdate(status: PlayerStatus) {
     this.statusSubject.next(status);
+  }
+
+  private onStateUpdate(state: PlayerState) {
+    console.log('stateUpdated:', state);
+    this.onStatusUpdate(state.status);
+    this.playlistSubject.next(state.playlist);
   }
 
   private onAddToPlaylist(track) {
