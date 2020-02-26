@@ -1,15 +1,17 @@
-import { WebSocketGateway, WebSocketServer, SubscribeMessage, OnGatewayConnection } from '@nestjs/websockets';
-import { Server, Client, Socket } from 'socket.io';
-import { PlayerInfos } from './model/player-infos';
-import { ClientEvents } from './dto/client-events.enum';
-import { TrackInfos } from './dto/track-infos';
-import { ServerEvents } from './dto/server-events.enum';
-import { YoutubeService } from './youtube.service';
-import { Inject, forwardRef } from '@nestjs/common';
-import { PlayerStatus } from './model/player-status';
+import {OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer} from '@nestjs/websockets';
+import {Client, Server, Socket} from 'socket.io';
+import {ClientEvents} from './dto/client-events.enum';
+import {TrackInfos} from './dto/track-infos';
+import {ServerEvents} from './dto/server-events.enum';
+import {YoutubeService} from './youtube.service';
+import {forwardRef, Inject, Logger} from '@nestjs/common';
+import {PlayerStatus} from './model/player-status';
+import {PlayerState} from './model/player-state';
 
-@WebSocketGateway({ namespace: 'player' })
+@WebSocketGateway({namespace: 'player'})
 export class YoutubeGateway implements OnGatewayConnection {
+
+  private readonly logger = new Logger(YoutubeGateway.name);
 
   @WebSocketServer()
   private server: Server;
@@ -18,7 +20,8 @@ export class YoutubeGateway implements OnGatewayConnection {
   constructor(
     @Inject(forwardRef(() => YoutubeService))
     private readonly youtubeService: YoutubeService,
-  ) { }
+  ) {
+  }
 
   public handleConnection(client: Socket) {
     client.emit(
@@ -33,16 +36,21 @@ export class YoutubeGateway implements OnGatewayConnection {
     this.server.emit(ServerEvents.STATUS_UPDATED, {status});
   }
 
+  public sendStateUpdate(state: PlayerState) {
+    this.server.emit(ServerEvents.STATE_UPDATED, {state});
+  }
+
   public onAddToPlaylist(cb: (track: TrackInfos) => void) {
     this.addToPlaylistListeners.push(cb);
   }
 
   public sendAddToPlaylist(track: TrackInfos) {
-    this.server.emit(ServerEvents.ADD_TO_PLAYLIST, { track });
+    this.server.emit(ServerEvents.ADD_TO_PLAYLIST, {track});
   }
 
   @SubscribeMessage(ClientEvents.ADD_TO_PLAYLIST)
   private addToPlaylistAction(client: Client, data: { track: TrackInfos }) {
+    this.logger.debug(`Received event : ${ClientEvents.ADD_TO_PLAYLIST} (${data.track.title})`);
     if (!!data.track) {
       this.addToPlaylistListeners.forEach(cb => cb(data.track));
     }
@@ -50,16 +58,19 @@ export class YoutubeGateway implements OnGatewayConnection {
 
   @SubscribeMessage(ClientEvents.GET_PLAYLIST)
   private getPlaylistAction(): TrackInfos[] {
+    this.logger.debug(`Received event : ${ClientEvents.GET_PLAYLIST}`);
     return this.youtubeService.getPlaylist();
   }
 
   @SubscribeMessage(ClientEvents.PLAY)
   private playAction() {
+    this.logger.debug(`Received event : ${ClientEvents.PLAY}`);
     this.youtubeService.play();
   }
 
   @SubscribeMessage(ClientEvents.PAUSE)
   private plauseAction() {
+    this.logger.debug(`Received event : ${ClientEvents.PAUSE}`);
     this.youtubeService.pause();
   }
 }

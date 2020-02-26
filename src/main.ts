@@ -10,6 +10,6 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.enableCors();
   app.enableShutdownHooks();
-  await app.listen(app.get('ConfigService').get('app.port'));
+  await app.listen(app.get('ConfigService').get('port'));
 }
 bootstrap();

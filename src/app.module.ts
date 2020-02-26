@@ -6,16 +6,18 @@ import {StorageModule} from './storage/storage.module';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import {UserModule} from './user/user.module';
 import {AuthModule} from './auth/auth.module';
-import {ConfigModule} from 'nestjs-config';
+import {ConfigModule} from '@nestjs/config';
 import {DiscordModule} from './discord/discord.module';
-import {YoutubeModule} from './youtube/youtube.module';
 import {CategoryModule} from './category/category.module';
-import * as path from 'path';
+import configuration from './config/configuration';
+import {YoutubeModule} from './youtube/youtube.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(),
-    ConfigModule.load(path.resolve(__dirname, 'config', '**/!(*.d).{ts,js}')),
+    ConfigModule.forRoot({
+      load: [configuration],
+    }),
     BotModule,
     SoundModule,
     StorageModule,

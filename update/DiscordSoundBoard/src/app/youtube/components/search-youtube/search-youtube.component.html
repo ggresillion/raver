@@ -1,0 +1,13 @@
+<mat-card>
+  <form>
+    <mat-form-field class="example-full-width">
+      <input matInput placeholder="Search ..." name="searchString" [(ngModel)]="searchString"/>
+    </mat-form-field>
+    <button mat-raised-button (keyup.enter)="search()" (click)="search()">Search</button>
+  </form>
+  <div *ngFor="let video of videos">
+    <img [src]="video.thumbnails.default.url"/>
+    {{video.title}}
+    <mat-icon (click)="addToPlaylist(video)">playlist_add</mat-icon>
+  </div>
+</mat-card>

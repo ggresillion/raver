@@ -1,0 +1,13 @@
+<div *ngIf="!!botInfos" class="bot-status-container">
+  <div>
+    <div class="bot-username">{{botInfos.username}}</div>
+    <div class="bot-status">{{botInfos.status}}</div>
+  </div>
+  <div class="bot-avatar-container">
+    <img [src]="'https://cdn.discordapp.com/avatars/' + botInfos.id + '/' + botInfos.avatar" class="bot-avatar"
+         alt="bot avatar">
+    <div *ngIf="botInfos.status === 'disconnected'" class="bot-status-badge red"></div>
+    <div *ngIf="botInfos.status === 'connected'" class="bot-status-badge green"></div>
+    <div *ngIf="botInfos.status === 'inVoiceChannel'" class="bot-status-badge blue"></div>
+  </div>
+</div>

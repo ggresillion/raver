@@ -1,0 +1,24 @@
+.player-container {
+  display: flex;
+  font-size: 12px;
+
+  .player-progress {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2px;
+
+    * {
+      margin: 2px;
+    }
+  }
+}
+
+.playlist-content {
+  width: 100%;
+
+  .playlist-play {
+    float: right;
+  }
+}
