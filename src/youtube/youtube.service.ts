@@ -1,5 +1,4 @@
 import {forwardRef, Inject, Injectable} from '@nestjs/common';
-// import {exec} from 'youtube-dl';
 import {StorageService} from '../storage/storage.service';
 import {SoundService} from '../sound/sound.service';
 import {BotService, BotStatus} from '../bot/bot.service';
@@ -8,6 +7,8 @@ import {PlayerStatus} from './model/player-status';
 import * as ytdlDiscord from 'ytdl-core-discord';
 import {TrackInfos} from './dto/track-infos';
 import {YoutubeDataAPI} from 'youtube-v3-api';
+import * as ytdl from 'ytdl-core';
+import * as FFmpeg from 'fluent-ffmpeg';
 
 @Injectable()
 export class YoutubeService {
@@ -31,7 +32,12 @@ export class YoutubeService {
   }
 
   public async fetchVideoInfos(id: string): Promise<TrackInfos> {
-    return await this.ytApi.searchVideo(id, 10) as TrackInfos;
+    const res = await this.ytApi.searchVideo(id) as any;
+    return {
+      id: res.items[0].id,
+      title: res.items[0].snippet.title,
+      description: res.items[0].snippet.description,
+    };
 
   }
 
@@ -42,25 +48,30 @@ export class YoutubeService {
 
   public async uploadFromYoutube(url: string, name: string, categoryId: number): Promise<any> {
     return new Promise((resolve, reject) => {
-      // const sound = this.soundService.createNewSoundEntity(name, categoryId);
-      // youtubeDl.exec(
-      //   url,
-      //   ['-x', '--audio-format', 'mp3', '-o', sound.uuid],
-      //   { cwd: this.storageService.getUploadDir() },
-      //   async (err) => {
-      //     if (err) {
-      //       return reject(err);
-      //     }
-      //     resolve(this.soundService.saveNewSoundEntity(sound));
-      //   },
-      // );
+      const sound = this.soundService.createNewSoundEntity(name, categoryId);
+      const stream = ytdl(url, {quality: 'lowestaudio'});
+      FFmpeg({source: stream})
+        .audioBitrate(128)
+        .withNoVideo()
+        .toFormat('opus')
+        .save(this.storageService.getUploadDir() + '/' + sound.uuid)
+        .on('end', () => {
+          resolve(this.soundService.saveNewSoundEntity(sound));
+        });
     });
   }
 
   public async playSoundFromYoutube(id: string) {
-    this.botService.playFromStream(await ytdlDiscord(
+    ytdl.getBasicInfo(`http://youtube.com/watch?v=${id}`, (err, info) => {
+      console.log(info)
+    });
+    const stream = await ytdlDiscord(
       `http://youtube.com/watch?v=${id}`,
-      {highWaterMark: 1024 * 1024 * 10}),
+      {highWaterMark: 1024 * 1024 * 10});
+    stream.on('data', d => {
+      console.log(d);
+    });
+    this.botService.playFromStream(stream,
       () => this.youtubeGateway.sendStatusUpdate(PlayerStatus.PLAYING),
       () => this.youtubeGateway.sendStatusUpdate(PlayerStatus.PAUSED));
   }
