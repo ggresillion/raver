@@ -12,6 +12,9 @@ import { YoutubeThumbnailComponent } from './components/youtube-thumbnail/youtub
   imports: [
     SharedModule
   ],
+  exports: [
+    YoutubeThumbnailComponent
+  ],
   providers: [YoutubeService]
 })
 export class YoutubeModule {
