@@ -37,12 +37,16 @@ export class YoutubeGateway implements OnGatewayConnection {
   }
 
   public sendStateUpdate(state: PlayerState) {
-    this.logger.debug('Sending state update');
+    this.logger.log('Sending state update');
     this.server.emit(ServerEvents.STATE_UPDATED, {state});
   }
 
   public onAddToPlaylist(cb: (track: TrackInfos) => void) {
     this.addToPlaylistListeners.push(cb);
+  }
+
+  public sendProgressUpdate(progressSeconds: number): void {
+    this.server.emit(ServerEvents.PROGRESS_UPDATED, {progressSeconds});
   }
 
   // public sendAddToPlaylist(track: TrackInfos) {
@@ -51,7 +55,7 @@ export class YoutubeGateway implements OnGatewayConnection {
 
   @SubscribeMessage(ClientEvents.ADD_TO_PLAYLIST)
   private addToPlaylistAction(client: Client, data: { track: TrackInfos }) {
-    this.logger.debug(`Received event : ${ClientEvents.ADD_TO_PLAYLIST} (${data.track.title})`);
+    this.logger.log(`Received event : ${ClientEvents.ADD_TO_PLAYLIST} (${data.track.title})`);
     if (!!data.track) {
       this.addToPlaylistListeners.forEach(cb => cb(data.track));
     }
@@ -59,25 +63,25 @@ export class YoutubeGateway implements OnGatewayConnection {
 
   @SubscribeMessage(ClientEvents.GET_PLAYLIST)
   private getPlaylistAction(): TrackInfos[] {
-    this.logger.debug(`Received event : ${ClientEvents.GET_PLAYLIST}`);
+    this.logger.log(`Received event : ${ClientEvents.GET_PLAYLIST}`);
     return this.youtubeService.getPlaylist();
   }
 
   @SubscribeMessage(ClientEvents.PLAY)
   private playAction() {
-    this.logger.debug(`Received event : ${ClientEvents.PLAY}`);
+    this.logger.log(`Received event : ${ClientEvents.PLAY}`);
     this.youtubeService.play();
   }
 
   @SubscribeMessage(ClientEvents.PAUSE)
   private plauseAction() {
-    this.logger.debug(`Received event : ${ClientEvents.PAUSE}`);
+    this.logger.log(`Received event : ${ClientEvents.PAUSE}`);
     this.youtubeService.pause();
   }
 
   @SubscribeMessage(ClientEvents.NEXT)
   private nextAction() {
-    this.logger.debug(`Received event : ${ClientEvents.NEXT}`);
+    this.logger.log(`Received event : ${ClientEvents.NEXT}`);
     this.youtubeService.next();
   }
 }

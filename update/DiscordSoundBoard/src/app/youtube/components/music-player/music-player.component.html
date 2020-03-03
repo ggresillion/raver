@@ -29,6 +29,7 @@
        *ngIf="displayTitle && !!playlist[0]">
     <app-youtube-thumbnail [id]="playlist[0].id"></app-youtube-thumbnail>
     <span>{{ playlist[0].title }}</span>
+    <span>{{currentTime}}</span>
   </div>
 
   <div class="playlist">

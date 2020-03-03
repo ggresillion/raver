@@ -4,4 +4,5 @@ export enum ServerEvents {
   GET_PLAYLIST = 'getPlaylist',
   SYNC = 'sync',
   STATE_UPDATED = 'stateUpdated',
+  PROGRESS_UPDATED = 'progressUpdated'
 }

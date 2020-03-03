@@ -45,13 +45,16 @@ export class MusicPlayerComponent implements OnInit {
 
   ngOnInit() {
     this.setDataSourceAttributes();
-    this.playlistService.getPlaylist().subscribe((playlist) => {
-      console.log(playlist);
-      this.playlist = playlist;
+    this.playlistService.getState().subscribe((state) => {
+      this.status = state.status;
+      this.playlist = state.playlist;
+      this.duration = state.totalLengthSeconds;
+      console.log(this.duration)
       this.setDataSourceAttributes();
     });
-    this.playlistService.getStatus().subscribe((status) => {
-      this.status = status;
+    this.playlistService.getProgress().subscribe(progress => {
+      this.currentTime = progress;
+      console.log(this.currentTime)
     });
   }
 
