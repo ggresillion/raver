@@ -4,7 +4,7 @@ import {SoundService} from '../sound/sound.service';
 import {BotService, BotStatus} from '../bot/bot.service';
 import {YoutubeGateway} from './youtube-gateway';
 import {PlayerStatus} from './model/player-status';
-import * as ytdlDiscord from 'ytdl-core-discord';
+import * as ytdlDiscord from './util/ytdl-wrapper';
 import {TrackInfos} from './dto/track-infos';
 import {YoutubeDataAPI} from 'youtube-v3-api';
 import * as ytdl from 'ytdl-core';
@@ -16,6 +16,7 @@ export class YoutubeService {
   private ytApi = new YoutubeDataAPI(process.env.YOUTUBE_API_KEY);
   private playlist: TrackInfos[] = [];
   private status: PlayerStatus;
+  private totalLengthSeconds: number;
 
   constructor(
     private readonly soundService: SoundService,
@@ -62,18 +63,22 @@ export class YoutubeService {
   }
 
   public async playSoundFromYoutube(id: string) {
-    ytdl.getBasicInfo(`http://youtube.com/watch?v=${id}`, (err, info) => {
-      console.log(info)
-    });
-    const stream = await ytdlDiscord(
+    const res = await ytdlDiscord.stream(
       `http://youtube.com/watch?v=${id}`,
-      {highWaterMark: 1024 * 1024 * 10});
-    stream.on('data', d => {
-      console.log(d);
-    });
-    this.botService.playFromStream(stream,
-      () => this.youtubeGateway.sendStatusUpdate(PlayerStatus.PLAYING),
-      () => this.youtubeGateway.sendStatusUpdate(PlayerStatus.PAUSED));
+      {highWaterMark: 1024 * 1024 * 10},
+      ((current) => {
+        this.youtubeGateway.sendProgressUpdate(current);
+      }));
+    this.totalLengthSeconds = res.totalLengthSeconds;
+    this.botService.playFromStream(res.stream,
+      () => {
+        this.status = PlayerStatus.PLAYING;
+        this.propagateState();
+      },
+      () => {
+        this.status = PlayerStatus.IDLE;
+        this.propagateState();
+      });
   }
 
   public getPlaylist() {
@@ -137,6 +142,10 @@ export class YoutubeService {
   }
 
   private propagateState() {
-    this.youtubeGateway.sendStateUpdate({status: this.status, playlist: this.playlist});
+    this.youtubeGateway.sendStateUpdate({
+      status: this.status,
+      playlist: this.playlist,
+      totalLengthSeconds: this.totalLengthSeconds,
+    });
   }
 }

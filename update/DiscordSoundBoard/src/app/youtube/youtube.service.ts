@@ -15,9 +15,13 @@ import {PlayerState} from './model/player-state';
 })
 export class YoutubeService {
 
-  private playlistSubject: BehaviorSubject<TrackInfos[]> = new BehaviorSubject([]);
   public indexSong = 0;
-  private statusSubject: BehaviorSubject<PlayerStatus> = new BehaviorSubject(PlayerStatus.IDLE);
+  private stateSubject: BehaviorSubject<PlayerState> = new BehaviorSubject({
+    playlist: [],
+    status: PlayerStatus.IDLE,
+    totalLengthSeconds: undefined
+  });
+  private progressSubject: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   private currentTime = 0;
   private duration = 0;
   private socket: Socket;
@@ -33,12 +37,8 @@ export class YoutubeService {
     this.socket.emit(ClientEvents.ADD_TO_PLAYLIST, {track});
   }
 
-  public getPlaylist() {
-    return this.playlistSubject.asObservable();
-  }
-
   public nextSong(): void {
-    if ((this.indexSong + 1) >= this.playlistSubject.value.length) {
+    if ((this.indexSong + 1) >= this.stateSubject.value.playlist.length) {
       this.indexSong = 0;
     } else {
       this.indexSong++;
@@ -48,7 +48,7 @@ export class YoutubeService {
 
   public previousSong(): void {
     if ((this.indexSong - 1) < 0) {
-      this.indexSong = (this.playlistSubject.value.length - 1);
+      this.indexSong = (this.stateSubject.value.playlist.length - 1);
     } else {
       this.indexSong--;
     }
@@ -62,8 +62,8 @@ export class YoutubeService {
     this.indexSong = index - 1;
   }
 
-  public getStatus() {
-    return this.statusSubject.asObservable();
+  public getState(): Observable<PlayerState> {
+    return this.stateSubject.asObservable();
   }
 
   public searchYoutube(searchString: string): Observable<any[]> {
@@ -78,28 +78,38 @@ export class YoutubeService {
     this.socket.emit(ClientEvents.PAUSE);
   }
 
+  public getProgress(): Observable<number> {
+    return this.progressSubject.asObservable();
+  }
+
   private bindToEvents() {
     this.socket.on(ServerEvents.SYNC, infos => {
-      this.statusSubject.next(infos.status);
-      this.playlistSubject.next(infos.playlist);
+      this.stateSubject.next({
+        status: infos.status,
+        playlist: infos.playlist,
+        totalLengthSeconds: infos.totalLengthSeconds,
+      });
     });
     this.socket.on(ServerEvents.STATUS_UPDATED, data => this.onStatusUpdate(data.status));
     this.socket.on(ServerEvents.ADD_TO_PLAYLIST, data => this.onAddToPlaylist(data.track));
-    this.socket.on(ServerEvents.GET_PLAYLIST, playlist => this.playlistSubject.next(playlist));
+    this.socket.on(ServerEvents.GET_PLAYLIST, playlist => this.onStateUpdate(playlist));
     this.socket.on(ServerEvents.STATE_UPDATED, data => this.onStateUpdate(data.state));
+    this.socket.on(ServerEvents.PROGRESS_UPDATED, data => this.onProgressUpdate(data.progressSeconds));
   }
 
   private onStatusUpdate(status: PlayerStatus) {
-    this.statusSubject.next(status);
+    this.onStateUpdate({status});
   }
 
-  private onStateUpdate(state: PlayerState) {
-    console.log('stateUpdated:', state);
-    this.onStatusUpdate(state.status);
-    this.playlistSubject.next(state.playlist);
+  private onStateUpdate(state: Partial<PlayerState>) {
+    this.stateSubject.next({...this.stateSubject.value, ...state});
   }
 
   private onAddToPlaylist(track) {
-    this.playlistSubject.next([...this.playlistSubject.value, track]);
+    this.onStateUpdate({playlist: [...this.stateSubject.value.playlist, track]});
+  }
+
+  private onProgressUpdate(progressSeconds: number) {
+    this.progressSubject.next(progressSeconds);
   }
 }

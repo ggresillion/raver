@@ -58,7 +58,7 @@ export class BotService implements OnApplicationShutdown {
       this.dispatcher.on('debug', this.logger.debug);
       this.dispatcher.on('error', this.logger.error);
       this.dispatcher.on('start', () => {
-        this.logger.debug(`Playing file ` + uuid);
+        this.logger.log(`Playing file ` + uuid);
         this.botStatusUpdate(BotStatus.PLAYING);
       });
       this.dispatcher.on('end', () => {
@@ -84,7 +84,7 @@ export class BotService implements OnApplicationShutdown {
       this.dispatcher.on('debug', this.logger.debug);
       this.dispatcher.on('error', this.logger.error);
       this.dispatcher.on('start', () => {
-        this.logger.debug('Playing from stream');
+        this.logger.log('Playing from stream');
         onStart();
       });
       this.dispatcher.on('end', () => {
@@ -97,18 +97,18 @@ export class BotService implements OnApplicationShutdown {
 
   public pauseStream() {
     this.dispatcher.pause();
-    this.logger.debug('Paused stream');
+    this.logger.log('Paused stream');
   }
 
   public resumeStream() {
     this.dispatcher.resume();
-    this.logger.debug('Resumed stream');
+    this.logger.log('Resumed stream');
   }
 
   public stopStream() {
     this.dispatcher.end();
     this.dispatcher = null;
-    this.logger.debug('Stopped stream');
+    this.logger.log('Stopped stream');
   }
 
   public isPlaying(): boolean {
@@ -120,7 +120,7 @@ export class BotService implements OnApplicationShutdown {
   }
 
   private botStatusUpdate(status: BotStatus) {
-    this.logger.debug(`Bot status: ${status}`);
+    this.logger.log(`Bot status: ${status}`);
     this.onStatusChangeListeners.forEach(cb => cb(status));
     this.botGateway.sendStatusUpdate(status);
   }
@@ -154,7 +154,7 @@ export class BotService implements OnApplicationShutdown {
     if (channel) {
       try {
         await channel.join();
-        this.logger.debug(`Bot connected in channel ${channel.name} (${channel.id})`);
+        this.logger.log(`Bot connected in channel ${channel.name} (${channel.id})`);
         this.botStatusUpdate(BotStatus.IN_VOICE_CHANNEL);
       } catch (e) {
         this.logger.error(e.message);
