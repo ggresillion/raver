@@ -1,5 +1,9 @@
+@import 'src/styles';
+
 .mat-toolbar {
   color: white;
+  background: rgb(3, 169, 244);
+  background: linear-gradient(90deg, rgba(3, 169, 244, 1) 35%, rgba(5, 213, 255, 0.6194852941176471) 100%);
 
   .fill {
     flex: 1 1 auto;
@@ -13,23 +17,6 @@
       margin: 4px;
     }
   }
-
-  .user {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-
-    .avatar {
-      border-radius: 999px;
-      max-height: 80%;
-      cursor: pointer;
-    }
-
-    .username {
-      margin-right: 14px;
-    }
-  }
 }
 
 app-bot-status {
@@ -41,4 +28,69 @@ app-bot-status {
 
 .main-container {
   height: calc(100% - 64px);
+}
+
+mat-drawer {
+  width: 14vw;
+
+  h2 {
+    color: #888888;
+  }
+
+  .guilds {
+    padding: 16px;
+
+    .selected {
+      background-color: $primary;
+      color: white !important;
+    }
+
+    .guild {
+      padding: 16px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      color: #727272;
+      border-radius: 6px;
+
+      &:hover {
+        background-color: $primary;
+        color: white;
+      }
+
+      .name {
+        font-size: 18px;
+      }
+
+      .guild-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        background-image: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .75));
+      }
+    }
+  }
+}
+
+.user {
+  padding: 12px;
+  background: rgb(3, 169, 244);
+  color: white;
+
+  .avatar {
+    border-radius: 999px;
+    height: 52px;
+  }
+
+  .username {
+    font-size: 22px;
+  }
+
+  .identifier {
+    font-size: 10px;
+  }
 }

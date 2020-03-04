@@ -11,6 +11,7 @@ import {DiscordModule} from './discord/discord.module';
 import {CategoryModule} from './category/category.module';
 import configuration from './config/configuration';
 import {YoutubeModule} from './youtube/youtube.module';
+import {GuildModule} from './guild/guild.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import {YoutubeModule} from './youtube/youtube.module';
     DiscordModule,
     YoutubeModule,
     CategoryModule,
+    GuildModule
   ],
   controllers: [AppController],
   providers: [],

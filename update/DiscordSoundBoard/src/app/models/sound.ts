@@ -1,4 +1,4 @@
-import {Category} from './Category';
+import {Category} from './category';
 
 export class Sound {
   public id: number;

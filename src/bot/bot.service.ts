@@ -4,6 +4,8 @@ import {Command} from './command.enum';
 import {StorageService} from '../storage/storage.service';
 import {BotGateway} from './bot.gateway';
 import {Readable} from 'stream';
+import {UserDTO} from '../user/dto/user.dto';
+import {GuildDTO} from '../guild/dto/guild.dto';
 
 export enum BotStatus {
   PLAYING = 'playing',
@@ -117,6 +119,16 @@ export class BotService implements OnApplicationShutdown {
 
   public onBotStatusUpdate(cb: (status: BotStatus) => void) {
     this.onStatusChangeListeners.push(cb);
+  }
+
+  public getGuildsForUser(user: UserDTO): GuildDTO[] {
+    return this.client.guilds.cache.array()
+      .filter(guild => guild.members.cache.array().some(member => member.id === user.id))
+      .map(guild => ({
+        id: guild.id,
+        name: guild.name,
+        icon: guild.icon,
+      }));
   }
 
   private botStatusUpdate(status: BotStatus) {
