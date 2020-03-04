@@ -6,14 +6,16 @@ import {YoutubeGateway} from './youtube-gateway';
 import {PlayerStatus} from './model/player-status';
 import * as ytdlDiscord from './util/ytdl-wrapper';
 import {TrackInfos} from './dto/track-infos';
-import {YoutubeDataAPI} from 'youtube-v3-api';
 import * as ytdl from 'ytdl-core';
 import * as FFmpeg from 'fluent-ffmpeg';
+import {PlayerState} from './model/player-state';
+import {Sound} from '../sound/sound.entity';
+import * as youtubeSearch from 'youtube-search';
+import {YouTubeSearchOptions, YouTubeSearchResults} from 'youtube-search';
 
 @Injectable()
 export class YoutubeService {
 
-  private ytApi = new YoutubeDataAPI(process.env.YOUTUBE_API_KEY);
   private playlist: TrackInfos[] = [];
   private status: PlayerStatus;
   private totalLengthSeconds: number;
@@ -32,23 +34,24 @@ export class YoutubeService {
     this.youtubeGateway.onAddToPlaylist(track => this.onAddToPlaylist(track));
   }
 
-  public async fetchVideoInfos(id: string): Promise<TrackInfos> {
-    const res = await this.ytApi.searchVideo(id) as any;
-    return {
-      id: res.items[0].id,
-      title: res.items[0].snippet.title,
-      description: res.items[0].snippet.description,
+  public async searchVideos(q: string): Promise<YouTubeSearchResults[]> {
+    const opts: YouTubeSearchOptions = {
+      maxResults: 10,
+      key: process.env.YOUTUBE_API_KEY,
+      type: 'video',
     };
-
-  }
-
-  public async searchVideos(q: string): Promise<TrackInfos[]> {
-    const rawVideos = (await this.ytApi.searchAll(q, 10, {part: 'id'}) as any).items;
-    return rawVideos.map(rawVideo => ({id: rawVideo.id.videoId, ...rawVideo.snippet}));
-  }
-
-  public async uploadFromYoutube(url: string, name: string, categoryId: number): Promise<any> {
     return new Promise((resolve, reject) => {
+      youtubeSearch(q, opts, (err, results) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(results);
+      });
+    });
+  }
+
+  public async uploadFromYoutube(url: string, name: string, categoryId: number): Promise<Sound> {
+    return new Promise((resolve) => {
       const sound = this.soundService.createNewSoundEntity(name, categoryId);
       const stream = ytdl(url, {quality: 'lowestaudio'});
       FFmpeg({source: stream})
@@ -87,6 +90,14 @@ export class YoutubeService {
 
   public getStatus() {
     return this.status;
+  }
+
+  public getState(): PlayerState {
+    return {
+      status: this.status,
+      playlist: this.playlist,
+      totalLengthSeconds: this.totalLengthSeconds,
+    };
   }
 
   public play() {

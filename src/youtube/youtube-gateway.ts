@@ -26,10 +26,7 @@ export class YoutubeGateway implements OnGatewayConnection {
   public handleConnection(client: Socket) {
     client.emit(
       ServerEvents.SYNC,
-      {
-        status: this.youtubeService.getStatus(),
-        playlist: this.youtubeService.getPlaylist(),
-      });
+      {state: this.youtubeService.getState()});
   }
 
   public sendStatusUpdate(status: PlayerStatus) {

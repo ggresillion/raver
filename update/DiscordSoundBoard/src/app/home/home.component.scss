@@ -38,3 +38,7 @@ app-bot-status {
   bottom: 0;
   z-index: 99;
 }
+
+.main-container {
+  height: calc(100% - 64px);
+}

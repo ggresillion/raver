@@ -83,11 +83,12 @@ export class YoutubeService {
   }
 
   private bindToEvents() {
-    this.socket.on(ServerEvents.SYNC, infos => {
+    this.socket.on(ServerEvents.SYNC, data => {
+      const state = data.state;
       this.stateSubject.next({
-        status: infos.status,
-        playlist: infos.playlist,
-        totalLengthSeconds: infos.totalLengthSeconds,
+        status: state.status,
+        playlist: state.playlist,
+        totalLengthSeconds: state.totalLengthSeconds,
       });
     });
     this.socket.on(ServerEvents.STATUS_UPDATED, data => this.onStatusUpdate(data.status));

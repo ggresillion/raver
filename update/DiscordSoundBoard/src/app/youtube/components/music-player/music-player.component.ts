@@ -36,7 +36,7 @@ export class MusicPlayerComponent implements OnInit {
   loaderDisplay = false;
   isPlaying = false;
   currentTime = 0;
-  duration = 0.01;
+  duration;
 
   public status = PlayerStatus.IDLE;
 
@@ -48,13 +48,13 @@ export class MusicPlayerComponent implements OnInit {
     this.playlistService.getState().subscribe((state) => {
       this.status = state.status;
       this.playlist = state.playlist;
-      this.duration = state.totalLengthSeconds;
-      console.log(this.duration)
+      if (state.totalLengthSeconds) {
+        this.duration = Math.trunc(state.totalLengthSeconds);
+      }
       this.setDataSourceAttributes();
     });
     this.playlistService.getProgress().subscribe(progress => {
-      this.currentTime = progress;
-      console.log(this.currentTime)
+      this.currentTime = Math.trunc(progress);
     });
   }
 
