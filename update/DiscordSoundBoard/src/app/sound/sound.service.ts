@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpEventType, HttpRequest} from '@angular/common/http';
 import {environment} from '../../environments/environment';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
-import {Sound} from '../models/Sound';
+import {Sound} from '../models/sound';
 import {VideoInfos} from './model/video-infos';
 
 @Injectable({

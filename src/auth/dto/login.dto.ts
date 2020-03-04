@@ -1,7 +1,7 @@
-import {GetUserDTO} from '../../user/dto/get-user.dto';
+import {UserDTO} from '../../user/dto/user.dto';
 
 export class LoginDto {
   token: string;
-  user: GetUserDTO;
+  user: UserDTO;
   expiresIn: number;
 }

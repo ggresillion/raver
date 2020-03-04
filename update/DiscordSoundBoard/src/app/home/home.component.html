@@ -4,18 +4,62 @@
   <div class="search-container">
     <mat-icon>search</mat-icon>
     <mat-form-field>
-      <input matInput type="text" [(ngModel)]="search" (ngModelChange)="onSearchChange()"/>
-      <button mat-button *ngIf="search" matSuffix mat-icon-button aria-label="Clear" (click)="reset()">
+      <input matInput
+             type="text"
+             [(ngModel)]="search"
+             (ngModelChange)="onSearchChange()"/>
+      <button mat-button
+              *ngIf="search"
+              matSuffix
+              mat-icon-button
+              aria-label="Clear"
+              (click)="reset()">
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
   </div>
-  <div *ngIf="!!connectedUser" class="user">
-    <p class="username">{{connectedUser.username}}</p>
-    <img [src]="'https://cdn.discordapp.com/avatars/' + connectedUser.id + '/' + connectedUser.avatar" class="avatar"
-         alt="avatar">
-  </div>
 </mat-toolbar>
-<div class="main-container">
-  <router-outlet></router-outlet>
-</div>
+<mat-drawer-container class="main-container">
+  <mat-drawer mode="side"
+              opened
+              fxLayout="column"
+              fxLayoutAlign="start center">
+    <div *ngIf="!!connectedUser"
+         class="user"
+         fxLayout="row"
+         fxLayoutAlign="space-evenly center">
+      <img [src]="'https://cdn.discordapp.com/avatars/' + connectedUser.id + '/' + connectedUser.avatar"
+           class="avatar"
+           alt="avatar">
+      <div fxLayout="column"
+           fxLayoutAlign="center">
+        <span class="username">{{connectedUser.username}}</span>
+        <span class="identifier">#{{connectedUser.id}}</span>
+      </div>
+    </div>
+    <div class="guilds">
+      <h2>Guilds</h2>
+      <div *ngIf="guilds.length>0">
+        <div *ngFor="let guild of guilds"
+             class="guild"
+             fxLayout="row"
+             fxLayoutAlign="start center"
+             fxLayoutGap="16px"
+             [ngClass]="{'selected' : (this.selectedGuild && guild.id === this.selectedGuild.id)}"
+             (click)="selectGuild(guild)">
+          <img *ngIf="guild.icon" [src]="'https://cdn.discordapp.com/icons/' + guild.id + '/' + guild.icon"
+               alt="guild"/>
+          <div *ngIf="!guild.icon"
+               class="guild-icon"
+               [style.background-color]="stringToRGB(guild.name)">
+            <span>{{guild.name.charAt(0).toUpperCase()}}</span>
+          </div>
+          <span class="name">{{guild.name}}</span>
+        </div>
+      </div>
+    </div>
+  </mat-drawer>
+  <mat-drawer-content>
+    <router-outlet></router-outlet>
+  </mat-drawer-content>
+</mat-drawer-container>

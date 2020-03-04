@@ -6,7 +6,7 @@ export const environment = {
   production: false,
   api: 'http://localhost:8000/api',
   websocket: 'http://localhost:8000/',
-  isDiscordIntegrationEnabled: false,
+  isDiscordIntegrationEnabled: true,
 };
 
 /*

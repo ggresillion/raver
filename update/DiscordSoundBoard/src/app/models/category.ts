@@ -1,4 +1,4 @@
-import {Sound} from './Sound';
+import {Sound} from './sound';
 
 export class Category {
   public id: number;
