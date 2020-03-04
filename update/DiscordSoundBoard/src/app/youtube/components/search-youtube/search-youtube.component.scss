@@ -1,0 +1,34 @@
+@import "src/styles";
+
+:host, .container {
+  height: 100%;
+}
+
+.search-result {
+  overflow-y: auto;
+
+  mat-icon {
+    font-size: 32px;
+    margin-right: 32px;
+    cursor: pointer;
+    color: $accent;
+    transition: all .1s ease-in;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+}
+
+app-youtube-thumbnail {
+  width: 150px;
+  height: 85px;
+}
+
+.untouched {
+  mat-icon {
+    font-size: 124px;
+    width: 124px;
+    height: 124px;
+  }
+}

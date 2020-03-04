@@ -49,6 +49,7 @@
     "typeorm": "^0.2.16",
     "typescript": "^3.4.1",
     "uuid": "^3.3.2",
+    "youtube-search": "^1.1.4",
     "youtube-v3-api": "^1.1.1",
     "ytdl-core": "^2.0.0",
     "ytdl-core-discord": "^1.0.3"

@@ -1,13 +1,39 @@
-<mat-card>
-  <form>
-    <mat-form-field class="example-full-width">
+<mat-card class="container" fxLayout="column">
+  <h2>Search on YouTube</h2>
+  <form fxLayout="row" fxLayoutGap="12px" fxLayoutAlign="start center">
+    <mat-form-field fxFlex="50">
       <input matInput placeholder="Search ..." name="searchString" [(ngModel)]="searchString"/>
     </mat-form-field>
     <button mat-raised-button (keyup.enter)="search()" (click)="search()">Search</button>
   </form>
-  <div *ngFor="let video of videos">
-    <img [src]="video.thumbnails.default.url"/>
-    {{video.title}}
-    <mat-icon (click)="addToPlaylist(video)">playlist_add</mat-icon>
+  <div *ngIf="videos.length > 0; else untouched" class="search-result"
+       fxFlex
+       fxLayout="column"
+       fxLayoutGap="12px">
+    <div *ngFor="let video of videos"
+         class="search-item"
+         fxLayout="row"
+         fxLayoutAlign="space-between center">
+      <div fxLayout="row"
+           fxLayoutAlign="start center"
+           fxLayoutGap="12px">
+        <app-youtube-thumbnail [id]="video.id"></app-youtube-thumbnail>
+        <div fxLayout="column">
+          <span class="mat-h2">{{video.title}}</span>
+          <span class="mat-h3">{{video.channelTitle}}</span>
+        </div>
+      </div>
+      <mat-icon (click)="addToPlaylist(video)">playlist_add</mat-icon>
+    </div>
   </div>
 </mat-card>
+
+<ng-template #untouched>
+  <div class="untouched"
+       fxFlex fxLayout="column"
+       fxLayoutAlign="center center"
+       fxLayoutGap="12px">
+    <mat-icon>youtube_searched_for</mat-icon>
+    <span class="mat-h1">Search for YouTube videos</span>
+  </div>
+</ng-template>

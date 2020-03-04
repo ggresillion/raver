@@ -26,11 +26,6 @@
 
   .playlist {
 
-    .title {
-      font-size: 24px;
-      color: #5a5a5a;
-    }
-
     .playlist-content {
       width: 100%;
 
@@ -44,5 +39,15 @@
     max-height: 100px;
     max-width: 140px;
     margin: 6px;
+  }
+}
+
+.no-music {
+  margin-top: 24px;
+
+  mat-icon {
+    font-size: 124px;
+    width: 124px;
+    height: 124px;
   }
 }

@@ -6,11 +6,13 @@ import {MusicPlayerComponent} from './components/music-player/music-player.compo
 import {YoutubeService} from './youtube.service';
 import { SearchYoutubeComponent } from './components/search-youtube/search-youtube.component';
 import { YoutubeThumbnailComponent } from './components/youtube-thumbnail/youtube-thumbnail.component';
+import {MatDividerModule} from '@angular/material/divider';
 
 @NgModule({
   declarations: [YoutubeComponent, SecondsToMinutesPipe, MusicPlayerComponent, SearchYoutubeComponent, YoutubeThumbnailComponent],
   imports: [
-    SharedModule
+    SharedModule,
+    MatDividerModule
   ],
   exports: [
     YoutubeThumbnailComponent
