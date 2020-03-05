@@ -9,7 +9,7 @@ export class AuthController {
 
   private readonly CLIENT_ID = process.env.CLIENT_ID;
   private readonly CLIENT_SECRET = process.env.CLIENT_SECRET;
-  private readonly scopes = ['identify'];
+  private readonly scopes = ['identify', 'guilds'];
 
   constructor(
     private readonly authService: AuthService,
@@ -21,7 +21,7 @@ export class AuthController {
   public async login(@Res() res: Response, @Req() req: Request): Promise<any> {
 
     const redirect = req.protocol + '://' + req.get('Host') + '/api/auth/token';
-    res.redirect(`https://discordapp.com/oauth2/authorize?client_id=${this.CLIENT_ID}&scope=${this.scopes.join()}` +
+    res.redirect(`https://discordapp.com/oauth2/authorize?client_id=${this.CLIENT_ID}&scope=${this.scopes.join('%20')}` +
       `&response_type=code&redirect_uri=${redirect}`);
   }
 

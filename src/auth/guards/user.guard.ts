@@ -27,7 +27,7 @@ export class UserGuard implements CanActivate {
     const token = authorizationHeader.slice(7);
     this.discordService.setToken(token);
     const user = await this.discordService.getUser();
-    request.params.user = user;
+    request.params.user = JSON.stringify(user);
     return !!user;
   }
 }

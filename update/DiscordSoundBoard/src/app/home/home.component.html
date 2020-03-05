@@ -1,6 +1,31 @@
-<mat-toolbar color="primary">
-  <h1>La Boite de Discorde</h1>
-  <span class="fill"></span>
+<mat-toolbar fxLayout="row"
+             fxLayoutAlign="start center">
+  <div class="title"
+       fxLayout="row"
+       fxLayoutAlign="center"><h1>La Boite de Discorde</h1></div>
+  <div class="links"
+       fxFlex
+       fxLayout="row"
+       fxLayoutAlign="start center">
+    <div class="link"
+         fxLayout="row"
+         fxLayoutAlign="start center"
+         fxLayoutGap="12px"
+         [ngClass]="{'active': isLinkSelected('')}"
+         (click)="navigateTo('')">
+      <mat-icon>music_video</mat-icon>
+      <span>SoundBoard</span>
+    </div>
+    <div class="link"
+         fxLayout="row"
+         fxLayoutAlign="start center"
+         fxLayoutGap="12px"
+         [ngClass]="{'active': isLinkSelected('youtube')}"
+         (click)="navigateTo('youtube')">
+      <mat-icon svgIcon="youtube"></mat-icon>
+      <span>Youtube</span>
+    </div>
+  </div>
   <div class="search-container">
     <mat-icon>search</mat-icon>
     <mat-form-field>
@@ -45,16 +70,20 @@
              fxLayout="row"
              fxLayoutAlign="start center"
              fxLayoutGap="16px"
-             [ngClass]="{'selected' : (this.selectedGuild && guild.id === this.selectedGuild.id)}"
+             [ngClass]="{'selected' : (this.selectedGuild && guild.id === this.selectedGuild.id),
+                         'disabled': !guild.isBotInGuild}"
              (click)="selectGuild(guild)">
-          <img *ngIf="guild.icon" [src]="'https://cdn.discordapp.com/icons/' + guild.id + '/' + guild.icon"
+          <img *ngIf="guild.icon"
+               class="guild-icon"
+               [src]="'https://cdn.discordapp.com/icons/' + guild.id + '/' + guild.icon"
                alt="guild"/>
           <div *ngIf="!guild.icon"
                class="guild-icon"
                [style.background-color]="stringToRGB(guild.name)">
             <span>{{guild.name.charAt(0).toUpperCase()}}</span>
           </div>
-          <span class="name">{{guild.name}}</span>
+          <span class="name" fxFlex>{{guild.name}}</span>
+          <mat-icon *ngIf="!guild.isBotInGuild">add_circle_outline</mat-icon>
         </div>
       </div>
     </div>

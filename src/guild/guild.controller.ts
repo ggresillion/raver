@@ -13,6 +13,6 @@ export class GuildController {
 
   @Get('/')
   public async getAvailableGuilds(@ConnectedUser() user): Promise<GuildDTO[]> {
-    return this.guildService.getAvailableGuildsForUser(user);
+    return await this.guildService.getAvailableGuildsForUser(user);
   }
 }
