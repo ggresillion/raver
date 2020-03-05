@@ -4,6 +4,10 @@ import {User} from '../models/user';
 import {SoundService} from '../sound/sound.service';
 import {GuildsService} from '../guilds/guilds.service';
 import {Guild} from '../models/guild';
+import {Location} from '@angular/common';
+import {Router} from '@angular/router';
+import {MatDialog} from '@angular/material/dialog';
+import {AddBotToGuildDialogComponent} from '../guilds/dialogs/add-bot-to-guild-dialog/add-bot-to-guild-dialog.component';
 
 @Component({
   selector: 'app-home',
@@ -16,11 +20,15 @@ export class HomeComponent implements OnInit {
   public search: string;
   public guilds: Guild[] = [];
   public selectedGuild: Guild;
+  public activatedRoute: any;
 
   constructor(
     private readonly authService: AuthService,
     private readonly soundService: SoundService,
     private readonly guildService: GuildsService,
+    private readonly location: Location,
+    private readonly router: Router,
+    private readonly dialog: MatDialog,
   ) {
   }
 
@@ -28,9 +36,13 @@ export class HomeComponent implements OnInit {
     // this.authService.getConnectedUser().subscribe(user => this.connectedUser = user);
     this.guildService.getAvailableGuilds().subscribe(guilds => {
       this.guilds = guilds;
-      if (guilds.length > 0) {
-        this.selectedGuild = guilds[0];
-      }
+    });
+    this.guildService.getSelectedGuild().subscribe(guild => {
+      this.selectedGuild = guild;
+    });
+    this.activatedRoute = /[^/]*$/.exec(this.location.path())[0];
+    this.location.onUrlChange(url => {
+      this.activatedRoute = /[^/]*$/.exec(url)[0];
     });
   }
 
@@ -58,6 +70,18 @@ export class HomeComponent implements OnInit {
   }
 
   public selectGuild(guild: Guild): void {
-    this.selectedGuild = guild;
+    if (!guild.isBotInGuild) {
+      this.dialog.open(AddBotToGuildDialogComponent);
+      return;
+    }
+    this.guildService.setSelectedGuild(guild);
+  }
+
+  public isLinkSelected(route: string): boolean {
+    return this.activatedRoute === route;
+  }
+
+  public navigateTo(route: string): void {
+    this.router.navigate([route]);
   }
 }

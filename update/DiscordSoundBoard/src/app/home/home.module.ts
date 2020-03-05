@@ -1,18 +1,26 @@
 import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
 import {HomeComponent} from './home.component';
 import {SharedModule} from '../shared/shared.module';
 import {SoundModule} from '../sound/sound.module';
 import {BotStatusComponent} from './components/bot-status/bot-status.component';
 import {RouterModule} from '@angular/router';
+import {GuildsModule} from '../guilds/guilds.module';
+import {AddBotToGuildDialogComponent} from '../guilds/dialogs/add-bot-to-guild-dialog/add-bot-to-guild-dialog.component';
 
 @NgModule({
-  declarations: [HomeComponent, BotStatusComponent],
+  declarations: [
+    HomeComponent,
+    BotStatusComponent,
+    AddBotToGuildDialogComponent,
+  ],
+  entryComponents: [
+    AddBotToGuildDialogComponent,
+  ],
   imports: [
-    CommonModule,
     SharedModule,
     SoundModule,
     RouterModule,
+    GuildsModule,
   ]
 })
 export class HomeModule {

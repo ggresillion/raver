@@ -48,25 +48,25 @@ export class BotService implements OnApplicationShutdown {
     };
   }
 
-  public playFile(uuid: string) {
-    this.client.voice.connections.forEach(co => {
-      this.dispatcher = co.play(this.storageService.getPathFromUUID(uuid));
-      // Workaround to prevent stream to end unexpectedly
-      (this.dispatcher as any)._setSpeaking(1);
-      // tslint:disable-next-line:no-empty
-      (this.dispatcher as any)._setSpeaking = () => {
-      };
-      // --
-      this.dispatcher.on('debug', this.logger.debug);
-      this.dispatcher.on('error', this.logger.error);
-      this.dispatcher.on('start', () => {
-        this.logger.log(`Playing file ` + uuid);
-        this.botStatusUpdate(BotStatus.PLAYING);
-      });
-      this.dispatcher.on('end', () => {
-        this.dispatcher = null;
-        this.botStatusUpdate(BotStatus.IN_VOICE_CHANNEL);
-      });
+  public playFile(uuid: string, guildId: string) {
+    const connection = this.client.voice.connections
+      .find(c => c.channel.guild.id === guildId);
+    this.dispatcher = connection.play(this.storageService.getPathFromUUID(uuid));
+    // Workaround to prevent stream to end unexpectedly
+    (this.dispatcher as any)._setSpeaking(1);
+    // tslint:disable-next-line:no-empty
+    (this.dispatcher as any)._setSpeaking = () => {
+    };
+    // --
+    this.dispatcher.on('debug', this.logger.debug);
+    this.dispatcher.on('error', this.logger.error);
+    this.dispatcher.on('start', () => {
+      this.logger.log(`Playing file ` + uuid);
+      this.botStatusUpdate(BotStatus.PLAYING);
+    });
+    this.dispatcher.on('end', () => {
+      this.dispatcher = null;
+      this.botStatusUpdate(BotStatus.IN_VOICE_CHANNEL);
     });
   }
 
@@ -121,14 +121,23 @@ export class BotService implements OnApplicationShutdown {
     this.onStatusChangeListeners.push(cb);
   }
 
-  public getGuildsForUser(user: UserDTO): GuildDTO[] {
-    return this.client.guilds.cache.array()
-      .filter(guild => guild.members.cache.array().some(member => member.id === user.id))
-      .map(guild => ({
-        id: guild.id,
-        name: guild.name,
-        icon: guild.icon,
-      }));
+  // public getGuildsForUser(user: UserDTO): GuildDTO[] {
+  //   return this.client.guilds.cache.array()
+  //     .filter(guild => guild.members.cache.array().some(member => member.id === user.id))
+  //     .map(guild => ({
+  //       id: guild.id,
+  //       name: guild.name,
+  //       icon: guild.icon,
+  //     }));
+  // }
+
+  public setIsBotInGuild(user: UserDTO, guilds: GuildDTO[]): GuildDTO[] {
+    return guilds.map(guild => {
+      return {
+        ...guild,
+        isBotInGuild: this.client.guilds.cache.array().some(g => g.id === guild.id),
+      };
+    });
   }
 
   private botStatusUpdate(status: BotStatus) {

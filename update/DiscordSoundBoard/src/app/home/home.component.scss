@@ -4,17 +4,27 @@
   color: white;
   background: rgb(3, 169, 244);
   background: linear-gradient(90deg, rgba(3, 169, 244, 1) 35%, rgba(5, 213, 255, 0.6194852941176471) 100%);
+  padding-left: 0;
 
-  .fill {
-    flex: 1 1 auto;
+  .title {
+    flex: 1 1 calc(14vw - 2px);
+    max-width: calc(14vw - 2px);
   }
 
-  .search-container {
-    display: flex;
-    align-items: center;
+  .links {
+    .link {
+      padding: 12px;
+      cursor: pointer;
 
-    * {
-      margin: 4px;
+      &.active, &:hover {
+        background-color: $accent;
+      }
+
+      mat-icon {
+        font-size: 42px;
+        height: 42px;
+        width: 42px;
+      }
     }
   }
 }
@@ -39,6 +49,7 @@ mat-drawer {
 
   .guilds {
     padding: 16px;
+    overflow-y: auto;
 
     .selected {
       background-color: $primary;
@@ -46,11 +57,15 @@ mat-drawer {
     }
 
     .guild {
-      padding: 16px;
+      padding: 12px;
       margin-bottom: 8px;
       cursor: pointer;
       color: #727272;
-      border-radius: 6px;
+      border-radius: 4px;
+
+      &.disabled {
+        background-color: rgba($primary, 0.2);
+      }
 
       &:hover {
         background-color: $primary;
@@ -63,7 +78,9 @@ mat-drawer {
 
       .guild-icon {
         width: 52px;
+        min-width: 52px;
         height: 52px;
+        min-height: 52px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -71,6 +88,10 @@ mat-drawer {
         color: white;
         font-size: 24px;
         background-image: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .75));
+      }
+
+      mat-icon {
+        color: green;
       }
     }
   }

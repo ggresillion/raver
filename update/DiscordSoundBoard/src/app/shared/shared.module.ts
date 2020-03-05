@@ -50,7 +50,7 @@ import {FlexLayoutModule} from '@angular/flex-layout';
     MatExpansionModule,
     MatTableModule,
     MatPaginatorModule,
-    FlexLayoutModule
+    FlexLayoutModule,
   ],
   declarations: [DraggableDirective, DropperDirective],
   providers: [CategoryService, BotService],

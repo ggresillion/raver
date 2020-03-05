@@ -1,6 +1,7 @@
-import {Column, Entity, Index, ManyToOne, ObjectID, PrimaryGeneratedColumn, RelationId} from 'typeorm';
+import {Column, Entity, Index, ManyToOne, ObjectID, OneToOne, PrimaryGeneratedColumn, RelationId} from 'typeorm';
 import {v4 as uuid} from 'uuid';
-import {Category} from '../category/category.entity';
+import {Category} from '../../category/category.entity';
+import {Image} from './image.entity';
 
 @Entity()
 export class Sound {
@@ -17,6 +18,9 @@ export class Sound {
 
   @ManyToOne(() => Category, {onDelete: 'SET NULL'})
   public category: Category;
+
+  @OneToOne(() => Image, {onDelete: 'CASCADE'})
+  public image: Image;
 
   @Column({nullable: true})
   public categoryId: number | null;

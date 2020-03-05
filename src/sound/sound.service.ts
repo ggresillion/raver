@@ -1,10 +1,11 @@
 import {Injectable, NotFoundException, OnApplicationShutdown, UnprocessableEntityException} from '@nestjs/common';
 import {StorageService} from '../storage/storage.service';
 import {ObjectID, Repository} from 'typeorm';
-import {Sound} from './sound.entity';
+import {Sound} from './entity/sound.entity';
 import {InjectRepository} from '@nestjs/typeorm';
 import {BotService} from '../bot/bot.service';
-import {SoundDto} from './sound.dto';
+import {SoundDto} from './dto/sound.dto';
+import {Image} from './entity/image.entity';
 
 @Injectable()
 export class SoundService {
@@ -12,6 +13,8 @@ export class SoundService {
   constructor(
     @InjectRepository(Sound)
     private readonly soundRepository: Repository<Sound>,
+    @InjectRepository(Image)
+    private readonly imageRepository: Repository<Image>,
     private readonly storageService: StorageService,
     private readonly botService: BotService,
   ) {
@@ -25,10 +28,12 @@ export class SoundService {
     return this.soundRepository.findOne(id, {relations: ['category']});
   }
 
-  public async saveSound(name: string, categoryId: number, buffer: Buffer) {
+  public async saveSound(name: string, categoryId: number, bSound: Buffer, bImage: Buffer) {
     try {
-      const sound = this.soundRepository.create({name, categoryId});
-      await this.storageService.saveFile(sound.uuid, buffer);
+      const image = this.imageRepository.create();
+      const sound = this.soundRepository.create({name, categoryId, image});
+      await this.storageService.saveFile(image.uuid, bImage);
+      await this.storageService.saveFile(sound.uuid, bSound);
       return await this.soundRepository.save(sound);
     } catch (e) {
       if (e.code === 11000) {
@@ -47,12 +52,12 @@ export class SoundService {
     return await this.soundRepository.save(updatedSound);
   }
 
-  public async playSound(id: ObjectID): Promise<Sound> {
+  public async playSound(id: ObjectID, guildId: string): Promise<Sound> {
     return this.getSoundById(id).then(sound => {
       if (!sound) {
         throw new NotFoundException('sound not found');
       }
-      this.botService.playFile(sound.uuid);
+      this.botService.playFile(sound.uuid, guildId);
       return sound;
     });
   }
