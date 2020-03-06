@@ -6,13 +6,8 @@ import {BotGateway} from './bot.gateway';
 import {Readable} from 'stream';
 import {UserDTO} from '../user/dto/user.dto';
 import {GuildDTO} from '../guild/dto/guild.dto';
-
-export enum BotStatus {
-  PLAYING = 'playing',
-  IN_VOICE_CHANNEL = 'inVoiceChannel',
-  CONNECTED = 'connected',
-  DISCONNECTED = 'disconnected',
-}
+import {BotStateDTO} from './dto/bot-state.dto';
+import {BotStatus} from './dto/bot-status.enum';
 
 @Injectable()
 export class BotService implements OnApplicationShutdown {
@@ -34,18 +29,6 @@ export class BotService implements OnApplicationShutdown {
 
   public onApplicationShutdown(signal?: string): any {
     this.client.voice.connections.forEach(co => co.disconnect());
-  }
-
-  public getInfos() {
-    if (!this.client.user) {
-      return {status: BotStatus.DISCONNECTED};
-    }
-    return {
-      status: this.client.voice.connections.size > 0 ? BotStatus.IN_VOICE_CHANNEL : BotStatus.CONNECTED,
-      id: this.client.user.id,
-      username: this.client.user.username,
-      avatar: this.client.user.avatar,
-    };
   }
 
   public playFile(uuid: string, guildId: string) {
@@ -121,16 +104,6 @@ export class BotService implements OnApplicationShutdown {
     this.onStatusChangeListeners.push(cb);
   }
 
-  // public getGuildsForUser(user: UserDTO): GuildDTO[] {
-  //   return this.client.guilds.cache.array()
-  //     .filter(guild => guild.members.cache.array().some(member => member.id === user.id))
-  //     .map(guild => ({
-  //       id: guild.id,
-  //       name: guild.name,
-  //       icon: guild.icon,
-  //     }));
-  // }
-
   public setIsBotInGuild(user: UserDTO, guilds: GuildDTO[]): GuildDTO[] {
     return guilds.map(guild => {
       return {
@@ -140,10 +113,29 @@ export class BotService implements OnApplicationShutdown {
     });
   }
 
-  private botStatusUpdate(status: BotStatus) {
+  private botStatusUpdate(status: BotStatus): void {
     this.logger.log(`Bot status: ${status}`);
     this.onStatusChangeListeners.forEach(cb => cb(status));
-    this.botGateway.sendStatusUpdate(status);
+    const state: BotStateDTO = {
+      guilds: this.client.guilds.cache.map(g => ({
+        id: g.id,
+        status: this.client.voice.connections.some(c => c.channel.guild.id === g.id)
+          ? BotStatus.IN_VOICE_CHANNEL
+          : BotStatus.CONNECTED,
+      })),
+    };
+    this.botGateway.sendStateUpdate(state);
+  }
+
+  public getState(): BotStateDTO {
+    return {
+      guilds: this.client.guilds.cache.map(g => ({
+        id: g.id,
+        status: this.client.voice.connections.some(c => c.channel.guild.id === g.id)
+          ? BotStatus.IN_VOICE_CHANNEL
+          : BotStatus.CONNECTED,
+      })),
+    };
   }
 
   private bindToEvents() {
@@ -186,12 +178,12 @@ export class BotService implements OnApplicationShutdown {
   }
 
   private onLeaveCommand(message: Message) {
-    // const voice = message.guild.voiceConnection;
-    // if (voice) {
-    //   this.logger.debug(`Bot disconnected from channel ${voice.channel.name} (${voice.channel.id})`);
-    //   this.botStatusUpdate(BotStatus.CONNECTED);
-    //   voice.disconnect();
-    // }
+    const voice = message.guild.voice;
+    if (voice) {
+      this.logger.debug(`Bot disconnected from channel ${voice.channel.name} (${voice.channel.id})`);
+      this.botStatusUpdate(BotStatus.CONNECTED);
+      voice.connection.disconnect();
+    }
   }
 
   private connect() {
