@@ -1,57 +1,93 @@
-<mat-card class="player-container">
-  <button mat-button style="border-left: 1px solid #ddd;"
-    [disabled]="true">
-    <mat-icon aria-hidden="true">skip_previous</mat-icon>
-  </button>
-  <button mat-button (click)='playPause()' style="border-left: 2px solid #ccc; border-right: 2px solid #ccc;"
-    [disabled]="status === 'na'">
-    <mat-icon *ngIf="status !== 'playing'">play_arrow</mat-icon>
-    <mat-icon *ngIf="status === 'playing'">pause</mat-icon>
-  </button>
-  <button mat-button style="border-right: 1px solid #ddd;" (click)='nextSong();'
-    [disabled]="status === 'na'">
-    <mat-icon aria-hidden="true">skip_next</mat-icon>
-  </button>
+<mat-card class="container"
+          fxLayout="column">
+  <div class="player"
+       fxLayout="column"
+       fxLayoutGap="16px">
+    <div class="player-container">
+      <button mat-button style="border-left: 1px solid #ddd;"
+              [disabled]="true">
+        <mat-icon aria-hidden="true">skip_previous</mat-icon>
+      </button>
+      <button mat-button (click)='playPause()' style="border-left: 2px solid #ccc; border-right: 2px solid #ccc;"
+              [disabled]="status === 'na' || playlist.length <= 0">
+        <mat-icon *ngIf="status !== 'playing'">play_arrow</mat-icon>
+        <mat-icon *ngIf="status === 'playing'">pause</mat-icon>
+      </button>
+      <button mat-button style="border-right: 1px solid #ddd;" (click)='nextSong();'
+              [disabled]="status === 'na'">
+        <mat-icon aria-hidden="true">skip_next</mat-icon>
+      </button>
 
-  <div class="player-progress">
-    <span *ngIf="duration !== 0.01">{{currentTime | secondsToMinutes}}</span>
-    <mat-slider style="width: 100%" min="0" max="{{duration}}" value="{{currentTime}}"
-      (change)="currTimePosChanged($event)"></mat-slider>
-    <span *ngIf="duration !== 0.01">-{{duration - currentTime | secondsToMinutes }}</span>
-  </div>
-</mat-card>
-
-<mat-card *ngIf="displayTitle && !!playlist[0]" style="border: 1px solid #ddd; box-shadow: none;">
-  <div style="text-align: center;">
-    <div style="padding:1px 3px;">
-      <span>{{ playlist[0].title }}</span>
+      <div class="player-progress">
+        <span *ngIf="duration">{{currentTime | secondsToMinutes}}</span>
+        <mat-slider style="width: 100%" min="0" max="{{duration}}" value="{{currentTime}}"
+                    (change)="currTimePosChanged($event)"></mat-slider>
+        <span *ngIf="duration">-{{duration - currentTime | secondsToMinutes }}</span>
+      </div>
     </div>
-    <div class="clear"></div>
+
+    <div class="current-song"
+         fxLayout="row"
+         fxLayoutAlign="start center"
+         fxLayoutGap="16px"
+         *ngIf="displayTitle && !!playlist[0]; else noTrack">
+      <app-youtube-thumbnail [id]="playlist[0].id"></app-youtube-thumbnail>
+      <div>
+        <span class="mat-h2">{{ playlist[0].title }}</span>
+        <span> - </span>
+        <span class="mat-h3">{{ playlist[0].channelTitle }}</span>
+      </div>
+    </div>
+    <ng-template #noTrack>
+      <div class="no-music"
+           fxLayout="row"
+           fxLayoutAlign="center center">
+        <span class="mat-h4">No music playing.</span>
+      </div>
+    </ng-template>
+  </div>
+
+  <div class="playlist"
+       fxLayout="column"
+       fxLayoutAlign="space-between"
+       fxFlex>
+    <div fxLayout="column"
+         fxFlex>
+      <h2>Playlist</h2>
+      <table class="playlist-content"
+             mat-table
+             [dataSource]="dataSource"
+             *ngIf="dataSource.data.length > 0">
+        <ng-container matColumnDef="position">
+          <th mat-header-cell *matHeaderCellDef>#</th>
+          <td mat-cell *matCellDef="let element; let i = index">
+            {{i + 2}}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="thumbnail">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let element" fxLayout="row" fxLayoutAlign="center center">
+            <app-youtube-thumbnail [id]="element.id"></app-youtube-thumbnail>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef> Title</th>
+          <td mat-cell *matCellDef="let element">
+            {{element.title}}
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+      <div *ngIf="dataSource.data.length === 0"
+           fxLayout="row"
+           fxLayoutAlign="center"
+           fxFlex>
+        <span>No music in the playlist.</span>
+      </div>
+    </div>
+    <mat-paginator
+      [pageSizeOptions]="pageSizeOptions"
+      showFirstLastButtons></mat-paginator>
   </div>
 </mat-card>
-
-<mat-accordion class="playlist-container" *ngIf="displayPlaylist">
-  <mat-expansion-panel [expanded]="expanded">
-    <mat-expansion-panel-header>
-      Play List
-    </mat-expansion-panel-header>
-    <table class="playlist-content" mat-table [dataSource]="dataSource">
-      <ng-container matColumnDef="title">
-        <th mat-header-cell *matHeaderCellDef> Title</th>
-        <td mat-cell *matCellDef="let element"> {{element.title}} </td>
-      </ng-container>
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let element">
-          <div class="playlist-play" *ngIf="playlist[1].title === element.title">
-            <mat-icon *ngIf="isPlaying">loader</mat-icon>
-            <mat-icon *ngIf="!isPlaying">play_arrow</mat-icon>
-          </div>
-        </td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-    <mat-paginator [pageSizeOptions]="pageSizeOptions" showFirstLastButtons></mat-paginator>
-  </mat-expansion-panel>
-</mat-accordion>

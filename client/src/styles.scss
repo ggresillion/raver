@@ -1,15 +1,28 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
 @import '~@angular/material/theming';
 
 @include mat-core();
 
 $app-primary: mat-palette($mat-light-blue);
-$app-accent:  mat-palette($mat-blue, A200, A100, A400);
-$app-warn:    mat-palette($mat-red);
-$app-theme:   mat-light-theme($app-primary, $app-accent, $app-warn);
+$app-accent: mat-palette($mat-deep-purple, A200, A100, A400);
+$app-warn: mat-palette($mat-red);
+$app-theme: mat-light-theme($app-primary, $app-accent, $app-warn);
 
 $primary: mat-color($app-primary);
 $accent: mat-color($app-accent);
 $warn: mat-color($app-warn);
+
+$green: mat-color(mat-palette($mat-light-green));
 
 @include angular-material-theme($app-theme);
 
@@ -19,7 +32,7 @@ $warn: mat-color($app-warn);
   width: 100%;
   height: 100%;
 
-  & .drag-over{
+  & .drag-over {
     background: $primary;
   }
 }
@@ -30,4 +43,20 @@ $warn: mat-color($app-warn);
 
 body {
   margin: 0;
+}
+
+/* Scrollbars */
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: $primary;
 }

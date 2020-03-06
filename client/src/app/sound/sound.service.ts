@@ -2,8 +2,10 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpEventType, HttpRequest} from '@angular/common/http';
 import {environment} from '../../environments/environment';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
-import {Sound} from '../models/Sound';
+import {Sound} from '../models/sound';
 import {VideoInfos} from './model/video-infos';
+import {GuildsService} from '../guilds/guilds.service';
+import {Guild} from '../models/guild';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +14,12 @@ export class SoundService {
 
   private soundsSubject = new BehaviorSubject<Sound[]>([]);
   private sounds: Sound[] = [];
+  private selectedGuild: Guild;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient,
+              private guildService: GuildsService) {
+    this.guildService.getSelectedGuild()
+      .subscribe(guild => this.selectedGuild = guild);
   }
 
   public getSounds(): Observable<Sound[]> {
@@ -29,8 +35,8 @@ export class SoundService {
       });
   }
 
-  public playSound(id: number) {
-    return this.http.post(`${environment.api}/sounds/${id}/play`, null);
+  public playSound(id: number): Observable<void> {
+    return this.http.post<void>(`${environment.api}/sounds/${id}/play?guildId=${this.selectedGuild.id}`, null);
   }
 
   public uploadSound(name: string, categoryId: number, file: File): Observable<number> {

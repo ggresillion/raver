@@ -1,40 +1,119 @@
+@import 'src/styles';
+
 .mat-toolbar {
   color: white;
+  background: rgb(3, 169, 244);
+  background: linear-gradient(90deg, rgba(3, 169, 244, 1) 35%, rgba(109, 5, 255, 0.6194852941176471) 100%);
+  padding-left: 0;
 
-  .fill {
-    flex: 1 1 auto;
+  .title {
+    flex: 1 1 calc(16vw - 2px);
+    max-width: calc(16vw - 2px);
   }
 
-  .search-container {
-    display: flex;
-    align-items: center;
-
-    * {
-      margin: 4px;
-    }
-  }
-
-  .user {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-
-    .avatar {
-      border-radius: 999px;
-      max-height: 80%;
+  .links {
+    .link {
+      padding: 12px;
       cursor: pointer;
-    }
 
-    .username {
-      margin-right: 14px;
+      &.active, &:hover {
+        background-color: rgba($accent, 0.6);
+      }
+
+      mat-icon {
+        font-size: 42px;
+        height: 42px;
+        width: 42px;
+      }
     }
   }
 }
 
-app-bot-status {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  z-index: 99;
+.main-container {
+  height: calc(100% - 64px);
+}
+
+mat-drawer {
+  width: 16vw;
+
+  h2 {
+    color: #888888;
+  }
+
+  .users {
+    background: linear-gradient(rgba(0, 0, 0, .4), rgba(0, 0, 0, .4)), url("../../assets/images/vda9rbt01en01.png");
+    width: 100%;
+    padding: 12px;
+    background-size: cover;
+    color: white;
+
+    .user {
+
+      .avatar {
+        border-radius: 999px;
+        height: 52px;
+      }
+
+      .username {
+        font-size: 22px;
+      }
+
+      .identifier {
+        font-size: 10px;
+      }
+    }
+  }
+
+  .guilds {
+    padding: 16px;
+    overflow-y: auto;
+
+    .selected {
+      background-color: $primary;
+      color: white !important;
+    }
+
+    .guild {
+      padding: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      color: #727272;
+      border-radius: 4px;
+
+      &.disabled {
+        background-color: rgba(grey, 0.2);
+      }
+
+      &:hover {
+        background-color: $primary;
+        color: white;
+      }
+
+      .name {
+        font-size: 18px;
+      }
+
+      .guild-icon {
+        width: 52px;
+        min-width: 52px;
+        height: 52px;
+        min-height: 52px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        background-image: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .75));
+      }
+
+      mat-icon {
+        color: $green;
+      }
+    }
+  }
+}
+
+mat-spinner {
+  margin-top: 100%;
 }

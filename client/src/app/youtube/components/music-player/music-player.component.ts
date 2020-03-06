@@ -1,8 +1,9 @@
-import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
-import { MatSlider, MatPaginator, MatTableDataSource } from '@angular/material';
-import { YoutubeService } from '../../youtube.service';
-import { TrackInfos } from '../../model/track-infos';
-import { PlayerStatus } from '../../model/player-status';
+import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import {YoutubeService} from '../../youtube.service';
+import {TrackInfos} from '../../model/track-infos';
+import {PlayerStatus} from '../../model/player-status';
+import {MatTableDataSource} from '@angular/material/table';
+import {MatPaginator} from '@angular/material/paginator';
 
 @Component({
   selector: 'app-music-player',
@@ -25,7 +26,7 @@ export class MusicPlayerComponent implements OnInit {
 
   @ViewChild('audioPlayer') player: ElementRef;
 
-  displayedColumns: string[] = ['title', 'status'];
+  displayedColumns: string[] = ['position', 'thumbnail', 'title'];
 
   dataSource = new MatTableDataSource<TrackInfos>();
 
@@ -35,7 +36,7 @@ export class MusicPlayerComponent implements OnInit {
   loaderDisplay = false;
   isPlaying = false;
   currentTime = 0;
-  duration = 0.01;
+  duration;
 
   public status = PlayerStatus.IDLE;
 
@@ -44,13 +45,16 @@ export class MusicPlayerComponent implements OnInit {
 
   ngOnInit() {
     this.setDataSourceAttributes();
-    this.playlistService.getPlaylist().subscribe((playlist) => {
-      this.playlist = playlist;
+    this.playlistService.getState().subscribe((state) => {
+      this.status = state.status;
+      this.playlist = state.playlist;
+      if (state.totalLengthSeconds) {
+        this.duration = Math.trunc(state.totalLengthSeconds);
+      }
       this.setDataSourceAttributes();
     });
-    this.playlistService.getStatus().subscribe((status) => {
-      console.log(status)
-      this.status = status;
+    this.playlistService.getProgress().subscribe(progress => {
+      this.currentTime = Math.trunc(progress);
     });
   }
 
@@ -62,7 +66,7 @@ export class MusicPlayerComponent implements OnInit {
   setDataSourceAttributes() {
     if (this.playlist) {
       const data = [...this.playlist];
-      data.pop();
+      data.splice(0, 1);
       this.dataSource = new MatTableDataSource<TrackInfos>(data);
       this.dataSource.paginator = this.paginator;
     }

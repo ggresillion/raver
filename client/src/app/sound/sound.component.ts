@@ -1,14 +1,14 @@
 import {Component, OnInit} from '@angular/core';
-import {Sound} from '../models/Sound';
+import {Sound} from '../models/sound';
 import {SoundService} from './sound.service';
-import {MatDialog} from '@angular/material';
 import {UploadSoundDialogComponent} from './dialogs/upload-sound-dialog/upload-sound-dialog.component';
 import {AddFromYoutubeDialogComponent} from './dialogs/add-from-youtube-dialog/add-from-youtube-dialog.component';
 import {CreateCategoryDialogComponent} from './dialogs/create-category-dialog/create-category-dialog.component';
 import {CategoryService} from '../shared/services/category.service';
-import {Category} from '../models/Category';
+import {Category} from '../models/category';
 import {animate, style, transition, trigger} from '@angular/animations';
 import {RenameCategoryDialogComponent} from './dialogs/rename-category-dialog/rename-category-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-sound',

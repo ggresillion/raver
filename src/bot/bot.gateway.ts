@@ -1,14 +1,28 @@
-import {WebSocketGateway, WebSocketServer} from '@nestjs/websockets';
+import {OnGatewayConnection, WebSocketGateway, WebSocketServer} from '@nestjs/websockets';
 import {Server} from 'socket.io';
-import {BotStatus} from './bot.service';
+import {ServerEvents} from './dto/server-events.enum';
+import {BotStateDTO} from './dto/bot-state.dto';
+import {forwardRef, Inject} from '@nestjs/common';
+import {YoutubeService} from '../youtube/youtube.service';
+import {BotService} from './bot.service';
 
 @WebSocketGateway({namespace: 'bot'})
-export class BotGateway {
+export class BotGateway implements OnGatewayConnection {
 
   @WebSocketServer()
   private server: Server;
 
-  public sendStatusUpdate(botStatus: BotStatus) {
-    this.server.emit('status', botStatus);
+  constructor(
+    @Inject(forwardRef(() => BotService))
+    private readonly botService: BotService,
+  ) {
+  }
+
+  public sendStateUpdate(botState: BotStateDTO) {
+    this.server.emit(ServerEvents.STATE_UPDATE.toString(), botState);
+  }
+
+  handleConnection(client: any, ...args: any[]): any {
+    client.emit(this.botService.getState());
   }
 }

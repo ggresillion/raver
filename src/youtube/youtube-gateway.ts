@@ -47,7 +47,7 @@ export class YoutubeGateway implements OnGatewayConnection {
   }
 
   // public sendAddToPlaylist(track: TrackInfos) {
-  //   this.server.emit(ServerEvents.ADD_TO_PLAYLIST, {track});
+  //   this.server.emit(ServerEvents.YT_ADD_TO_PLAYLIST, {track});
   // }
 
   @SubscribeMessage(ClientEvents.ADD_TO_PLAYLIST)

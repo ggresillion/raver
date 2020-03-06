@@ -1,9 +1,9 @@
 import {NgModule} from '@angular/core';
-import {GuildsComponent} from './guilds.component';
 import {SharedModule} from '../shared/shared.module';
 
 @NgModule({
-  declarations: [GuildsComponent],
+  declarations: [],
+  entryComponents: [],
   imports: [
     SharedModule,
   ]

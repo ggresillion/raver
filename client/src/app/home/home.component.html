@@ -1,19 +1,110 @@
-<mat-toolbar color="primary">
-  <h1>La Boite de Discorde</h1>
-  <span class="fill"></span>
+<mat-toolbar fxLayout="row"
+             fxLayoutAlign="start center">
+  <div class="title"
+       fxLayout="row"
+       fxLayoutAlign="center"><h1>La Boite de Discorde</h1></div>
+  <div class="links"
+       fxFlex
+       fxLayout="row"
+       fxLayoutAlign="start center">
+    <div class="link"
+         fxLayout="row"
+         fxLayoutAlign="start center"
+         fxLayoutGap="12px"
+         [ngClass]="{'active': isLinkSelected('')}"
+         (click)="navigateTo('')">
+      <mat-icon>music_video</mat-icon>
+      <span>SoundBoard</span>
+    </div>
+    <div class="link"
+         fxLayout="row"
+         fxLayoutAlign="start center"
+         fxLayoutGap="12px"
+         [ngClass]="{'active': isLinkSelected('youtube')}"
+         (click)="navigateTo('youtube')">
+      <mat-icon svgIcon="youtube"></mat-icon>
+      <span>Youtube</span>
+    </div>
+  </div>
   <div class="search-container">
     <mat-icon>search</mat-icon>
     <mat-form-field>
-      <input matInput type="text" [(ngModel)]="search" (ngModelChange)="onSearchChange()"/>
-      <button mat-button *ngIf="search" matSuffix mat-icon-button aria-label="Clear" (click)="reset()">
+      <input matInput
+             type="text"
+             [(ngModel)]="search"
+             (ngModelChange)="onSearchChange()"/>
+      <button mat-button
+              *ngIf="search"
+              matSuffix
+              mat-icon-button
+              aria-label="Clear"
+              (click)="reset()">
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
   </div>
-  <div *ngIf="!!connectedUser" class="user">
-    <p class="username">{{connectedUser.username}}</p>
-    <img [src]="'https://cdn.discordapp.com/avatars/' + connectedUser.id + '/' + connectedUser.avatar" class="avatar"
-         alt="avatar">
-  </div>
 </mat-toolbar>
-<router-outlet></router-outlet>
+<!-- left panel -->
+<mat-drawer-container class="main-container">
+  <mat-drawer mode="side"
+              opened>
+    <div fxLayout="column"
+         fxFlex>
+
+      <!-- top part -->
+      <div class="users"
+           fxLayout="column"
+           fxLayoutAlign="space-between center"
+           fxLayoutGap="12px"
+           fxFlex="18">
+        <div *ngIf="!!connectedUser"
+             class="user"
+             fxLayout="row"
+             fxLayoutAlign="center end"
+             fxLayoutGap="12px">
+          <img [src]="'https://cdn.discordapp.com/avatars/' + connectedUser.id + '/' + connectedUser.avatar"
+               class="avatar"
+               alt="avatar">
+          <div fxLayout="column"
+               fxLayoutAlign="center">
+            <span class="username">{{connectedUser.username}}</span>
+            <span class="identifier">#{{connectedUser.id}}</span>
+          </div>
+        </div>
+        <app-bot-status></app-bot-status>
+      </div>
+      <div class="guilds"
+           fxFlex
+           fxLayout="column">
+        <h2>Guilds</h2>
+        <mat-spinner *ngIf="!guilds" fxFlexAlign="center"></mat-spinner>
+        <div *ngIf="guilds"
+             class="guilds-content">
+          <div *ngFor="let guild of guilds"
+               class="guild"
+               fxLayout="row"
+               fxLayoutAlign="start center"
+               fxLayoutGap="16px"
+               [ngClass]="{'selected' : (this.selectedGuild && guild.id === this.selectedGuild.id),
+                         'disabled': !guild.isBotInGuild}"
+               (click)="selectGuild(guild)">
+            <img *ngIf="guild.icon"
+                 class="guild-icon"
+                 [src]="'https://cdn.discordapp.com/icons/' + guild.id + '/' + guild.icon"
+                 alt="guild"/>
+            <div *ngIf="!guild.icon"
+                 class="guild-icon"
+                 [style.background-color]="stringToRGB(guild.name)">
+              <span>{{guild.name.charAt(0).toUpperCase()}}</span>
+            </div>
+            <span class="name" fxFlex>{{guild.name}}</span>
+            <mat-icon *ngIf="!guild.isBotInGuild">add_circle_outline</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-drawer>
+  <mat-drawer-content>
+    <router-outlet></router-outlet>
+  </mat-drawer-content>
+</mat-drawer-container>

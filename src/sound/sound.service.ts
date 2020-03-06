@@ -30,7 +30,7 @@ export class SoundService {
 
   public async saveSound(name: string, categoryId: number, bSound: Buffer, bImage: Buffer) {
     try {
-      const image = this.imageRepository.create();
+      const image = await this.imageRepository.save(this.imageRepository.create());
       const sound = this.soundRepository.create({name, categoryId, image});
       await this.storageService.saveFile(image.uuid, bImage);
       await this.storageService.saveFile(sound.uuid, bSound);

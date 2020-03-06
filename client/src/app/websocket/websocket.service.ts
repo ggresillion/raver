@@ -3,7 +3,7 @@ import * as io from 'socket.io-client';
 import {environment} from '../../environments/environment';
 import {BotStatus} from '../shared/model/bot-status';
 import {Observable, Subject} from 'rxjs';
-import Socket = SocketIOClient.Socket;
+import {Socket} from 'socket.io';
 
 @Injectable({
   providedIn: 'root'

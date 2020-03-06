@@ -5,12 +5,12 @@ import { TrackInfos } from '../../model/track-infos';
 @Component({
   selector: 'app-search-youtube',
   templateUrl: './search-youtube.component.html',
-  styleUrls: ['./search-youtube.component.sass']
+  styleUrls: ['./search-youtube.component.scss']
 })
 export class SearchYoutubeComponent implements OnInit {
 
   searchString = '';
-  videos = [];
+  videos: TrackInfos[] = [];
 
   constructor(
     private readonly youtubeService: YoutubeService,

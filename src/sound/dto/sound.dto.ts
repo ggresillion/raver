@@ -9,5 +9,4 @@ export class SoundDto {
   @IsInt()
   @IsOptional()
   public readonly categoryId;
-  public readonly
 }

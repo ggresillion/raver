@@ -16,7 +16,7 @@ services:
     environment:
       POSTGRES_DB: 'dsb'
       POSTGRES_USER: 'dsb'
-      POSTGRES_PASSWORD: 'dsb'
+      POSTGRES_PASSWORD: $DB_PASSWORD
 
 
   nginx:
