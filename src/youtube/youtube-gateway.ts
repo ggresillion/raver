@@ -29,21 +29,21 @@ export class YoutubeGateway implements OnGatewayConnection {
       {state: this.youtubeService.getState()});
   }
 
-  public sendStatusUpdate(status: PlayerStatus) {
-    this.server.emit(ServerEvents.STATUS_UPDATED, {status});
+  public sendStatusUpdate(guildId: string, status: PlayerStatus) {
+    this.server.to(guildId).emit(ServerEvents.STATUS_UPDATED, {status});
   }
 
-  public sendStateUpdate(state: PlayerState) {
+  public sendStateUpdate(guildId: string, state: PlayerState) {
     this.logger.log('Sending state update');
-    this.server.emit(ServerEvents.STATE_UPDATED, {state});
+    this.server.to(guildId).emit(ServerEvents.STATE_UPDATED, {state});
   }
 
-  public onAddToPlaylist(cb: (track: TrackInfos) => void) {
+  public onAddToPlaylist(guildId: string, cb: (track: TrackInfos) => void) {
     this.addToPlaylistListeners.push(cb);
   }
 
-  public sendProgressUpdate(progressSeconds: number): void {
-    this.server.emit(ServerEvents.PROGRESS_UPDATED, {progressSeconds});
+  public sendProgressUpdate(guildId: string, progressSeconds: number): void {
+    this.server.to(guildId).emit(ServerEvents.PROGRESS_UPDATED, {progressSeconds});
   }
 
   // public sendAddToPlaylist(track: TrackInfos) {
@@ -52,9 +52,10 @@ export class YoutubeGateway implements OnGatewayConnection {
 
   @SubscribeMessage(ClientEvents.ADD_TO_PLAYLIST)
   private addToPlaylistAction(client: Client, data: { track: TrackInfos }) {
+    console.log(data)
     this.logger.log(`Received event : ${ClientEvents.ADD_TO_PLAYLIST} (${data.track.title})`);
     if (!!data.track) {
-      this.addToPlaylistListeners.forEach(cb => cb(data.track));
+      this.addToPlaylistListeners.forEach(cb => cb(data, data.track));
     }
   }
 
@@ -67,18 +68,18 @@ export class YoutubeGateway implements OnGatewayConnection {
   @SubscribeMessage(ClientEvents.PLAY)
   private playAction() {
     this.logger.log(`Received event : ${ClientEvents.PLAY}`);
-    this.youtubeService.play();
+    this.youtubeService.play("");
   }
 
   @SubscribeMessage(ClientEvents.PAUSE)
   private plauseAction() {
     this.logger.log(`Received event : ${ClientEvents.PAUSE}`);
-    this.youtubeService.pause();
+    this.youtubeService.pause("");
   }
 
   @SubscribeMessage(ClientEvents.NEXT)
   private nextAction() {
     this.logger.log(`Received event : ${ClientEvents.NEXT}`);
-    this.youtubeService.next();
+    this.youtubeService.next("");
   }
 }

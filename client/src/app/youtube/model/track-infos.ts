@@ -1,6 +1,6 @@
 export interface TrackInfos {
-  id?: string;
-  channelId?: string;
+  videoId?: string;
+  author?: any;
   channelTitle?: string;
   description: string;
   liveBroadcastContent?: string;

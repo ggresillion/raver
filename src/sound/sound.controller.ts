@@ -27,8 +27,8 @@ export class SoundController {
   }
 
   @Get()
-  public async getSounds(): Promise<Sound[]> {
-    return await this.soundService.getSounds();
+  public async getSounds(@Query('guildId') guildId: string): Promise<Sound[]> {
+    return await this.soundService.getSounds(guildId);
   }
 
   @Post()
@@ -44,7 +44,7 @@ export class SoundController {
       throw new BadRequestException('missing file');
     }
     const name = soundData.name && soundData.name !== '' ? soundData.name : sound.originalname;
-    return await this.soundService.saveSound(name, soundData.categoryId, sound.buffer, image.buffer);
+    return await this.soundService.saveSound(name, soundData.categoryId, soundData.guildId, sound.buffer, image.buffer);
   }
 
   @Delete(':id')
@@ -58,7 +58,7 @@ export class SoundController {
   }
 
   @Post(':id/play')
-  public async playSound(@Param('id')id: ObjectID, @Query('guildId')guildId: string) {
-    return await this.soundService.playSound(id, guildId);
+  public async playSound(@Param('id')id: ObjectID) {
+    return await this.soundService.playSound(id);
   }
 }

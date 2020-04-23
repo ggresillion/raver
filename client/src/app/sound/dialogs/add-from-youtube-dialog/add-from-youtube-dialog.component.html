@@ -17,7 +17,7 @@
   </div>
   <div *ngIf="!!videoInfos">
     <div mat-dialog-content class="youtube-video">
-      <app-youtube-thumbnail [id]="videoInfos.id"></app-youtube-thumbnail>
+      <app-youtube-thumbnail [id]="videoInfos.videoId"></app-youtube-thumbnail>
       <div style="grid-column: 2; max-width: 300px;">
         <h3>{{videoInfos.title}}</h3>
         <p>{{videoInfos.description}}</p>

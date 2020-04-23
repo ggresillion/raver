@@ -17,7 +17,7 @@ import {BotService} from '../bot/bot.service';
 })
 export class HomeComponent implements OnInit {
 
-  public connectedUser: User = {id: BigInt(169143950203027456), username: 'Un Cacatoès', avatar: 'a49fd2d7b4c48f6d2d070d210d08f69e'};
+  public connectedUser: User = {id: BigInt(169143950203027456), username: 'Un Cacatoès', avatar: '91f29163d9ef4eb856a45a25b9bc8523.png'};
   public search: string;
   public guilds: Guild[];
   public selectedGuild: Guild;

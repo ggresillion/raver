@@ -13,7 +13,6 @@ export class Sound {
   public uuid: string = uuid();
 
   @Column()
-  @Index({unique: true})
   public name: string;
 
   @ManyToOne(() => Category, {onDelete: 'SET NULL'})
@@ -25,4 +24,6 @@ export class Sound {
   @Column({nullable: true})
   public categoryId: number | null;
 
+  @Column()
+  public guildId: string;
 }

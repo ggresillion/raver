@@ -28,6 +28,7 @@
     "@nestjs/passport": "^6.0.0",
     "@nestjs/platform-express": "^6.0.5",
     "@nestjs/platform-socket.io": "^6.1.1",
+    "@nestjs/serve-static": "^2.1.0",
     "@nestjs/typeorm": "^6.0.0",
     "@nestjs/websockets": "^6.1.1",
     "@types/fluent-ffmpeg": "^2.1.14",
@@ -49,8 +50,8 @@
     "typeorm": "^0.2.16",
     "typescript": "^3.4.1",
     "uuid": "^3.3.2",
-    "youtube-search": "^1.1.4",
     "youtube-v3-api": "^1.1.1",
+    "yt-search": "^1.1.2",
     "ytdl-core": "^2.0.0",
     "ytdl-core-discord": "^1.0.3"
   },

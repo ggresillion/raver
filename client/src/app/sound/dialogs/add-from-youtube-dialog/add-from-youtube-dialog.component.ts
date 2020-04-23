@@ -1,7 +1,7 @@
-import {Component, Inject, OnInit} from '@angular/core';
-import {SoundService} from '../../sound.service';
-import {VideoInfos} from '../../model/video-infos';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { Component, Inject, OnInit } from '@angular/core';
+import { SoundService } from '../../sound.service';
+import { VideoInfos } from '../../model/video-infos';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-add-from-youtube-dialog',
@@ -16,8 +16,8 @@ export class AddFromYoutubeDialogComponent implements OnInit {
   public uploadName = '';
 
   constructor(public dialogRef: MatDialogRef<AddFromYoutubeDialogComponent>,
-              @Inject(MAT_DIALOG_DATA) public data: any,
-              private songService: SoundService) {
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private songService: SoundService) {
   }
 
   ngOnInit() {
@@ -36,9 +36,12 @@ export class AddFromYoutubeDialogComponent implements OnInit {
 
   public upload() {
     this.loading = true;
-    this.songService.uploadFromYoutube(this.videoURL, this.data.category,
-      this.uploadName !== '' ? this.uploadName : this.videoInfos.title).subscribe(() => {
-      this.dialogRef.close();
-    });
+    this.songService.uploadFromYoutube(
+      this.videoURL,
+      this.data.category,
+      this.uploadName !== '' ? this.uploadName : this.videoInfos.title)
+      .subscribe(() => {
+        this.dialogRef.close();
+      });
   }
 }

@@ -1,9 +1,10 @@
 node_modules/
-web-client/node_modules/
+client/node_modules/
 .idea/
 dist/
 uploads/
 package-lock.json
-web-client/package-lock.json
+client/package-lock.json
 .env
 settings.json
+.vscode

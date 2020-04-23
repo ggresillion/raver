@@ -1,14 +1,15 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import * as io from 'socket.io-client';
-import {environment} from '../../environments/environment';
-import {PlayerStatus} from './model/player-status';
-import {HttpClient} from '@angular/common/http';
-import {ClientEvents} from './model/client-events.enum';
-import {ServerEvents} from './model/server-events.enum';
-import {Socket} from 'socket.io';
-import {TrackInfos} from './model/track-infos';
-import {PlayerState} from './model/player-state';
+import { environment } from '../../environments/environment';
+import { PlayerStatus } from './model/player-status';
+import { HttpClient } from '@angular/common/http';
+import { ClientEvents } from './model/client-events.enum';
+import { ServerEvents } from './model/server-events.enum';
+import { Socket } from 'socket.io';
+import { TrackInfos } from './model/track-infos';
+import { PlayerState } from './model/player-state';
+import { GuildsService } from '../guilds/guilds.service';
 
 @Injectable({
   providedIn: 'root'
@@ -25,16 +26,23 @@ export class YoutubeService {
   private currentTime = 0;
   private duration = 0;
   private socket: Socket;
+  private currentGuild;
 
   constructor(
     private http: HttpClient,
+    private guildsService: GuildsService
   ) {
-    this.socket = io(environment.websocket + 'player');
-    this.bindToEvents();
+    this.guildsService.getSelectedGuild().subscribe(g => this.currentGuild = g);
+    io(environment.websocket + 'player').on('connect', (socket) => {
+      console.log(socket)
+      this.socket = socket;
+      this.joinRooms();
+      this.bindToEvents();
+    });
   }
 
   public addToPlaylist(track: TrackInfos) {
-    this.socket.emit(ClientEvents.ADD_TO_PLAYLIST, {track});
+    this.socket.to(this.currentGuild.id).emit(ClientEvents.ADD_TO_PLAYLIST, { track });
   }
 
   public nextSong(): void {
@@ -98,16 +106,22 @@ export class YoutubeService {
     this.socket.on(ServerEvents.YT_PROGRESS_UPDATED, data => this.onProgressUpdate(data.progressSeconds));
   }
 
+  private joinRooms() {
+    this.guildsService.getAvailableGuilds().subscribe(guilds => {
+      guilds.forEach(g => this.socket.join(g.id));
+    });
+  }
+
   private onStatusUpdate(status: PlayerStatus) {
-    this.onStateUpdate({status});
+    this.onStateUpdate({ status });
   }
 
   private onStateUpdate(state: Partial<PlayerState>) {
-    this.stateSubject.next({...this.stateSubject.value, ...state});
+    this.stateSubject.next({ ...this.stateSubject.value, ...state });
   }
 
   private onAddToPlaylist(track) {
-    this.onStateUpdate({playlist: [...this.stateSubject.value.playlist, track]});
+    this.onStateUpdate({ playlist: [...this.stateSubject.value.playlist, track] });
   }
 
   private onProgressUpdate(progressSeconds: number) {

@@ -1,16 +1,16 @@
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Guild} from '../models/guild';
-import {environment} from '../../environments/environment';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {tap} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Guild } from '../models/guild';
+import { environment } from '../../environments/environment';
+import { BehaviorSubject, Observable, EMPTY, ReplaySubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GuildsService {
 
-  private guildSubject = new BehaviorSubject<Guild>(null);
+  private guildSubject = new ReplaySubject<Guild>();
 
   constructor(private readonly http: HttpClient) {
   }

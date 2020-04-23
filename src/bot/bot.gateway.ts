@@ -1,12 +1,12 @@
-import {OnGatewayConnection, WebSocketGateway, WebSocketServer} from '@nestjs/websockets';
-import {Server} from 'socket.io';
-import {ServerEvents} from './dto/server-events.enum';
-import {BotStateDTO} from './dto/bot-state.dto';
-import {forwardRef, Inject} from '@nestjs/common';
-import {YoutubeService} from '../youtube/youtube.service';
-import {BotService} from './bot.service';
+import { OnGatewayConnection, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { Server } from 'socket.io';
+import { ServerEvents } from './dto/server-events.enum';
+import { BotStateDTO } from './dto/bot-state.dto';
+import { forwardRef, Inject } from '@nestjs/common';
+import { YoutubeService } from '../youtube/youtube.service';
+import { BotService } from './bot.service';
 
-@WebSocketGateway({namespace: 'bot'})
+@WebSocketGateway({ namespace: 'bot' })
 export class BotGateway implements OnGatewayConnection {
 
   @WebSocketServer()
@@ -19,7 +19,9 @@ export class BotGateway implements OnGatewayConnection {
   }
 
   public sendStateUpdate(botState: BotStateDTO) {
-    this.server.emit(ServerEvents.STATE_UPDATE.toString(), botState);
+    if (this.server) {
+      this.server.emit(ServerEvents.STATE_UPDATE.toString(), botState);
+    }
   }
 
   handleConnection(client: any, ...args: any[]): any {

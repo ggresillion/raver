@@ -16,7 +16,7 @@
       <mat-icon>music_video</mat-icon>
       <span>SoundBoard</span>
     </div>
-    <div class="link"
+    <!-- <div class="link"
          fxLayout="row"
          fxLayoutAlign="start center"
          fxLayoutGap="12px"
@@ -24,7 +24,7 @@
          (click)="navigateTo('youtube')">
       <mat-icon svgIcon="youtube"></mat-icon>
       <span>Youtube</span>
-    </div>
+    </div> -->
   </div>
   <div class="search-container">
     <mat-icon>search</mat-icon>
@@ -54,9 +54,9 @@
       <!-- top part -->
       <div class="users"
            fxLayout="column"
-           fxLayoutAlign="space-between center"
+           fxLayoutAlign="center center"
            fxLayoutGap="12px"
-           fxFlex="18">
+           fxFlex="12">
         <div *ngIf="!!connectedUser"
              class="user"
              fxLayout="row"
@@ -71,7 +71,7 @@
             <span class="identifier">#{{connectedUser.id}}</span>
           </div>
         </div>
-        <app-bot-status></app-bot-status>
+        <!-- <app-bot-status></app-bot-status> -->
       </div>
       <div class="guilds"
            fxFlex

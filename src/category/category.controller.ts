@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Put, Query} from '@nestjs/common';
 import {Category} from './category.entity';
 import {CategoryService} from './category.service';
 
@@ -11,8 +11,8 @@ export class CategoryController {
   }
 
   @Get()
-  public async getCategories(): Promise<Category[]> {
-    return this.categoryService.findAllCategories();
+  public async getCategories(@Query('guildId') guildId: string): Promise<Category[]> {
+    return this.categoryService.findAllCategories(guildId);
   }
 
   @Post()

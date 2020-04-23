@@ -10,4 +10,7 @@ export class UploadDto {
   @IsString()
   @IsNotEmpty()
   public name: string;
+  @IsString()
+  @IsNotEmpty()
+  public guildId: string;
 }

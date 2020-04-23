@@ -1,11 +1,11 @@
-import {Injectable, NotFoundException, OnApplicationShutdown, UnprocessableEntityException} from '@nestjs/common';
-import {StorageService} from '../storage/storage.service';
-import {ObjectID, Repository} from 'typeorm';
-import {Sound} from './entity/sound.entity';
-import {InjectRepository} from '@nestjs/typeorm';
-import {BotService} from '../bot/bot.service';
-import {SoundDto} from './dto/sound.dto';
-import {Image} from './entity/image.entity';
+import { Injectable, NotFoundException, OnApplicationShutdown, UnprocessableEntityException } from '@nestjs/common';
+import { StorageService } from '../storage/storage.service';
+import { ObjectID, Repository } from 'typeorm';
+import { Sound } from './entity/sound.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { BotService } from '../bot/bot.service';
+import { SoundDto } from './dto/sound.dto';
+import { Image } from './entity/image.entity';
 
 @Injectable()
 export class SoundService {
@@ -20,18 +20,18 @@ export class SoundService {
   ) {
   }
 
-  public async getSounds(): Promise<Sound[]> {
-    return this.soundRepository.find({relations: ['category']});
+  public async getSounds(guildId: string): Promise<Sound[]> {
+    return this.soundRepository.find({ where: { guildId }, relations: ['category'] });
   }
 
   public async getSoundById(id: ObjectID): Promise<Sound> {
-    return this.soundRepository.findOne(id, {relations: ['category']});
+    return this.soundRepository.findOne(id, { relations: ['category'] });
   }
 
-  public async saveSound(name: string, categoryId: number, bSound: Buffer, bImage: Buffer) {
+  public async saveSound(name: string, categoryId: number, guildId: string, bSound: Buffer, bImage: Buffer) {
     try {
       const image = await this.imageRepository.save(this.imageRepository.create());
-      const sound = this.soundRepository.create({name, categoryId, image});
+      const sound = this.soundRepository.create({ name, categoryId, guildId, image });
       await this.storageService.saveFile(image.uuid, bImage);
       await this.storageService.saveFile(sound.uuid, bSound);
       return await this.soundRepository.save(sound);
@@ -52,21 +52,21 @@ export class SoundService {
     return await this.soundRepository.save(updatedSound);
   }
 
-  public async playSound(id: ObjectID, guildId: string): Promise<Sound> {
+  public async playSound(id: ObjectID): Promise<Sound> {
     return this.getSoundById(id).then(sound => {
       if (!sound) {
         throw new NotFoundException('sound not found');
       }
-      this.botService.playFile(sound.uuid, guildId);
+      this.botService.playFile(sound.uuid, sound.guildId);
       return sound;
     });
   }
 
-  public createNewSoundEntity(name: string, categoryId: number): Sound {
-    return this.soundRepository.create({name, categoryId});
+  public createNewSoundEntity(name: string, categoryId: number, guildId: string): Sound {
+    return this.soundRepository.create({ name, categoryId, guildId });
   }
 
-  public async saveNewSoundEntity(sound: Sound): Promise<Sound> {
+  public async saveSoundEntity(sound: Sound): Promise<Sound> {
     return await this.soundRepository.save(sound);
   }
 

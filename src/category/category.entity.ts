@@ -8,4 +8,7 @@ export class Category {
 
   @Column()
   public name: string;
+
+  @Column()
+  public guildId: string;
 }

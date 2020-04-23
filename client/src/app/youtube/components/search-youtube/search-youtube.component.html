@@ -17,10 +17,10 @@
       <div fxLayout="row"
            fxLayoutAlign="start center"
            fxLayoutGap="12px">
-        <app-youtube-thumbnail [id]="video.id"></app-youtube-thumbnail>
+        <app-youtube-thumbnail [id]="video.videoId"></app-youtube-thumbnail>
         <div fxLayout="column">
           <span class="mat-h2">{{video.title}}</span>
-          <span class="mat-h3">{{video.channelTitle}}</span>
+          <span class="mat-h3">{{video.author.name}}</span>
         </div>
       </div>
       <mat-icon (click)="addToPlaylist(video)">playlist_add</mat-icon>
