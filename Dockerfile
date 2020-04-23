@@ -1,6 +1,18 @@
+FROM node:latest as frontend
+
+WORKDIR /app
+
+COPY client/package*.json ./
+
+RUN npm install
+
+COPY client/ .
+
+RUN npm run build -- --prod
+
 FROM node:latest
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
 
@@ -8,6 +20,10 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 80
+RUN npm run build
 
-CMD ["npm", "start"]
+COPY --from=frontend /app/dist/DiscordSoundBoard /app/dist/client
+
+RUN apt-get update && apt-get install ffmpeg -y
+
+CMD node dist/main.js

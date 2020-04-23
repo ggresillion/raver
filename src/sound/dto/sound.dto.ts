@@ -9,4 +9,6 @@ export class SoundDto {
   @IsInt()
   @IsOptional()
   public readonly categoryId;
+  @IsString()
+  public readonly guildId;
 }

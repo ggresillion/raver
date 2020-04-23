@@ -11,6 +11,6 @@ export class BotController {
 
   @Get('infos')
   public async getBotInfos() {
-    return this.botService.getInfos();
+    // return this.botService.getInfos();
   }
 }

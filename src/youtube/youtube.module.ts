@@ -4,7 +4,7 @@ import { YoutubeController } from './youtube.controller';
 import {StorageModule} from '../storage/storage.module';
 import {SoundModule} from '../sound/sound.module';
 import {YoutubeGateway} from './youtube-gateway';
-import { BotModule } from 'src/bot/bot.module';
+import { BotModule } from '../bot/bot.module';
 
 @Module({
   imports: [SoundModule, StorageModule, BotModule],

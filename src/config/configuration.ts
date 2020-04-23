@@ -9,8 +9,8 @@ const config = {
     isDiscordIntegrationEnabled: true,
   },
   production: {
-    port: 8000,
-    isDiscordIntegrationEnabled: false,
+    port: 80,
+    isDiscordIntegrationEnabled: true,
   },
 };
 

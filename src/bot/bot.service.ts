@@ -100,7 +100,7 @@ export class BotService implements OnApplicationShutdown {
     return !!this.dispatcher;
   }
 
-  public onBotStatusUpdate(cb: (status: BotStatus) => void) {
+  public onBotStatusUpdate(guildId: string, cb: (status: BotStatus) => void) {
     this.onStatusChangeListeners.push(cb);
   }
 
