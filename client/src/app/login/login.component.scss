@@ -1,7 +1,36 @@
-.login-card {
+@import 'src/styles';
+
+:host {
+  background-color: $primary;
+  height: 100vh;
+  width: 100vw;
   position: absolute;
-  height: 250px;
-  width: 300px;
-  top: calc(50% - 250px);
-  left: calc(50% - 300px);
+  overflow: hidden;
+}
+
+.icon {
+  height: 22%;
+}
+
+.login-card {
+  min-height: 48%;
+  min-width: 32%;
+  background-color: white;
+  border-radius: 30px;
+  padding: 22px;
+
+  span {
+    color: $primary;
+    font-size: 4em;
+  }
+
+  button {
+    min-width: 100%;
+    font-size: 22px;
+    min-height: 50px;
+  }
+}
+
+.footer {
+  color: white;
 }

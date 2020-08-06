@@ -1,14 +1,14 @@
-import {Component, OnInit} from '@angular/core';
-import {AuthService} from '../auth/auth.service';
-import {User} from '../models/user';
-import {SoundService} from '../sound/sound.service';
-import {GuildsService} from '../guilds/guilds.service';
-import {Guild} from '../models/guild';
-import {Location} from '@angular/common';
-import {Router} from '@angular/router';
-import {MatDialog} from '@angular/material/dialog';
-import {AddBotToGuildDialogComponent} from '../guilds/dialogs/add-bot-to-guild-dialog/add-bot-to-guild-dialog.component';
-import {BotService} from '../bot/bot.service';
+import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../auth/auth.service';
+import { User } from '../models/user';
+import { SoundService } from '../sound/sound.service';
+import { GuildsService } from '../guilds/guilds.service';
+import { Guild } from '../models/guild';
+import { Location } from '@angular/common';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { AddBotToGuildDialogComponent } from '../guilds/dialogs/add-bot-to-guild-dialog/add-bot-to-guild-dialog.component';
+import { BotService } from '../bot/bot.service';
 
 @Component({
   selector: 'app-home',
@@ -17,7 +17,7 @@ import {BotService} from '../bot/bot.service';
 })
 export class HomeComponent implements OnInit {
 
-  public connectedUser: User = {id: BigInt(169143950203027456), username: 'Un Cacatoès', avatar: '91f29163d9ef4eb856a45a25b9bc8523.png'};
+  public connectedUser: User = { id: BigInt(169143950203027456), username: 'Un Cacatoès', avatar: '91f29163d9ef4eb856a45a25b9bc8523.png' };
   public search: string;
   public guilds: Guild[];
   public selectedGuild: Guild;
@@ -72,7 +72,7 @@ export class HomeComponent implements OnInit {
     return '#' + color;
   }
 
-  public selectGuild(guild: Guild): void {
+  public selectGuild(guild: Guild) {
     if (!guild.isBotInGuild) {
       this.dialog.open(AddBotToGuildDialogComponent);
       return;
@@ -86,5 +86,9 @@ export class HomeComponent implements OnInit {
 
   public navigateTo(route: string): void {
     this.router.navigate([route]);
+  }
+
+  public disconnect() {
+    this.authService.logout();
   }
 }

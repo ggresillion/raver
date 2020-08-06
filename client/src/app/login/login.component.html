@@ -1,8 +1,13 @@
-<mat-card class="login-card">
-  <mat-card-header>
-    <mat-card-title>Login</mat-card-title>
-  </mat-card-header>
-  <mat-card-actions>
+<div fxLayout="column" fxLayoutAlign="space-evenly center" fxFill>
+  <img class="icon" src="../../assets/icons/app.svg">
+
+  <div class="login-card" fxLayout="column" fxLayoutAlign="space-evenly center">
+    <span class="title">Login to Disvoice!</span>
     <button (click)="login()" color="primary" mat-raised-button>Login using Discord</button>
-  </mat-card-actions>
-</mat-card>
+  </div>
+  
+  <div class="footer">
+    <span>©2020 - Disvoice - All rights reserved</span>
+  </div>
+
+</div>

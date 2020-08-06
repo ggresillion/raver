@@ -40,28 +40,25 @@ mat-drawer {
     color: #888888;
   }
 
-  .users {
+  .user {
     background: linear-gradient(rgba(0, 0, 0, .4), rgba(0, 0, 0, .4)), url("../../assets/images/vda9rbt01en01.png");
     width: 100%;
-    padding: 12px;
+    padding: 24px;
     background-size: cover;
     color: white;
-
-    .user {
 
       .avatar {
         border-radius: 999px;
         height: 52px;
       }
 
+      .welcome {
+        color: $light-secondary-text;
+      }
+
       .username {
         font-size: 22px;
       }
-
-      .identifier {
-        font-size: 10px;
-      }
-    }
   }
 
   .guilds {
