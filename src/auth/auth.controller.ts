@@ -3,6 +3,7 @@ import {Request, Response} from 'express';
 import {AuthService} from './auth.service';
 import fetch from 'node-fetch';
 import {ConfigService} from '@nestjs/config';
+import {URLSearchParams} from 'url';
 
 @Controller('auth')
 export class AuthController {
@@ -33,17 +34,22 @@ export class AuthController {
     const host = `${req.protocol}://${req.get('Host')}/`;
     const redirect = host + 'api/auth/token';
     const creds = Buffer.from(`${this.CLIENT_ID}:${this.CLIENT_SECRET}`).toString('base64');
-    const response = await fetch(`https://discordapp.com/api/oauth2/token?grant_type=authorization_code&code=${code}` +
-      `&redirect_uri=${redirect}&scope=${this.scopes.join()}`,
+    const params = new URLSearchParams();
+    params.append('grant_type', 'authorization_code');
+    params.append('code', code);
+    params.append('redirect_uri', redirect);
+    params.append('scope', this.scopes.join('%20'));
+    const response = await fetch('https://discordapp.com/api/oauth2/token',
       {
         method: 'POST',
         headers: {
           Authorization: `Basic ${creds}`,
         },
+        body: params
       });
     const body = await response.json();
     if (!response.ok) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(body.error_description);
     }
     const accessToken = body.access_token;
     const refreshToken = body.refresh_token;

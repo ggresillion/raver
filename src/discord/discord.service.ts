@@ -33,6 +33,10 @@ export class DiscordService {
     });
   }
 
+  /**
+   * Return the user's guilds
+   * @param user user
+   */
   public async getMyGuilds(user: UserDTO): Promise<GuildDTO[]> {
     const res = await fetch(`${this.discordApi}/users/@me/guilds`, {
       headers: {
