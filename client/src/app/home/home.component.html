@@ -1,6 +1,7 @@
 <mat-toolbar fxLayout="row" fxLayoutAlign="start center">
-  <div class="title" fxLayout="row" fxLayoutAlign="center">
-    <h1>La Boite de Discorde</h1>
+  <div class="title" fxLayout="row" fxLayoutAlign="space-evenly center">
+    <img class="logo" src="../../assets/icons/app_sm.svg">
+    <h1>Discord SoundBoard</h1>
   </div>
   <div class="links" fxFlex fxLayout="row" fxLayoutAlign="start center">
     <div class="link" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="12px"
@@ -18,7 +19,7 @@
       <span>Youtube</span>
     </div> -->
   </div>
-  <div class="search-container">
+  <div class="search-container" fxLayout fxLayoutAlign="start center">
     <mat-icon>search</mat-icon>
     <mat-form-field>
       <input matInput type="text" [(ngModel)]="search" (ngModelChange)="onSearchChange()" />
@@ -35,7 +36,8 @@
 
       <!-- top part -->
       <div class="user" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="24px" (click)="disconnect()">
-        <ng-container *ngIf="!!connectedUser" class="user" fxLayout="row" fxLayoutAlign="center space-between" fxLayoutGap="12px">
+        <ng-container *ngIf="!!connectedUser" class="user" fxLayout="row" fxLayoutAlign="center space-between"
+          fxLayoutGap="12px">
           <img [src]="'https://cdn.discordapp.com/avatars/' + connectedUser.id + '/' + connectedUser.avatar"
             class="avatar" alt="avatar">
           <div fxLayout="column" fxLayoutAlign="center space-between">
@@ -48,17 +50,21 @@
       <div class="guilds" fxFlex fxLayout="column">
         <h2>Guilds</h2>
         <mat-spinner *ngIf="!guilds" fxFlexAlign="center"></mat-spinner>
-        <div *ngIf="guilds" class="guilds-content">
-          <div *ngFor="let guild of guilds" class="guild" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px"
-            [ngClass]="{'selected' : (this.selectedGuild && guild.id === this.selectedGuild.id),
-                         'disabled': !guild.isBotInGuild}" (click)="selectGuild(guild)">
+        <div *ngIf="guilds" class="guilds-content" fxLayout="column" fxFlex>
+          <div *ngFor="let guild of getGuilds()" class="guild" fxLayout="row" fxLayoutAlign="start center"
+            fxLayoutGap="16px" [ngClass]="{'selected' : (this.selectedGuild && guild.id === this.selectedGuild.id)}"
+            (click)="selectGuild(guild)">
             <img *ngIf="guild.icon" class="guild-icon"
               [src]="'https://cdn.discordapp.com/icons/' + guild.id + '/' + guild.icon" alt="guild" />
             <div *ngIf="!guild.icon" class="guild-icon" [style.background-color]="stringToRGB(guild.name)">
               <span>{{guild.name.charAt(0).toUpperCase()}}</span>
             </div>
             <span class="name" fxFlex>{{guild.name}}</span>
-            <mat-icon *ngIf="!guild.isBotInGuild">add_circle_outline</mat-icon>
+          </div>
+          <div class="guild add" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px"
+            (click)="addBotToGuild()">
+            <mat-icon class="guild-icon" [style.background-color]="'green'">add</mat-icon>
+            <span class="name" fxFlex>Add to your server</span>
           </div>
         </div>
       </div>

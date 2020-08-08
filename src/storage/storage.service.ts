@@ -44,7 +44,7 @@ export class StorageService implements OnModuleInit {
   }
 
   public getPathFromUUID(uuid: string) {
-    return this.STORAGE_PATH + uuid;
+    return './' + this.STORAGE_PATH + uuid;
   }
 
   public getUploadDir() {

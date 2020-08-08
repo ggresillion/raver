@@ -11,6 +11,10 @@
     max-width: calc(16vw - 2px);
   }
 
+  .logo {
+    max-height: 52px;
+  }
+
   .links {
     .link {
       padding: 12px;
@@ -77,6 +81,10 @@ mat-drawer {
       color: #727272;
       border-radius: 4px;
 
+      &.add {
+        margin-top: auto;
+      }
+
       &.disabled {
         background-color: rgba(grey, 0.2);
       }
@@ -101,7 +109,7 @@ mat-drawer {
         justify-content: center;
         color: white;
         font-size: 24px;
-        background-image: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .75));
+        background-color: grey;
       }
 
       mat-icon {

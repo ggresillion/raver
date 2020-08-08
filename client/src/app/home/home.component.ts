@@ -49,6 +49,10 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  public getGuilds(): Guild[] {
+    return this.guilds.filter(g => g.isBotInGuild);
+  }
+
   public onSearchChange() {
     this.soundService.setSearchString(this.search);
   }
@@ -73,11 +77,11 @@ export class HomeComponent implements OnInit {
   }
 
   public selectGuild(guild: Guild) {
-    if (!guild.isBotInGuild) {
-      this.dialog.open(AddBotToGuildDialogComponent);
-      return;
-    }
     this.guildService.setSelectedGuild(guild);
+  }
+
+  public addBotToGuild(): void {
+    this.dialog.open(AddBotToGuildDialogComponent);
   }
 
   public isLinkSelected(route: string): boolean {

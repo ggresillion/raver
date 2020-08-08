@@ -14,7 +14,6 @@ import { map, flatMap, mergeMap, first } from 'rxjs/operators';
 export class SoundService {
 
   private soundsSubject = new BehaviorSubject<Sound[]>([]);
-  private sounds: Sound[] = [];
   private selectedGuild: Guild;
 
   constructor(private http: HttpClient,
@@ -29,46 +28,39 @@ export class SoundService {
   }
 
   public refreshSounds() {
-    this.guildService.getSelectedGuild()
-      .pipe(first())
-      .subscribe(guild => {
-        this.http.get<Sound[]>(`${environment.api}/sounds?guildId=${guild.id}`)
-          .subscribe(sounds => {
-            this.sounds = sounds;
-            this.soundsSubject.next(sounds);
-          });
+    this.http.get<Sound[]>(`${environment.api}/sounds?guildId=${this.selectedGuild.id}`)
+      .subscribe(sounds => {
+        this.soundsSubject.next(sounds);
       });
   }
 
   public playSound(id: number): Observable<void> {
-    return this.http.post<void>(`${environment.api}/sounds/${id}/play`, null);
+    return this.http.post<void>(`${environment.api}/sounds/${id}/play`, this.selectedGuild.id);
   }
 
   public uploadSound(name: string, categoryId: number, file: File): Observable<number> {
     const progress = new Subject<number>();
-    this.guildService.getSelectedGuild().subscribe(guild => {
-      const formData: FormData = new FormData();
-      formData.append('name', name);
-      formData.append('guildId', guild.id.toString());
-      if (categoryId) {
-        formData.append('categoryId', categoryId.toString());
-      }
-      formData.append('sound', file, file.name);
+    const formData: FormData = new FormData();
+    formData.append('name', name);
+    formData.append('guildId', this.selectedGuild.id.toString());
+    if (categoryId) {
+      formData.append('categoryId', categoryId.toString());
+    }
+    formData.append('sound', file, file.name);
 
-      const req = new HttpRequest('POST', `${environment.api}/sounds`, formData, {
-        reportProgress: true
-      });
-
-      this.http.request(req).subscribe(event => {
-        if (event.type === HttpEventType.UploadProgress) {
-          const percentDone = Math.round(100 * event.loaded / event.total);
-          progress.next(percentDone);
-        } else if (event.type === 3) {
-          progress.complete();
-        }
-      });
-
+    const req = new HttpRequest('POST', `${environment.api}/sounds`, formData, {
+      reportProgress: true
     });
+
+    this.http.request(req).subscribe(event => {
+      if (event.type === HttpEventType.UploadProgress) {
+        const percentDone = Math.round(100 * event.loaded / event.total);
+        progress.next(percentDone);
+      } else if (event.type === 3) {
+        progress.complete();
+      }
+    });
+
     return progress.asObservable();
   }
 
@@ -93,6 +85,6 @@ export class SoundService {
   }
 
   public setSearchString(search: string) {
-    this.soundsSubject.next(this.sounds.filter(song => song.name.toLowerCase().includes(search.toLowerCase())));
+    this.soundsSubject.next(this.soundsSubject.value.filter(song => song.name.toLowerCase().includes(search.toLowerCase())));
   }
 }
