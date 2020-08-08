@@ -44,7 +44,7 @@ export class SoundController {
       throw new BadRequestException('missing file');
     }
     const name = soundData.name && soundData.name !== '' ? soundData.name : sound.originalname;
-    return await this.soundService.saveSound(name, soundData.categoryId, soundData.guildId, sound.buffer, image.buffer);
+    return await this.soundService.saveSound(name, soundData.categoryId, soundData.guildId, sound.buffer, image ? image.buffer : null);
   }
 
   @Delete(':id')

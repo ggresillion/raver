@@ -1,13 +1,13 @@
-import {Injectable, Logger, OnApplicationShutdown} from '@nestjs/common';
-import {Client, Message, StreamDispatcher} from 'discord.js';
-import {Command} from './command.enum';
-import {StorageService} from '../storage/storage.service';
-import {BotGateway} from './bot.gateway';
-import {Readable} from 'stream';
-import {UserDTO} from '../user/dto/user.dto';
-import {GuildDTO} from '../guild/dto/guild.dto';
-import {BotStateDTO} from './dto/bot-state.dto';
-import {BotStatus} from './dto/bot-status.enum';
+import { Injectable, Logger, OnApplicationShutdown, BadRequestException } from '@nestjs/common';
+import { Client, Message, StreamDispatcher } from 'discord.js';
+import { Command } from './command.enum';
+import { StorageService } from '../storage/storage.service';
+import { BotGateway } from './bot.gateway';
+import { Readable } from 'stream';
+import { UserDTO } from '../user/dto/user.dto';
+import { GuildDTO } from '../guild/dto/guild.dto';
+import { BotStateDTO } from './dto/bot-state.dto';
+import { BotStatus } from './dto/bot-status.enum';
 
 @Injectable()
 export class BotService implements OnApplicationShutdown {
@@ -33,7 +33,10 @@ export class BotService implements OnApplicationShutdown {
 
   public playFile(uuid: string, guildId: string) {
     const connection = this.client.voice.connections
-      .find(c => c.channel.guild.id === guildId);
+      .find((_, id) => id === guildId);
+    if (!connection) {
+      throw new BadRequestException('guild id not found');
+    }
     this.dispatcher = connection.play(this.storageService.getPathFromUUID(uuid));
     // Workaround to prevent stream to end unexpectedly
     (this.dispatcher as any)._setSpeaking(1);
@@ -59,7 +62,7 @@ export class BotService implements OnApplicationShutdown {
         this.dispatcher.end();
         this.dispatcher = null;
       }
-      this.dispatcher = co.play(stream, {type: 'opus'});
+      this.dispatcher = co.play(stream, { type: 'opus' });
       // Workaround to prevent stream to end unexpectedly
       (this.dispatcher as any)._setSpeaking(1);
       // tslint:disable-next-line:no-empty
@@ -150,6 +153,7 @@ export class BotService implements OnApplicationShutdown {
       this.logger.error(m);
     });
     this.client.on('message', async (message: Message) => {
+      if (!message.guild) return;
       const command = message.content;
       switch (command) {
         case Command.JOIN:
