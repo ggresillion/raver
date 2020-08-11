@@ -1,15 +1,15 @@
-import {forwardRef, Inject, Injectable} from '@nestjs/common';
-import {StorageService} from '../storage/storage.service';
-import {SoundService} from '../sound/sound.service';
-import {BotService} from '../bot/bot.service';
-import {YoutubeGateway} from './youtube-gateway';
-import {PlayerStatus} from './model/player-status';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { StorageService } from '../storage/storage.service';
+import { SoundService } from '../sound/sound.service';
+import { BotService } from '../bot/bot.service';
+import { YoutubeGateway } from './youtube-gateway';
+import { PlayerStatus } from './model/player-status';
 import * as ytdlDiscord from './util/ytdl-wrapper';
-import {TrackInfos} from './dto/track-infos';
+import { TrackInfos } from './dto/track-infos';
 import * as ytdl from 'ytdl-core';
 import * as FFmpeg from 'fluent-ffmpeg';
-import {PlayerState} from './model/player-state';
-import * as youtubeSearch from 'yt-search';
+import { PlayerState } from './model/player-state';
+import * as youtubeSearch from 'ytsr';
 import { Sound } from '../sound/entity/sound.entity';
 import { BotStatus } from '../bot/dto/bot-status.enum';
 import { UploadDto } from './dto/upload.dto';
@@ -37,11 +37,14 @@ export class YoutubeService {
 
   public async getVideoInfos(id: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      youtubeSearch({videoId: id}, (err, result) => {
+      youtubeSearch(id, (err, result) => {
         if (err) {
           return reject(err);
         }
-        return resolve(result);
+        if (result.items.length === 0) {
+          return reject('did not find any video');
+        }
+        return resolve(result.items[0]);
       });
     });
   }
@@ -52,7 +55,7 @@ export class YoutubeService {
         if (err) {
           return reject(err);
         }
-        return resolve(results.videos);
+        return resolve(results.items);
       });
     });
   }
@@ -60,8 +63,8 @@ export class YoutubeService {
   public async uploadFromYoutube(upload: UploadDto): Promise<Sound> {
     return new Promise((resolve) => {
       const sound = this.soundService.createNewSoundEntity(upload.name, upload.categoryId, upload.guildId);
-      const stream = ytdl(upload.url, {quality: 'lowestaudio'});
-      FFmpeg({source: stream})
+      const stream = ytdl(upload.url, { quality: 'lowestaudio' });
+      FFmpeg({ source: stream })
         .audioBitrate(128)
         .withNoVideo()
         .toFormat('opus')
@@ -75,7 +78,7 @@ export class YoutubeService {
   public async playSoundFromYoutube(guildId: string, id: string) {
     const res = await ytdlDiscord.stream(
       `http://youtube.com/watch?v=${id}`,
-      {highWaterMark: 1024 * 1024 * 10},
+      { highWaterMark: 1024 * 1024 * 10 },
       ((current) => {
         this.youtubeGateway.sendProgressUpdate(guildId, current);
       }));
