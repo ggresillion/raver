@@ -32,6 +32,13 @@
     z-index: 999;
     word-break: break-word;
     justify-content: center;
+    height: 150px;
+    width: 150px;
+    font-size: 18px;
+
+    span {
+      display: inline-block
+    }
 
     &.sound-button-editing {
       position: relative;

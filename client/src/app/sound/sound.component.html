@@ -1,7 +1,7 @@
 <mat-card-content>
   <mat-tab-group>
     <mat-tab *ngFor="let category of [{id: null, name: 'Default'}].concat(categories)" [id]="category"
-             [label]="category.name">
+      [label]="category.name">
       <ng-template mat-tab-label>
         <div appDropper [id]="category.id" class="mat-tab-label-content">
           {{category.name}}
@@ -17,12 +17,12 @@
       </mat-toolbar>
       <div class="container">
         <ng-container *ngFor="let sound of getSoundsForCategory(category.id)">
-          <button *ngIf="!isEditing" appDraggable [id]="sound.id" (click)="onSoundClick(sound.id)"
-                  class="sound-button" mat-raised-button>
+          <button *ngIf="!isEditing" appDraggable [id]="sound.id" (click)="onSoundClick(sound.id)" class="sound-button"
+            mat-raised-button>
             <span>{{sound.name}}</span>
           </button>
           <button *ngIf="isEditing" appDraggable [id]="sound.id" (click)="deleteSound(sound.id)"
-                  class="sound-button sound-button-editing" mat-raised-button>
+            class="sound-button sound-button-editing" mat-raised-button>
             <span>{{sound.name}}</span>
             <mat-icon class="remove-icon">delete_outline</mat-icon>
           </button>
