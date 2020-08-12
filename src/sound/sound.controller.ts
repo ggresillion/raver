@@ -38,7 +38,6 @@ export class SoundController {
   ]))
   public async createSound(@UploadedFiles() files,
     @Body() soundData: SoundDto): Promise<Sound> {
-    console.log(files);
     const sound = files.sound ? files.sound[0] : null;
     const image = files.image ? files.image[0] : null;
     if (!sound) {
