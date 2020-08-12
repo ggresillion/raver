@@ -8,6 +8,7 @@ import { UserDTO } from '../user/dto/user.dto';
 import { GuildDTO } from '../guild/dto/guild.dto';
 import { BotStateDTO } from './dto/bot-state.dto';
 import { BotStatus } from './dto/bot-status.enum';
+import { createReadStream } from 'fs';
 
 @Injectable()
 export class BotService implements OnApplicationShutdown {
@@ -37,7 +38,10 @@ export class BotService implements OnApplicationShutdown {
     if (!connection) {
       throw new BadRequestException('guild id not found');
     }
-    this.dispatcher = connection.play(this.storageService.getPathFromUUID(uuid));
+    const path = this.storageService.getPathFromUUID(uuid);
+    this.dispatcher = connection.play(createReadStream(path), {
+      type: 'ogg/opus'
+    });
     // Workaround to prevent stream to end unexpectedly
     (this.dispatcher as any)._setSpeaking(1);
     // tslint:disable-next-line:no-empty

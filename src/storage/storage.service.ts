@@ -1,15 +1,25 @@
-import {Injectable, Logger, OnModuleInit} from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs';
 
 @Injectable()
 export class StorageService implements OnModuleInit {
 
-  private readonly STORAGE_PATH = 'uploads/';
+  private readonly STORAGE_PATH = './uploads/';
   private readonly logger = new Logger(StorageService.name);
 
   public onModuleInit() {
     if (!fs.existsSync(this.STORAGE_PATH)) {
-      fs.mkdir(this.STORAGE_PATH, (err) => this.logger.error(err));
+      fs.mkdir(this.STORAGE_PATH, (err) => {
+        if (err) {
+          this.logger.error(err);
+          return;
+        }
+        fs.mkdir(this.STORAGE_PATH + 'tmp', (err) => {
+          if (err) {
+            this.logger.error(err);
+          }
+        });
+      });
     }
   }
 

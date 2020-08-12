@@ -35,16 +35,14 @@
     <div fxLayout="column" fxFlex>
 
       <!-- top part -->
-      <div class="user" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="24px" (click)="disconnect()">
-        <ng-container *ngIf="!!connectedUser" class="user" fxLayout="row" fxLayoutAlign="center space-between"
-          fxLayoutGap="12px">
-          <img [src]="'https://cdn.discordapp.com/avatars/' + connectedUser.id + '/' + connectedUser.avatar"
-            class="avatar" alt="avatar">
-          <div fxLayout="column" fxLayoutAlign="center space-between">
-            <span class="welcome">Welcome,</span>
-            <span class="username">{{connectedUser.username}}</span>
-          </div>
-        </ng-container>
+      <div *ngIf="!!connectedUser" class="user" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="24px"
+        (click)="disconnect()">
+        <img [src]="'https://cdn.discordapp.com/avatars/' + connectedUser.id + '/' + connectedUser.avatar"
+          class="avatar" alt="avatar">
+        <div fxLayout="column" fxLayoutAlign="center space-between">
+          <span class="welcome">Welcome,</span>
+          <span class="username">{{connectedUser.username}}</span>
+        </div>
         <!-- <app-bot-status></app-bot-status> -->
       </div>
       <div class="guilds" fxFlex fxLayout="column">

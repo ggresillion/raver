@@ -6,6 +6,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BotService } from '../bot/bot.service';
 import { SoundDto } from './dto/sound.dto';
 import { Image } from './entity/image.entity';
+import { OpusEncoder } from 'node-opus';
+import * as FFmpeg from 'fluent-ffmpeg';
+import { Duplex } from 'stream';
+import uuid = require('uuid');
 
 @Injectable()
 export class SoundService {
@@ -38,7 +42,9 @@ export class SoundService {
       } else {
         sound = this.soundRepository.create({ name, categoryId, guildId });
       }
-      await this.storageService.saveFile(sound.uuid, bSound);
+      // await this.storageService.saveFile(sound.uuid, bSound);
+      await this.saveToOpus(bSound, sound.uuid);
+
       return await this.soundRepository.save(sound);
     } catch (e) {
       if (e.code === 11000) {
@@ -82,5 +88,26 @@ export class SoundService {
     }
     await this.storageService.removeFile(sound.uuid);
     return await this.soundRepository.remove(sound);
+  }
+
+  private async saveToOpus(buffer: Buffer, uuid: string): Promise<void> {
+
+    await this.storageService.saveFile('tmp/' + uuid, buffer);
+
+    await new Promise((resolve, reject) => {
+      FFmpeg({ source: './uploads/tmp/' + uuid })
+        .audioBitrate(128)
+        .withNoVideo()
+        .toFormat('opus')
+        .save(this.storageService.getUploadDir() + '/' + uuid)
+        .on('error', (err) => {
+          reject(err);
+        })
+        .on('end', () => {
+          resolve();
+        });
+    });
+
+    await this.storageService.removeFile('tmp/' + uuid);
   }
 }

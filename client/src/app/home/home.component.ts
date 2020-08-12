@@ -7,8 +7,9 @@ import { Guild } from '../models/guild';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { AddBotToGuildDialogComponent } from '../guilds/dialogs/add-bot-to-guild-dialog/add-bot-to-guild-dialog.component';
 import { BotService } from '../bot/bot.service';
+import { environment } from '../../environments/environment';
+import * as querystring from 'querystring';
 
 @Component({
   selector: 'app-home',
@@ -17,7 +18,7 @@ import { BotService } from '../bot/bot.service';
 })
 export class HomeComponent implements OnInit {
 
-  public connectedUser: User = { id: BigInt(169143950203027456), username: 'Un Cacatoès', avatar: '91f29163d9ef4eb856a45a25b9bc8523.png' };
+  public connectedUser: User;
   public search: string;
   public guilds: Guild[];
   public selectedGuild: Guild;
@@ -36,7 +37,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     this.botService.getState().subscribe(s => console.log(s));
-    // this.authService.getConnectedUser().subscribe(user => this.connectedUser = user);
+    this.authService.getConnectedUser().subscribe(user => this.connectedUser = user);
     this.guildService.getAvailableGuilds().subscribe(guilds => {
       this.guilds = guilds;
     });
@@ -81,7 +82,12 @@ export class HomeComponent implements OnInit {
   }
 
   public addBotToGuild(): void {
-    this.dialog.open(AddBotToGuildDialogComponent);
+    window.open(`${environment.discord.api}?${querystring.encode({
+      client_id: environment.discord.clientId,
+      permissions: environment.discord.permissions,
+      redirect_uri: location.href,
+      scope: environment.discord.scope,
+    })}`);
   }
 
   public isLinkSelected(route: string): boolean {

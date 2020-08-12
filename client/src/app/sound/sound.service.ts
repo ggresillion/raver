@@ -13,6 +13,7 @@ import { map, flatMap, mergeMap, first } from 'rxjs/operators';
 })
 export class SoundService {
 
+  private sounds: Sound[] = [];
   private soundsSubject = new BehaviorSubject<Sound[]>([]);
   private selectedGuild: Guild;
 
@@ -30,6 +31,7 @@ export class SoundService {
   public refreshSounds() {
     this.http.get<Sound[]>(`${environment.api}/sounds?guildId=${this.selectedGuild.id}`)
       .subscribe(sounds => {
+        this.sounds = sounds;
         this.soundsSubject.next(sounds);
       });
   }
@@ -85,6 +87,6 @@ export class SoundService {
   }
 
   public setSearchString(search: string) {
-    this.soundsSubject.next(this.soundsSubject.value.filter(song => song.name.toLowerCase().includes(search.toLowerCase())));
+    this.soundsSubject.next(this.sounds.filter(song => song.name.toLowerCase().includes(search.toLowerCase())));
   }
 }
