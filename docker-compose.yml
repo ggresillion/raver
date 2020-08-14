@@ -2,7 +2,7 @@ version: '3'
 services:
 
   api:
-    build: .
+    image: discordsoundboard_api:latest
     volumes:
       - uploads-volume:/uploads
     environment:
@@ -12,7 +12,7 @@ services:
       - NODE_ENV=production
 
   postgres:
-    image: postgres:11
+    image: postgres:12-alpine
     environment:
       POSTGRES_DB: 'dsb'
       POSTGRES_USER: 'dsb'
@@ -24,8 +24,8 @@ services:
     ports:
       - '80:80'
 
-  front:
-    build: client/
+  client:
+    image: discordsoundboard_client:latest
 
 volumes:
   uploads-volume:
