@@ -14,20 +14,17 @@ import { YoutubeModule } from './youtube/youtube.module';
 import { GuildModule } from './guild/guild.module';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: "postgres",
-      host: "localhost",
-      port: 5432,
-      database: "dsb",
-      username: "dsb",
-      password: "dsb",
-      autoLoadEntities: true
-    }),
     ConfigModule.forRoot({
       load: [configuration],
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => config.get('database'),
+      inject: [ConfigService],
     }),
     BotModule,
     SoundModule,
