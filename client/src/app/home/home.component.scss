@@ -66,55 +66,65 @@ mat-drawer {
       }
   }
 
-  .guilds {
-    padding: 16px;
-    overflow-y: auto;
+  .side-bottom {
+    padding: 12px;
 
-    .selected {
-      background-color: $primary;
-      color: white !important;
+    .bot-join {
+      color: #727272;
+      height: 76px;
+      margin-bottom: 16px;
+      font-size: 18px;
     }
 
-    .guild {
-      padding: 12px;
-      margin-bottom: 8px;
-      cursor: pointer;
-      color: #727272;
-      border-radius: 4px;
+    .guilds {
+      overflow-y: auto;
 
-      &.add {
-        margin-top: auto;
-      }
-
-      &.disabled {
-        background-color: rgba(grey, 0.2);
-      }
-
-      &:hover {
+      .selected {
         background-color: $primary;
-        color: white;
+        color: white !important;
       }
 
-      .name {
-        font-size: 18px;
-      }
+      .guild {
+        padding: 12px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        color: #727272;
+        border-radius: 4px;
 
-      .guild-icon {
-        width: 52px;
-        min-width: 52px;
-        height: 52px;
-        min-height: 52px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 24px;
-        background-color: grey;
-      }
+        &.add {
+          margin-top: auto;
+        }
 
-      mat-icon {
-        color: $green;
+        &.disabled {
+          background-color: rgba(grey, 0.2);
+        }
+
+        &:hover {
+          background-color: $primary;
+          color: white;
+        }
+
+        .name {
+          font-size: 18px;
+        }
+
+        .guild-icon {
+          width: 52px;
+          min-width: 52px;
+          height: 52px;
+          min-height: 52px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-size: 24px;
+          background-color: grey;
+        }
+
+        mat-icon {
+          color: $green;
+        }
       }
     }
   }

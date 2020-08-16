@@ -5,5 +5,5 @@ export const ConnectedUser: () => ParameterDecorator = createParamDecorator((arg
   if (!user) {
     throw new UnauthorizedException();
   }
-  return user;
+  return JSON.parse(user);
 });

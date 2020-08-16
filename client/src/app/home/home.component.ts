@@ -6,7 +6,6 @@ import { GuildsService } from '../guilds/guilds.service';
 import { Guild } from '../models/guild';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
 import { BotService } from '../bot/bot.service';
 import { environment } from '../../environments/environment';
 import * as querystring from 'querystring';
@@ -30,7 +29,6 @@ export class HomeComponent implements OnInit {
     private readonly guildService: GuildsService,
     private readonly location: Location,
     private readonly router: Router,
-    private readonly dialog: MatDialog,
     private readonly botService: BotService,
   ) {
   }
@@ -100,5 +98,9 @@ export class HomeComponent implements OnInit {
 
   public disconnect() {
     this.authService.logout();
+  }
+
+  public joinMyChannel(): void {
+    this.botService.joinMyChannel().subscribe(() => { });
   }
 }

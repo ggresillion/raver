@@ -45,24 +45,27 @@
         </div>
         <!-- <app-bot-status></app-bot-status> -->
       </div>
-      <div class="guilds" fxFlex fxLayout="column">
-        <h2>Guilds</h2>
-        <mat-spinner *ngIf="!guilds" fxFlexAlign="center"></mat-spinner>
-        <div *ngIf="guilds" class="guilds-content" fxLayout="column" fxFlex>
-          <div *ngFor="let guild of getGuilds()" class="guild" fxLayout="row" fxLayoutAlign="start center"
-            fxLayoutGap="16px" [ngClass]="{'selected' : (this.selectedGuild && guild.id === this.selectedGuild.id)}"
-            (click)="selectGuild(guild)">
-            <img *ngIf="guild.icon" class="guild-icon"
-              [src]="'https://cdn.discordapp.com/icons/' + guild.id + '/' + guild.icon" alt="guild" />
-            <div *ngIf="!guild.icon" class="guild-icon" [style.background-color]="stringToRGB(guild.name)">
-              <span>{{guild.name.charAt(0).toUpperCase()}}</span>
+      <div class="side-bottom"  fxFlex fxLayout="column">
+        <button class="bot-join" mat-stroked-button (click)="joinMyChannel()"><mat-icon>record_voice_over</mat-icon> Join my channel</button>
+        <div class="guilds" fxFlex fxLayout="column">
+          <h2>Guilds</h2>
+          <mat-spinner *ngIf="!guilds" fxFlexAlign="center"></mat-spinner>
+          <div *ngIf="guilds" class="guilds-content" fxLayout="column" fxFlex>
+            <div *ngFor="let guild of getGuilds()" class="guild" fxLayout="row" fxLayoutAlign="start center"
+              fxLayoutGap="16px" [ngClass]="{'selected' : (this.selectedGuild && guild.id === this.selectedGuild.id)}"
+              (click)="selectGuild(guild)">
+              <img *ngIf="guild.icon" class="guild-icon"
+                [src]="'https://cdn.discordapp.com/icons/' + guild.id + '/' + guild.icon" alt="guild" />
+              <div *ngIf="!guild.icon" class="guild-icon" [style.background-color]="stringToRGB(guild.name)">
+                <span>{{guild.name.charAt(0).toUpperCase()}}</span>
+              </div>
+              <span class="name" fxFlex>{{guild.name}}</span>
             </div>
-            <span class="name" fxFlex>{{guild.name}}</span>
-          </div>
-          <div class="guild add" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px"
-            (click)="addBotToGuild()">
-            <mat-icon class="guild-icon" [style.background-color]="'green'">add</mat-icon>
-            <span class="name" fxFlex>Add to your server</span>
+            <div class="guild add" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="16px"
+              (click)="addBotToGuild()">
+              <mat-icon class="guild-icon" [style.background-color]="'green'">add</mat-icon>
+              <span class="name" fxFlex>Add to your server</span>
+            </div>
           </div>
         </div>
       </div>

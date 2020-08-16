@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnApplicationShutdown, BadRequestException } from '@nestjs/common';
-import { Client, Message, StreamDispatcher } from 'discord.js';
+import { Client, Message, StreamDispatcher, VoiceChannel, GuildMember, Snowflake, Collection } from 'discord.js';
 import { Command } from './command.enum';
 import { StorageService } from '../storage/storage.service';
 import { BotGateway } from './bot.gateway';
@@ -120,6 +120,17 @@ export class BotService implements OnApplicationShutdown {
     });
   }
 
+  public async joinMyChannel(user: UserDTO): Promise<void> {
+    for (let channel of this.client.channels.cache.array()
+      .filter(c => c instanceof VoiceChannel)) {
+      const members = <Collection<Snowflake, GuildMember>>channel['members'];
+      if (members.array().find(m => m.id === user.id)) {
+        await this.joinChannel(<VoiceChannel>channel);
+        return;
+      }
+    }
+  }
+
   private botStatusUpdate(status: BotStatus): void {
     this.logger.log(`Bot status: ${status}`);
     this.onStatusChangeListeners.forEach(cb => cb(status));
@@ -173,6 +184,14 @@ export class BotService implements OnApplicationShutdown {
   private async onJoinCommand(message: Message) {
     const channel = message.member.voice.channel;
     if (channel) {
+      await this.joinChannel(channel);
+    } else {
+      await message.reply('You need to join a voice channel first!');
+    }
+  }
+
+  private async joinChannel(channel: VoiceChannel): Promise<void> {
+    if (channel) {
       try {
         await channel.join();
         this.logger.log(`Bot connected in channel ${channel.name} (${channel.id})`);
@@ -180,8 +199,6 @@ export class BotService implements OnApplicationShutdown {
       } catch (e) {
         this.logger.error(e.message);
       }
-    } else {
-      await message.reply('You need to join a voice channel first!');
     }
   }
 

@@ -36,7 +36,7 @@ export class YoutubeService {
     io(environment.websocket + 'player').on('connect', (socket) => {
       console.log(socket)
       this.socket = socket;
-      this.joinRooms();
+      this.joinChannels();
       this.bindToEvents();
     });
   }
@@ -106,7 +106,7 @@ export class YoutubeService {
     this.socket.on(ServerEvents.YT_PROGRESS_UPDATED, data => this.onProgressUpdate(data.progressSeconds));
   }
 
-  private joinRooms() {
+  private joinChannels() {
     this.guildsService.getAvailableGuilds().subscribe(guilds => {
       guilds.forEach(g => this.socket.join(g.id));
     });
