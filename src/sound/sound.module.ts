@@ -4,7 +4,7 @@ import {SoundController} from './sound.controller';
 import {StorageModule} from '../storage/storage.module';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import {Sound} from './entity/sound.entity';
-import {Image} from './entity/image.entity';
+import {Image} from '../image/entity/image.entity';
 import {AuthModule} from '../auth/auth.module';
 import {BotModule} from '../bot/bot.module';
 

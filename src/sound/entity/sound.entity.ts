@@ -1,7 +1,7 @@
 import {Column, Entity, Index, ManyToOne, ObjectID, OneToOne, PrimaryGeneratedColumn, RelationId} from 'typeorm';
 import {v4 as uuid} from 'uuid';
 import {Category} from '../../category/category.entity';
-import {Image} from './image.entity';
+import {Image} from '../../image/entity/image.entity';
 
 @Entity()
 export class Sound {
