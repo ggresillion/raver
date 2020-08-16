@@ -1,15 +1,13 @@
-import { Injectable, NotFoundException, OnApplicationShutdown, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { StorageService } from '../storage/storage.service';
 import { ObjectID, Repository } from 'typeorm';
 import { Sound } from './entity/sound.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BotService } from '../bot/bot.service';
 import { SoundDto } from './dto/sound.dto';
-import { Image } from './entity/image.entity';
-import { OpusEncoder } from 'node-opus';
+import { Image } from '../image/entity/image.entity';
 import * as FFmpeg from 'fluent-ffmpeg';
-import { Duplex } from 'stream';
-import uuid = require('uuid');
+import { Bucket } from '../storage/bucket.enum';
 
 @Injectable()
 export class SoundService {
@@ -38,11 +36,10 @@ export class SoundService {
       if (!!bImage) {
         const image = await this.imageRepository.save(this.imageRepository.create());
         sound = this.soundRepository.create({ name, categoryId, guildId, image });
-        await this.storageService.saveFile(image.uuid, bImage);
+        await this.storageService.saveFile(Bucket.IMAGES, image.uuid, bImage);
       } else {
         sound = this.soundRepository.create({ name, categoryId, guildId });
       }
-      // await this.storageService.saveFile(sound.uuid, bSound);
       await this.saveToOpus(bSound, sound.uuid);
 
       return await this.soundRepository.save(sound);
@@ -86,20 +83,20 @@ export class SoundService {
     if (!sound) {
       throw new NotFoundException('sound not found');
     }
-    await this.storageService.removeFile(sound.uuid);
+    await this.storageService.removeFile(Bucket.SOUNDS, sound.uuid);
     return await this.soundRepository.remove(sound);
   }
 
   private async saveToOpus(buffer: Buffer, uuid: string): Promise<void> {
 
-    await this.storageService.saveFile('tmp/' + uuid, buffer);
+    await this.storageService.saveFile(Bucket.TEMP, uuid, buffer);
 
     await new Promise((resolve, reject) => {
       FFmpeg({ source: './uploads/tmp/' + uuid })
         .audioBitrate(128)
         .withNoVideo()
         .toFormat('opus')
-        .save(this.storageService.getUploadDir() + '/' + uuid)
+        .save(this.storageService.getUploadDir(Bucket.SOUNDS) + '/' + uuid)
         .on('error', (err) => {
           reject(err);
         })
@@ -108,6 +105,6 @@ export class SoundService {
         });
     });
 
-    await this.storageService.removeFile('tmp/' + uuid);
+    await this.storageService.removeFile(Bucket.TEMP, uuid);
   }
 }
