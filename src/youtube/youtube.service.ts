@@ -13,7 +13,7 @@ import * as youtubeSearch from 'ytsr';
 import { Sound } from '../sound/entity/sound.entity';
 import { BotStatus } from '../bot/dto/bot-status.enum';
 import { UploadDto } from './dto/upload.dto';
-import { Bucket } from 'src/storage/bucket.enum';
+import { Bucket } from '../storage/bucket.enum';
 
 @Injectable()
 export class YoutubeService {
