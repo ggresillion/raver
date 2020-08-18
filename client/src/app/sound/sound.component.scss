@@ -35,6 +35,9 @@
     height: 150px;
     width: 150px;
     font-size: 18px;
+    mix-blend-mode: difference;
+    background-size: cover;
+    background-position: center;
 
     span {
       display: inline-block

@@ -9,6 +9,7 @@ import {Category} from '../models/category';
 import {animate, style, transition, trigger} from '@angular/animations';
 import {RenameCategoryDialogComponent} from './dialogs/rename-category-dialog/rename-category-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-sound',
@@ -29,6 +30,8 @@ import {MatDialog} from '@angular/material/dialog';
   ],
 })
 export class SoundComponent implements OnInit {
+
+  public readonly environment = environment;
 
   public sounds: Sound[] = [];
   public categories: Category[] = [];

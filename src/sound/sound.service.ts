@@ -23,14 +23,14 @@ export class SoundService {
   }
 
   public async getSounds(guildId: string): Promise<Sound[]> {
-    return this.soundRepository.find({ where: { guildId }, relations: ['category'] });
+    return this.soundRepository.find({ where: { guildId }, relations: ['category', 'image'] });
   }
 
   public async getSoundById(id: ObjectID): Promise<Sound> {
     return this.soundRepository.findOne(id, { relations: ['category'] });
   }
 
-  public async saveSound(name: string, categoryId: number, guildId: string, bSound: Buffer, bImage: Buffer) {
+  public async saveSound(name: string, categoryId: number, guildId: string, bSound: Buffer, bImage?: Buffer) {
     try {
       let sound;
       if (!!bImage) {

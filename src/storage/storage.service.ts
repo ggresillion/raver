@@ -1,10 +1,11 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs';
+import { Stream } from 'stream';
 
 @Injectable()
 export class StorageService implements OnModuleInit {
 
-  private readonly STORAGE_PATH = './uploads/';
+  private readonly STORAGE_PATH = './uploads';
   private readonly logger = new Logger(StorageService.name);
 
   public onModuleInit() {
@@ -14,17 +15,17 @@ export class StorageService implements OnModuleInit {
           this.logger.error(err);
           return;
         }
-        fs.mkdir(this.STORAGE_PATH + 'tmp', (err) => {
+        fs.mkdir(this.STORAGE_PATH + '/tmp', (err) => {
           if (err) {
             this.logger.error(err);
           }
         });
-        fs.mkdir(this.STORAGE_PATH + 'sounds', (err) => {
+        fs.mkdir(this.STORAGE_PATH + '/sounds', (err) => {
           if (err) {
             this.logger.error(err);
           }
         });
-        fs.mkdir(this.STORAGE_PATH + 'images', (err) => {
+        fs.mkdir(this.STORAGE_PATH + '/images', (err) => {
           if (err) {
             this.logger.error(err);
           }
@@ -33,12 +34,10 @@ export class StorageService implements OnModuleInit {
     }
   }
 
-  public async getFile(bucket: string, filename: string): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-      fs.readFile(`${this.STORAGE_PATH}/${bucket}/${filename}`, (err, data) => {
-        return err ? reject('Failed to read a file : ' + filename) : resolve(data);
-      });
-    });
+  public getFile(bucket: string, filename: string): Stream {
+      const stream = fs.createReadStream(`${this.STORAGE_PATH}/${bucket}/${filename}`);
+      stream.on('error', () => {});
+      return stream;
   }
 
   public async listFiles(bucket: string): Promise<string[]> {
@@ -64,7 +63,7 @@ export class StorageService implements OnModuleInit {
   }
 
   public getPathFromUUID(bucket:string, uuid: string) {
-    return `./${this.STORAGE_PATH}/${bucket}/${uuid}`;
+    return `${this.STORAGE_PATH}/${bucket}/${uuid}`;
   }
 
   public getUploadDir(bucket: string) {

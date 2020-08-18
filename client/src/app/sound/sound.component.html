@@ -18,7 +18,7 @@
       <div class="container">
         <ng-container *ngFor="let sound of getSoundsForCategory(category.id)">
           <button *ngIf="!isEditing" appDraggable [id]="sound.id" (click)="onSoundClick(sound.id)" class="sound-button"
-            mat-raised-button>
+            mat-raised-button [style.background-image]="sound.image ? 'url(' + environment.api + '/image/' + sound.image.uuid + ')' : 'none'">
             <span>{{sound.name}}</span>
           </button>
           <button *ngIf="isEditing" appDraggable [id]="sound.id" (click)="deleteSound(sound.id)"

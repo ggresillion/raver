@@ -7,7 +7,7 @@ export class ImageService {
 
     constructor(private readonly storageService: StorageService) { }
 
-    public async getImageByUUID(uuid: string) {
-        return this.storageService.getFile(Bucket.SOUNDS, uuid);
+    public getImageByUUID(uuid: string) {
+        return this.storageService.getFile(Bucket.IMAGES, uuid);
     }
 }

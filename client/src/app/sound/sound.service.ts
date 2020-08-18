@@ -40,7 +40,7 @@ export class SoundService {
     return this.http.post<void>(`${environment.api}/sounds/${id}/play`, this.selectedGuild.id);
   }
 
-  public uploadSound(name: string, categoryId: number, file: File): Observable<number> {
+  public uploadSound(name: string, categoryId: number, sound: File, image?: File): Observable<number> {
     const progress = new Subject<number>();
     const formData: FormData = new FormData();
     formData.append('name', name);
@@ -48,7 +48,10 @@ export class SoundService {
     if (categoryId) {
       formData.append('categoryId', categoryId.toString());
     }
-    formData.append('sound', file, file.name);
+    formData.append('sound', sound, sound.name);
+    if (!!image) {
+      formData.append('image', image);
+    }
 
     const req = new HttpRequest('POST', `${environment.api}/sounds`, formData, {
       reportProgress: true
