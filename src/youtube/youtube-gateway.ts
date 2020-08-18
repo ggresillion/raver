@@ -52,7 +52,6 @@ export class YoutubeGateway implements OnGatewayConnection {
 
   @SubscribeMessage(ClientEvents.ADD_TO_PLAYLIST)
   private addToPlaylistAction(client: Client, data: { track: TrackInfos }) {
-    console.log(data)
     this.logger.log(`Received event : ${ClientEvents.ADD_TO_PLAYLIST} (${data.track.title})`);
     if (!!data.track) {
       this.addToPlaylistListeners.forEach(cb => cb(data, data.track));

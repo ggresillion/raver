@@ -6,8 +6,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BotService } from '../bot/bot.service';
 import { SoundDto } from './dto/sound.dto';
 import { Image } from '../image/entity/image.entity';
-import * as FFmpeg from 'fluent-ffmpeg';
+import * as ffmpeg from 'fluent-ffmpeg';
 import { Bucket } from '../storage/bucket.enum';
+import { Readable } from 'stream';
 
 @Injectable()
 export class SoundService {
@@ -89,10 +90,15 @@ export class SoundService {
 
   private async saveToOpus(buffer: Buffer, uuid: string): Promise<void> {
 
-    await this.storageService.saveFile(Bucket.TEMP, uuid, buffer);
+
+    const readable = new Readable();
+    readable._read = () => { };
+    readable.push(buffer);
+    readable.push(null);
 
     await new Promise((resolve, reject) => {
-      FFmpeg({ source: './uploads/tmp/' + uuid })
+      ffmpeg(readable)
+        .audioBitrate(128)
         .audioBitrate(128)
         .withNoVideo()
         .toFormat('opus')
@@ -104,7 +110,5 @@ export class SoundService {
           resolve();
         });
     });
-
-    await this.storageService.removeFile(Bucket.TEMP, uuid);
   }
 }
