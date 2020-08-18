@@ -1,4 +1,4 @@
-import {Column, Entity, Index, ManyToOne, ObjectID, OneToOne, PrimaryGeneratedColumn, RelationId} from 'typeorm';
+import {Column, Entity, Index, ManyToOne, ObjectID, OneToOne, PrimaryGeneratedColumn, RelationId, JoinColumn} from 'typeorm';
 import {v4 as uuid} from 'uuid';
 import {Category} from '../../category/category.entity';
 import {Image} from '../../image/entity/image.entity';
@@ -18,8 +18,12 @@ export class Sound {
   @ManyToOne(() => Category, {onDelete: 'SET NULL'})
   public category: Category;
 
-  @OneToOne(() => Image, {onDelete: 'CASCADE'})
+  @OneToOne(() => Image)
+  @JoinColumn({name: 'imageId'})
   public image: Image;
+
+  @Column({nullable: true})
+  public imageId: number | null;
 
   @Column({nullable: true})
   public categoryId: number | null;
