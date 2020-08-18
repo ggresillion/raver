@@ -10,6 +10,7 @@ import { Socket } from 'socket.io';
 import { TrackInfos } from './model/track-infos';
 import { PlayerState } from './model/player-state';
 import { GuildsService } from '../guilds/guilds.service';
+import { first } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -32,9 +33,8 @@ export class YoutubeService {
     private http: HttpClient,
     private guildsService: GuildsService
   ) {
-    this.guildsService.getSelectedGuild().subscribe(g => this.currentGuild = g);
+    this.guildsService.getSelectedGuild().pipe(first()).subscribe(g => this.currentGuild = g);
     io(environment.websocket + 'player').on('connect', (socket) => {
-      console.log(socket)
       this.socket = socket;
       this.joinChannels();
       this.bindToEvents();

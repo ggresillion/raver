@@ -40,7 +40,7 @@ export class SoundComponent implements OnInit {
   constructor(
     private readonly soundService: SoundService,
     private readonly categoryService: CategoryService,
-    public readonly dialog: MatDialog,
+    public readonly dialog: MatDialog
   ) {
   }
 
@@ -91,9 +91,9 @@ export class SoundComponent implements OnInit {
   }
 
   private fetchSounds() {
-    this.categoryService.getCategories().subscribe(categories => {
-      this.categories = categories;
-      this.soundService.getSounds().subscribe(sounds => this.sounds = sounds);
+    this.categoryService.getCategories().subscribe(categories => this.categories = categories);
+    this.soundService.getSounds().subscribe(sounds => {
+      this.sounds = sounds;
     });
   }
 

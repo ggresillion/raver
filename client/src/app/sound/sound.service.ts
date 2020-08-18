@@ -15,58 +15,61 @@ export class SoundService {
 
   private sounds: Sound[] = [];
   private soundsSubject = new BehaviorSubject<Sound[]>([]);
-  private selectedGuild: Guild;
 
   constructor(private http: HttpClient,
     private guildService: GuildsService) {
-    this.guildService.getSelectedGuild()
-      .subscribe(guild => this.selectedGuild = guild);
+      this.refreshSounds();
   }
 
   public getSounds(): Observable<Sound[]> {
-    this.refreshSounds();
     return this.soundsSubject.asObservable();
   }
 
   public refreshSounds() {
-    this.http.get<Sound[]>(`${environment.api}/sounds?guildId=${this.selectedGuild.id}`)
-      .subscribe(sounds => {
-        this.sounds = sounds;
-        this.soundsSubject.next(sounds);
-      });
+    return this.guildService.getSelectedGuild().subscribe(guild => {
+      return this.http.get<Sound[]>(`${environment.api}/sounds?guildId=${guild.id}`)
+        .subscribe(sounds => {
+          this.sounds = sounds;
+          this.soundsSubject.next(sounds);
+        });
+    });
   }
 
   public playSound(id: number): Observable<void> {
-    return this.http.post<void>(`${environment.api}/sounds/${id}/play`, this.selectedGuild.id);
+    return this.guildService.getSelectedGuild().pipe(first()).pipe(flatMap(guild => {
+      return this.http.post<void>(`${environment.api}/sounds/${id}/play`, guild.id);
+    }));
   }
 
   public uploadSound(name: string, categoryId: number, sound: File, image?: File): Observable<number> {
-    const progress = new Subject<number>();
-    const formData: FormData = new FormData();
-    formData.append('name', name);
-    formData.append('guildId', this.selectedGuild.id.toString());
-    if (categoryId) {
-      formData.append('categoryId', categoryId.toString());
-    }
-    formData.append('sound', sound, sound.name);
-    if (!!image) {
-      formData.append('image', image);
-    }
-
-    const req = new HttpRequest('POST', `${environment.api}/sounds`, formData, {
-      reportProgress: true
-    });
-
-    this.http.request(req).subscribe(event => {
-      if (event.type === HttpEventType.UploadProgress) {
-        const percentDone = Math.round(100 * event.loaded / event.total);
-        progress.next(percentDone);
-      } else if (event.type === 3) {
-        progress.complete();
+    return this.guildService.getSelectedGuild().pipe(first()).pipe(flatMap(guild => {
+      const progress = new Subject<number>();
+      const formData: FormData = new FormData();
+      formData.append('name', name);
+      formData.append('guildId', guild.id.toString());
+      if (categoryId) {
+        formData.append('categoryId', categoryId.toString());
       }
-    });
+      formData.append('sound', sound, sound.name);
+      if (!!image) {
+        formData.append('image', image);
+      }
 
-    return progress.asObservable();
+      const req = new HttpRequest('POST', `${environment.api}/sounds`, formData, {
+        reportProgress: true
+      });
+
+      this.http.request(req).subscribe(event => {
+        if (event.type === HttpEventType.UploadProgress) {
+          const percentDone = Math.round(100 * event.loaded / event.total);
+          progress.next(percentDone);
+        } else if (event.type === 3) {
+          progress.complete();
+        }
+      });
+
+      return progress.asObservable();
+    }));
   }
 
   public searchYoutube(videoURL: string) {
@@ -74,8 +77,7 @@ export class SoundService {
   }
 
   public uploadFromYoutube(url: string, categoryId: number, name: string): Observable<Sound> {
-    return this.guildService.getSelectedGuild().pipe(mergeMap(guild => {
-      console.log(guild)
+    return this.guildService.getSelectedGuild().pipe(first()).pipe(mergeMap(guild => {
       return this.http.post<Sound>(`${environment.api}/youtube/upload`,
         { url, name, categoryId, guildId: guild.id });
     }));

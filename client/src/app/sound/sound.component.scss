@@ -22,28 +22,63 @@
 .container {
   display: grid;
   grid-template-columns: repeat(auto-fill, 200px);
+  margin: 24px;
 
-  & * {
-    margin: 12px;
+  & > * {
+    margin: 24px;
   }
 
   .sound-button {
-    white-space: normal;
-    z-index: 999;
-    word-break: break-word;
-    justify-content: center;
+    display: inline-block;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 4px;
+    box-shadow: 0 8px 0 #00000036, 0 10px 15px rgba(0,0,0,.35);
+    transition: box-shadow 0.1s ease-in-out;
     height: 150px;
     width: 150px;
-    font-size: 18px;
-    mix-blend-mode: difference;
-    background-size: cover;
-    background-position: center;
 
-    span {
-      display: inline-block
+    & div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      background: white;
+      user-select: none;
+      color: grey;
+      border-radius: 4px;
+      transition: transform 0.1s ease-in-out;  
+      height: 100%;
+      width: 100%;
+      background-size: cover;
+      background-position: center;
     }
 
-    &.sound-button-editing {
+    & div span {
+      font-family: 'bebas-neue', 'arial', sans-serif;
+      text-align: center;
+      word-break: break-word;
+      line-height: 28px;
+
+      &.black {
+        color: black;
+        text-shadow: 0 -1px 1px white;
+      }
+      &.white {
+        color: #eff6ec;
+        text-shadow: 0 -1px 1px black;
+      }
+    }
+
+    &:active {
+      box-shadow: 0 8px 0 grey, 0 7px 10px rgba(0,0,0,.25);
+     }
+
+     &:active div {
+      transform: translateY(4px);
+    }
+
+    &.editing {
       position: relative;
 
       .remove-icon {
