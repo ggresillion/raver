@@ -13,6 +13,7 @@ import * as youtubeSearch from 'ytsr';
 import { Sound } from '../sound/entity/sound.entity';
 import { BotStatus } from '../bot/dto/bot-status.enum';
 import { UploadDto } from './dto/upload.dto';
+import { Bucket } from 'src/storage/bucket.enum';
 
 @Injectable()
 export class YoutubeService {
@@ -68,7 +69,7 @@ export class YoutubeService {
         .audioBitrate(128)
         .withNoVideo()
         .toFormat('opus')
-        .save(this.storageService.getUploadDir() + '/' + sound.uuid)
+        .save(this.storageService.getUploadDir(Bucket.SOUNDS) + '/' + sound.uuid)
         .on('end', () => {
           resolve(this.soundService.saveSoundEntity(sound));
         });
