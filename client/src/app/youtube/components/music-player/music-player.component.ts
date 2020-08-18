@@ -104,7 +104,6 @@ export class MusicPlayerComponent implements OnInit {
   }
 
   selectTrack(index: number): void {
-    console.log('selectTrack(index: number): void: ' + index);
     this.playlistService.selectATrack(index);
     setTimeout(() => {
       this.player.nativeElement.play();

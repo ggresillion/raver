@@ -1,17 +1,38 @@
 /* You can add global styles to this file, and also import other style files */
 
+@font-face {
+  font-family: bebas;
+  src: url(assets/fonts/Bebas-Regular.otf) format("opentype");
+}
+
+@font-face {
+  font-family: bebas-neue;
+  src: url(assets/fonts/BebasNeue-Regular.otf) format("opentype");
+}
+
+@font-face {
+  font-family: roboto-medium;
+  src: url(assets/fonts/Roboto-Medium.ttf) format("opentype");
+}
+
+@font-face {
+  font-family: comfortaa;
+  src: url(assets/fonts/Comfortaa-Regular.ttf) format("opentype");
+}
+
 html, body {
   height: 100%;
 }
 
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
 @import '~@angular/material/theming';
 
-@include mat-core();
+$custom-typography: mat-typography-config($font-family: 'comfortaa, sans-serif;');
+
+@include mat-core($custom-typography);
 
 $app-primary: mat-palette($mat-light-blue);
 $app-accent: mat-palette($mat-deep-purple, A200, A100, A400);

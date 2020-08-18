@@ -9,6 +9,7 @@ import { GuildDTO } from '../guild/dto/guild.dto';
 import { BotStateDTO } from './dto/bot-state.dto';
 import { BotStatus } from './dto/bot-status.enum';
 import { createReadStream } from 'fs';
+import { Bucket } from '../storage/bucket.enum';
 
 @Injectable()
 export class BotService implements OnApplicationShutdown {
@@ -38,7 +39,7 @@ export class BotService implements OnApplicationShutdown {
     if (!connection) {
       throw new BadRequestException('guild id not found');
     }
-    const path = this.storageService.getPathFromUUID(uuid);
+    const path = this.storageService.getPathFromUUID(Bucket.SOUNDS, uuid);
     this.dispatcher = connection.play(createReadStream(path), {
       type: 'ogg/opus'
     });

@@ -1,15 +1,14 @@
-import { Injectable, NotFoundException, OnApplicationShutdown, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { StorageService } from '../storage/storage.service';
 import { ObjectID, Repository } from 'typeorm';
 import { Sound } from './entity/sound.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BotService } from '../bot/bot.service';
 import { SoundDto } from './dto/sound.dto';
-import { Image } from './entity/image.entity';
-import { OpusEncoder } from 'node-opus';
-import * as FFmpeg from 'fluent-ffmpeg';
-import { Duplex } from 'stream';
-import uuid = require('uuid');
+import { Image } from '../image/entity/image.entity';
+import * as ffmpeg from 'fluent-ffmpeg';
+import { Bucket } from '../storage/bucket.enum';
+import { Readable } from 'stream';
 
 @Injectable()
 export class SoundService {
@@ -25,24 +24,23 @@ export class SoundService {
   }
 
   public async getSounds(guildId: string): Promise<Sound[]> {
-    return this.soundRepository.find({ where: { guildId }, relations: ['category'] });
+    return this.soundRepository.find({ where: { guildId }, relations: ['category', 'image'] });
   }
 
   public async getSoundById(id: ObjectID): Promise<Sound> {
     return this.soundRepository.findOne(id, { relations: ['category'] });
   }
 
-  public async saveSound(name: string, categoryId: number, guildId: string, bSound: Buffer, bImage: Buffer) {
+  public async saveSound(name: string, categoryId: number, guildId: string, bSound: Buffer, bImage?: Buffer) {
     try {
       let sound;
       if (!!bImage) {
         const image = await this.imageRepository.save(this.imageRepository.create());
         sound = this.soundRepository.create({ name, categoryId, guildId, image });
-        await this.storageService.saveFile(image.uuid, bImage);
+        await this.storageService.saveFile(Bucket.IMAGES, image.uuid, bImage);
       } else {
         sound = this.soundRepository.create({ name, categoryId, guildId });
       }
-      // await this.storageService.saveFile(sound.uuid, bSound);
       await this.saveToOpus(bSound, sound.uuid);
 
       return await this.soundRepository.save(sound);
@@ -86,20 +84,25 @@ export class SoundService {
     if (!sound) {
       throw new NotFoundException('sound not found');
     }
-    await this.storageService.removeFile(sound.uuid);
+    await this.storageService.removeFile(Bucket.SOUNDS, sound.uuid);
     return await this.soundRepository.remove(sound);
   }
 
   private async saveToOpus(buffer: Buffer, uuid: string): Promise<void> {
 
-    await this.storageService.saveFile('tmp/' + uuid, buffer);
+
+    const readable = new Readable();
+    readable._read = () => { };
+    readable.push(buffer);
+    readable.push(null);
 
     await new Promise((resolve, reject) => {
-      FFmpeg({ source: './uploads/tmp/' + uuid })
+      ffmpeg(readable)
+        .audioBitrate(128)
         .audioBitrate(128)
         .withNoVideo()
         .toFormat('opus')
-        .save(this.storageService.getUploadDir() + '/' + uuid)
+        .save(this.storageService.getUploadDir(Bucket.SOUNDS) + '/' + uuid)
         .on('error', (err) => {
           reject(err);
         })
@@ -107,7 +110,5 @@ export class SoundService {
           resolve();
         });
     });
-
-    await this.storageService.removeFile('tmp/' + uuid);
   }
 }

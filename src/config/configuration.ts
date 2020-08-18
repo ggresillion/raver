@@ -14,7 +14,8 @@ const config = {
       database: "dsb",
       username: "dsb",
       password: "dsb",
-      autoLoadEntities: true
+      autoLoadEntities: true,
+      synchronize: true
     }
   },
   production: {

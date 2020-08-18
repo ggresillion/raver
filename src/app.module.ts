@@ -15,6 +15,7 @@ import { GuildModule } from './guild/guild.module';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigService } from '@nestjs/config';
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ConfigService } from '@nestjs/config';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'client'),
     }),
+    ImageModule,
   ],
   controllers: [AppController],
   providers: [],

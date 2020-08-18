@@ -9,6 +9,7 @@ import {Category} from '../models/category';
 import {animate, style, transition, trigger} from '@angular/animations';
 import {RenameCategoryDialogComponent} from './dialogs/rename-category-dialog/rename-category-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-sound',
@@ -30,6 +31,8 @@ import {MatDialog} from '@angular/material/dialog';
 })
 export class SoundComponent implements OnInit {
 
+  public readonly environment = environment;
+
   public sounds: Sound[] = [];
   public categories: Category[] = [];
   public isEditing = false;
@@ -37,7 +40,7 @@ export class SoundComponent implements OnInit {
   constructor(
     private readonly soundService: SoundService,
     private readonly categoryService: CategoryService,
-    public readonly dialog: MatDialog,
+    public readonly dialog: MatDialog
   ) {
   }
 
@@ -88,9 +91,9 @@ export class SoundComponent implements OnInit {
   }
 
   private fetchSounds() {
-    this.categoryService.getCategories().subscribe(categories => {
-      this.categories = categories;
-      this.soundService.getSounds().subscribe(sounds => this.sounds = sounds);
+    this.categoryService.getCategories().subscribe(categories => this.categories = categories);
+    this.soundService.getSounds().subscribe(sounds => {
+      this.sounds = sounds;
     });
   }
 

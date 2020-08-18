@@ -34,7 +34,6 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.botService.getState().subscribe(s => console.log(s));
     this.authService.getConnectedUser().subscribe(user => this.connectedUser = user);
     this.guildService.getAvailableGuilds().subscribe(guilds => {
       this.guilds = guilds;

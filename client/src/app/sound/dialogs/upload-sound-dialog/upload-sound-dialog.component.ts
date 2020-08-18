@@ -9,8 +9,11 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 })
 export class UploadSoundDialogComponent {
 
-  @ViewChild('file') fileInput: ElementRef;
-  public name = '';
+  @ViewChild('sound') 
+  public soundInput: ElementRef;
+  @ViewChild('image') 
+  public imageInput: ElementRef;
+  public soundName = '';
   public uploadProgress;
 
   constructor(public dialogRef: MatDialogRef<UploadSoundDialogComponent>,
@@ -19,19 +22,20 @@ export class UploadSoundDialogComponent {
   }
 
   public upload() {
-    const file = this.fileInput.nativeElement.files[0];
-    this.uploadProgress = this.songService.uploadSound(this.name, this.data.categoryId, file);
+    const sound = this.soundInput.nativeElement.files[0];
+    const image = this.imageInput.nativeElement.files[0];
+    this.uploadProgress = this.songService.uploadSound(this.soundName, this.data.categoryId, sound, image);
     this.uploadProgress.subscribe(null, null, () => {
       this.dialogRef.close();
     });
   }
 
-  public onFileSelection(e) {
+  public onSoundSelection(e) {
     const file = e.target.files[0];
     if (!!file) {
-      this.name = file.name.split('.').slice(0, -1).join('.');
-      if (this.name.length > 30) {
-        this.name = this.name.slice(0, 30);
+      this.soundName = file.name.split('.').slice(0, -1).join('.');
+      if (this.soundName.length > 30) {
+        this.soundName = this.soundName.slice(0, 30);
       }
     }
   }
