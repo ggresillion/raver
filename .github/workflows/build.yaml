@@ -22,7 +22,7 @@ jobs:
         id: prepare
         run: |
           DOCKER_IMAGE=ggresillion/discordsoundboard_api
-          DOCKER_PLATFORMS=linux/amd64,linux/arm/v7
+          DOCKER_PLATFORMS=linux/arm/v7
           VERSION=latest
 
           if [[ $GITHUB_REF == refs/tags/* ]]; then
@@ -86,7 +86,7 @@ jobs:
         id: prepare
         run: |
           DOCKER_IMAGE=ggresillion/discordsoundboard_client
-          DOCKER_PLATFORMS=linux/amd64,linux/arm/v7
+          DOCKER_PLATFORMS=linux/arm/v7
           VERSION=latest
 
           if [[ $GITHUB_REF == refs/tags/* ]]; then
