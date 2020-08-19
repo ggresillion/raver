@@ -45,6 +45,7 @@ export class SoundComponent implements OnInit {
   }
 
   public ngOnInit() {
+    this.categoryService.getCategories().subscribe(categories => this.categories = categories);
     this.fetchSounds();
   }
 
@@ -91,7 +92,6 @@ export class SoundComponent implements OnInit {
   }
 
   private fetchSounds() {
-    this.categoryService.getCategories().subscribe(categories => this.categories = categories);
     this.soundService.getSounds().subscribe(sounds => {
       this.sounds = sounds;
     });

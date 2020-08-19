@@ -17,7 +17,8 @@
       </mat-toolbar>
       <div class="container">
         <ng-container *ngFor="let sound of getSoundsForCategory(category.id)">
-          <div class="sound-button" [class.editing]="isEditing" appDraggable [id]="sound.id" (click)="!isEditing ? onSoundClick(sound.id) : deleteSound(sound.id)">
+          <div class="sound-button" [class.editing]="isEditing" appDraggable [id]="sound.id"
+            (click)="!isEditing ? onSoundClick(sound.id) : deleteSound(sound.id)">
             <div
               [style.background-image]="sound.image ? 'url(' + environment.api + '/image/' + sound.image.uuid + ')' : 'none'">
               <span [class.white]="sound.image" [class.black]="!sound.image">{{sound.name}}</span>
@@ -40,13 +41,11 @@
         </mat-menu>
       </div>
     </mat-tab>
-    <mat-tab disabled>
-      <ng-template mat-tab-label>
-        <button (click)="openCreateCategoryDialog()" mat-icon-button>
-          <mat-icon style="color: green;">add_circle</mat-icon>
-        </button>
-      </ng-template>
-    </mat-tab>
   </mat-tab-group>
 </mat-card-content>
-<mat-slide-toggle [(ngModel)]="isEditing" id="edit-button" color="primary">Edit</mat-slide-toggle>
+<div class="tab-options">
+  <mat-slide-toggle [(ngModel)]="isEditing" id="edit-button" color="primary">Edit Mode</mat-slide-toggle>
+  <button mat-stroked-button (click)="openCreateCategoryDialog()">
+    <mat-icon style="color: #67b363;">add_circle</mat-icon> Create Category
+  </button>
+</div>

@@ -33,7 +33,7 @@ export class YoutubeService {
     private http: HttpClient,
     private guildsService: GuildsService
   ) {
-    this.guildsService.getSelectedGuild().pipe(first()).subscribe(g => this.currentGuild = g);
+    this.guildsService.getSelectedGuild().subscribe(g => this.currentGuild = g);
     io(environment.websocket + 'player').on('connect', (socket) => {
       this.socket = socket;
       this.joinChannels();

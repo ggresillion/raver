@@ -1,6 +1,6 @@
-import {Component, ElementRef, Inject, ViewChild} from '@angular/core';
-import {SoundService} from '../../sound.service';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
+import { SoundService } from '../../sound.service';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-upload-sound-dialog',
@@ -9,25 +9,28 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 })
 export class UploadSoundDialogComponent {
 
-  @ViewChild('sound') 
+  @ViewChild('sound')
   public soundInput: ElementRef;
-  @ViewChild('image') 
+  @ViewChild('image')
   public imageInput: ElementRef;
   public soundName = '';
   public uploadProgress;
 
   constructor(public dialogRef: MatDialogRef<UploadSoundDialogComponent>,
-              @Inject(MAT_DIALOG_DATA) public data: any,
-              private songService: SoundService) {
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private songService: SoundService) {
   }
 
   public upload() {
     const sound = this.soundInput.nativeElement.files[0];
     const image = this.imageInput.nativeElement.files[0];
-    this.uploadProgress = this.songService.uploadSound(this.soundName, this.data.categoryId, sound, image);
-    this.uploadProgress.subscribe(null, null, () => {
-      this.dialogRef.close();
-    });
+    this.songService.uploadSound(this.soundName, this.data.categoryId, sound, image)
+      .subscribe(
+        progress => this.uploadProgress = progress,
+        null,
+        () => {
+          this.dialogRef.close();
+        });;
   }
 
   public onSoundSelection(e) {

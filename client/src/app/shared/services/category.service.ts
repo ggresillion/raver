@@ -4,7 +4,7 @@ import { environment } from '../../../environments/environment';
 import { Category } from '../../models/category';
 import { Observable, ReplaySubject } from 'rxjs';
 import { GuildsService } from '../../guilds/guilds.service';
-import { flatMap, first } from 'rxjs/operators';
+import { flatMap, first, switchMap, tap } from 'rxjs/operators';
 
 @Injectable()
 export class CategoryService {
@@ -14,9 +14,7 @@ export class CategoryService {
   constructor(
     private http: HttpClient,
     private guildsService: GuildsService) {
-    this.guildsService.getSelectedGuild().subscribe(guild => {
-      this.fetchCategories();
-    });
+    this.fetchCategories();
   }
 
   public fetchCategories(): void {
@@ -31,18 +29,28 @@ export class CategoryService {
   }
 
   public createCategory(categoryName: string) {
-    return this.guildsService.getSelectedGuild().pipe(first()).pipe(flatMap(guild => {
-      return this.http.post(`${environment.api}/categories`, { name: categoryName, guildId: guild.id }, {
-        responseType: 'text'
-      });
-    }));
+    return this.guildsService.getSelectedGuild()
+      .pipe(switchMap(guild => {
+        return this.http.post(`${environment.api}/categories`, { name: categoryName, guildId: guild.id }, {
+          responseType: 'text'
+        });
+      }))
+      .pipe(tap(() => {
+        this.fetchCategories();
+      }));
   }
 
   public renameCategory(categoryId: number, name: string) {
-    return this.http.put(`${environment.api}/categories/${categoryId}`, { name });
+    return this.http.put(`${environment.api}/categories/${categoryId}`, { name })
+      .pipe(tap(() => {
+        this.fetchCategories();
+      }));
   }
 
   public deleteCategory(categoryId: number) {
-    return this.http.delete(`${environment.api}/categories/${categoryId}`);
+    return this.http.delete(`${environment.api}/categories/${categoryId}`)
+      .pipe(tap(() => {
+        this.fetchCategories();
+      }));
   }
 }
