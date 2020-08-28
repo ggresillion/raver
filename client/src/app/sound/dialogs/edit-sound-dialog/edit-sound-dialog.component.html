@@ -1,0 +1,30 @@
+<h1 mat-dialog-title>Edit a sound</h1>
+<mat-dialog-content [formGroup]="form" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="12px">
+
+    <div class="sound-button">
+        <div
+            [style.background-image]="imagePreview ? 'url(' + imagePreview + ')' : (sound.image ? 'url(' + environment.api + '/image/' + sound.image.uuid + ')' : 'null')">
+            <span [class.white]="imagePreview || sound.image"
+                [class.black]="!imagePreview && !sound.image">{{form.get('name').value}}</span>
+        </div>
+    </div>
+
+    <input (change)="onImageChange($event)" style="visibility: hidden" type="file" accept="image/*" #image>
+    <button (click)="image.click()" mat-raised-button>
+        <mat-icon>attach_file</mat-icon>
+        Choose an image
+    </button>
+    <span id="file-name">{{image.files && image.files.length > 0 ? image.files[0].name : null}}</span>
+    <mat-form-field>
+        <input matInput placeholder="Name" formControlName="name">
+    </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button mat-button color="warn" (click)="delete()">
+        <mat-icon>delete_outline</mat-icon> Delete
+    </button>
+    <div fxFlex fxLayout fxLayoutAlign="end">
+        <button mat-button mat-dialog-close>Cancel</button>
+        <button mat-button color="primary" (click)="save()">Save</button>
+    </div>
+</mat-dialog-actions>

@@ -17,11 +17,11 @@
       </mat-toolbar>
       <div class="container">
         <ng-container *ngFor="let sound of getSoundsForCategory(category.id)">
-          <div class="sound-button" [class.editing]="isEditing" appDraggable [id]="sound.id" (click)="!isEditing ? onSoundClick(sound.id) : deleteSound(sound.id)">
+          <div class="sound-button" [class.editing]="isEditing" appDraggable [id]="sound.id" (click)="!isEditing ? onSoundClick(sound.id) : editSound(sound.id)">
             <div
               [style.background-image]="sound.image ? 'url(' + environment.api + '/image/' + sound.image.uuid + ')' : 'none'">
               <span [class.white]="sound.image" [class.black]="!sound.image">{{sound.name}}</span>
-              <mat-icon *ngIf="isEditing" class="remove-icon">delete_outline</mat-icon>
+              <mat-icon *ngIf="isEditing">create</mat-icon>
             </div>
           </div>
         </ng-container>

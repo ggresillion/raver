@@ -1,40 +1,8 @@
-::ng-deep .mat-tab-header {
-  margin-right: 100px;
-}
-
-::ng-deep .mat-tab-body-content {
-  overflow: hidden !important;
-}
-
-#edit-button {
-  position: absolute;
-  top: 13px;
-  right: 12px;
-  z-index: 1;
-}
-
-.edit-container {
-  * {
-    margin: 0 12px 0 12px;
-  }
-}
-
-.container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 200px);
-  margin: 24px;
-
-  & > * {
-    margin: 24px;
-  }
-
-  .sound-button {
+.sound-button {
     display: inline-block;
     text-decoration: none;
-    cursor: pointer;
     border-radius: 4px;
     box-shadow: 0 8px 0 #00000036, 0 10px 15px rgba(0,0,0,.35);
-    transition: box-shadow 0.1s ease-in-out;
     height: 150px;
     width: 150px;
 
@@ -68,14 +36,6 @@
         color: #eff6ec;
         text-shadow: 0 -1px 1px black;
       }
-    }
-
-    &:active {
-      box-shadow: 0 8px 0 grey, 0 7px 10px rgba(0,0,0,.25);
-     }
-
-     &:active div {
-      transform: translateY(4px);
     }
 
     &.editing {
@@ -134,11 +94,3 @@
       }
     }
   }
-
-  .add-button {
-
-    mat-icon {
-      color: #67b363;
-    }
-  }
-}
