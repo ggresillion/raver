@@ -57,6 +57,14 @@ export class SoundController {
     return await this.soundService.editSound(id, soundData);
   }
 
+  @Put(':id/image')
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'image', maxCount: 1 },
+  ]))
+  public async editImage(@Param('id') id: number, @UploadedFiles() files): Promise<void> {
+    await this.soundService.editImage(id, files.image[0].buffer);
+  }
+
   @Post(':id/play')
   public async playSound(@Param('id') id: ObjectID) {
     return await this.soundService.playSound(id);
