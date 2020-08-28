@@ -61,6 +61,18 @@ export class SoundService {
     return await this.soundRepository.save(updatedSound);
   }
 
+  public async editImage(id: number, bImage: Buffer): Promise<void> {
+    const sound = await this.soundRepository.findOne(id, { relations: ['image'] });
+    if (sound.image) {
+      await this.storageService.saveFile(Bucket.IMAGES, sound.image.uuid, bImage);
+      return;
+    }
+    const image = await this.imageRepository.save(this.imageRepository.create());
+    sound.image = image;
+    await this.soundRepository.save(sound);
+    await this.storageService.saveFile(Bucket.IMAGES, image.uuid, bImage);
+  }
+
   public async playSound(id: ObjectID): Promise<Sound> {
     return this.getSoundById(id).then(sound => {
       if (!sound) {

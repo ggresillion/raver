@@ -1,47 +1,8 @@
-::ng-deep .mat-tab-header {
-  padding-right: 335px;
-}
-
-::ng-deep .mat-tab-body-content {
-  overflow: hidden !important;
-}
-
-.tab-options {
-  position: absolute;
-  top: 5px;
-  right: 8px;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  & > :not(:last-child) {
-    margin-right: 8px;
-  }
-}
-
-.edit-container {
-  * {
-    margin: 0 12px 0 12px;
-  }
-}
-
-.container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 200px);
-  margin: 24px;
-
-  & > * {
-    margin: 24px;
-  }
-
-  .sound-button {
+.sound-button {
     display: inline-block;
     text-decoration: none;
-    cursor: pointer;
     border-radius: 4px;
     box-shadow: 0 8px 0 #00000036, 0 10px 15px rgba(0,0,0,.35);
-    transition: box-shadow 0.1s ease-in-out;
     height: 150px;
     width: 150px;
 
@@ -75,14 +36,6 @@
         color: #eff6ec;
         text-shadow: 0 -1px 1px black;
       }
-    }
-
-    &:active {
-      box-shadow: 0 8px 0 grey, 0 7px 10px rgba(0,0,0,.25);
-     }
-
-     &:active div {
-      transform: translateY(4px);
     }
 
     &.editing {
@@ -141,11 +94,3 @@
       }
     }
   }
-
-  .add-button {
-
-    mat-icon {
-      color: #67b363;
-    }
-  }
-}

@@ -1,15 +1,16 @@
-import {Component, OnInit} from '@angular/core';
-import {Sound} from '../models/sound';
-import {SoundService} from './sound.service';
-import {UploadSoundDialogComponent} from './dialogs/upload-sound-dialog/upload-sound-dialog.component';
-import {AddFromYoutubeDialogComponent} from './dialogs/add-from-youtube-dialog/add-from-youtube-dialog.component';
-import {CreateCategoryDialogComponent} from './dialogs/create-category-dialog/create-category-dialog.component';
-import {CategoryService} from '../shared/services/category.service';
-import {Category} from '../models/category';
-import {animate, style, transition, trigger} from '@angular/animations';
-import {RenameCategoryDialogComponent} from './dialogs/rename-category-dialog/rename-category-dialog.component';
-import {MatDialog} from '@angular/material/dialog';
+import { Component, OnInit } from '@angular/core';
+import { Sound } from '../models/sound';
+import { SoundService } from './sound.service';
+import { UploadSoundDialogComponent } from './dialogs/upload-sound-dialog/upload-sound-dialog.component';
+import { AddFromYoutubeDialogComponent } from './dialogs/add-from-youtube-dialog/add-from-youtube-dialog.component';
+import { CreateCategoryDialogComponent } from './dialogs/create-category-dialog/create-category-dialog.component';
+import { CategoryService } from '../shared/services/category.service';
+import { Category } from '../models/category';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { RenameCategoryDialogComponent } from './dialogs/rename-category-dialog/rename-category-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 import { environment } from '../../environments/environment';
+import { EditSoundDialogComponent } from './dialogs/edit-sound-dialog/edit-sound-dialog.component';
 
 @Component({
   selector: 'app-sound',
@@ -18,13 +19,13 @@ import { environment } from '../../environments/environment';
   animations: [
     trigger('openClose', [
       transition(':enter', [
-        style({transform: 'translateY(-100%)'}),
+        style({ transform: 'translateY(-100%)' }),
         animate('200ms ease-out')
       ]),
       transition(':leave', [
-        style({transform: 'translateY(0)'}),
+        style({ transform: 'translateY(0)' }),
         animate('200ms ease-out',
-          style({transform: 'translateY(-100%)'}))
+          style({ transform: 'translateY(-100%)' }))
       ]),
     ]),
   ],
@@ -55,12 +56,12 @@ export class SoundComponent implements OnInit {
   }
 
   public uploadSound(categoryId: number) {
-    this.dialog.open(UploadSoundDialogComponent, {data: {categoryId}})
+    this.dialog.open(UploadSoundDialogComponent, { data: { categoryId } })
       .afterClosed().subscribe(() => this.refreshSounds());
   }
 
   public uploadFromYoutube(categoryId: number) {
-    this.dialog.open(AddFromYoutubeDialogComponent, {data: {categoryId}})
+    this.dialog.open(AddFromYoutubeDialogComponent, { data: { categoryId } })
       .afterClosed().subscribe(() => this.refreshSounds());
   }
 
@@ -76,13 +77,19 @@ export class SoundComponent implements OnInit {
     return this.sounds.filter(sound => sound.category && sound.category.id === categoryId);
   }
 
-  public deleteSound(soundId: number) {
-    return this.soundService.deleteSound(soundId)
-      .subscribe(() => this.refreshSounds());
+  public editSound(soundId: number) {
+    return this.dialog.open(EditSoundDialogComponent, {
+      data: this.sounds.find(s => s.id === soundId),
+      width: '500px'
+    }).afterClosed().subscribe(() => {
+      this.refreshSounds();
+      const i = this.sounds.findIndex(s => s.id === soundId);
+      this.sounds[i].image.uuid = this.sounds[i].image.uuid + new Date().toString();
+    });
   }
 
   public renameCategory(category: Category) {
-    return this.dialog.open(RenameCategoryDialogComponent, {data: category})
+    return this.dialog.open(RenameCategoryDialogComponent, { data: category })
       .afterClosed().subscribe(() => this.fetchSounds());
   }
 

@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpEventType, HttpRequest } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject, Observable, Subject, of } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, forkJoin } from 'rxjs';
 import { Sound } from '../models/sound';
 import { VideoInfos } from './model/video-infos';
 import { GuildsService } from '../guilds/guilds.service';
-import { switchMap, flatMap, take } from 'rxjs/operators';
+import { switchMap, flatMap, take, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -74,6 +74,16 @@ export class SoundService {
 
         return progress.asObservable();
       }));
+  }
+
+  public editSound(soundId: number, name: string, image?: File): Observable<Sound> {
+    const requests: Observable<any>[] = [this.http.put<Sound>(`${environment.api}/sounds/${soundId}`, { name })];
+    if (!!image) {
+      const formData: FormData = new FormData();
+      formData.append('image', image);
+      requests.push(this.http.put<void>(`${environment.api}/sounds/${soundId}/image`, formData));
+    }
+    return forkJoin(requests).pipe(map(res => res[0]));
   }
 
   public searchYoutube(videoURL: string) {
