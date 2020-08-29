@@ -6,7 +6,7 @@ import * as dotenv from 'dotenv';
 async function bootstrap() {
   dotenv.config();
   const app = await NestFactory.create(AppModule, {
-    logger: ['log', 'error', 'warn'],
+    logger: ['log', 'error', 'warn', 'debug'],
   });
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api');

@@ -1,21 +1,23 @@
-import {OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer} from '@nestjs/websockets';
-import {Client, Server, Socket} from 'socket.io';
-import {ClientEvents} from './dto/client-events.enum';
-import {TrackInfos} from './dto/track-infos';
-import {ServerEvents} from './dto/server-events.enum';
-import {YoutubeService} from './youtube.service';
-import {forwardRef, Inject, Logger} from '@nestjs/common';
-import {PlayerStatus} from './model/player-status';
-import {PlayerState} from './model/player-state';
+import { OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { Client, Server, Socket } from 'socket.io';
+import { ClientEvents } from './dto/client-events.enum';
+import { TrackInfos } from './dto/track-infos';
+import { ServerEvents } from './dto/server-events.enum';
+import { YoutubeService } from './youtube.service';
+import { forwardRef, Inject, Logger } from '@nestjs/common';
+import { PlayerStatus } from './model/player-status';
+import { PlayerState } from './model/player-state';
+import { Guild } from 'discord.js';
+import { Video } from 'ytsr';
 
-@WebSocketGateway({namespace: 'player'})
+@WebSocketGateway({ namespace: 'player' })
 export class YoutubeGateway implements OnGatewayConnection {
 
   private readonly logger = new Logger(YoutubeGateway.name);
 
   @WebSocketServer()
   private server: Server;
-  private addToPlaylistListeners = [];
+  private addToPlaylistListeners: ((guildId: string, track: TrackInfos) => void)[] = [];
 
   constructor(
     @Inject(forwardRef(() => YoutubeService))
@@ -24,26 +26,23 @@ export class YoutubeGateway implements OnGatewayConnection {
   }
 
   public handleConnection(client: Socket) {
-    client.emit(
-      ServerEvents.SYNC,
-      {state: this.youtubeService.getState()});
   }
 
   public sendStatusUpdate(guildId: string, status: PlayerStatus) {
-    this.server.to(guildId).emit(ServerEvents.STATUS_UPDATED, {status});
+    this.server.to(guildId).emit(ServerEvents.STATUS_UPDATED, { status });
   }
 
   public sendStateUpdate(guildId: string, state: PlayerState) {
     this.logger.log('Sending state update');
-    this.server.to(guildId).emit(ServerEvents.STATE_UPDATED, {state});
+    this.server.to(guildId).emit(ServerEvents.STATE_UPDATED, { state });
   }
 
-  public onAddToPlaylist(guildId: string, cb: (track: TrackInfos) => void) {
+  public onAddToPlaylist(cb: (guildId: string, track: Video) => void) {
     this.addToPlaylistListeners.push(cb);
   }
 
   public sendProgressUpdate(guildId: string, progressSeconds: number): void {
-    this.server.to(guildId).emit(ServerEvents.PROGRESS_UPDATED, {progressSeconds});
+    this.server.to(guildId).emit(ServerEvents.PROGRESS_UPDATED, { progressSeconds });
   }
 
   // public sendAddToPlaylist(track: TrackInfos) {
@@ -51,10 +50,11 @@ export class YoutubeGateway implements OnGatewayConnection {
   // }
 
   @SubscribeMessage(ClientEvents.ADD_TO_PLAYLIST)
-  private addToPlaylistAction(client: Client, data: { track: TrackInfos }) {
-    this.logger.log(`Received event : ${ClientEvents.ADD_TO_PLAYLIST} (${data.track.title})`);
+  private addToPlaylistAction(socket: Socket, data: { track: TrackInfos }) {
+    const guildId = this.getGuildId(socket);
+    this.logger.log(`Received event : ${ClientEvents.ADD_TO_PLAYLIST} (${guildId} - ${data.track.title})`);
     if (!!data.track) {
-      this.addToPlaylistListeners.forEach(cb => cb(data, data.track));
+      this.addToPlaylistListeners.forEach(cb => cb(guildId, data.track));
     }
   }
 
@@ -65,20 +65,37 @@ export class YoutubeGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage(ClientEvents.PLAY)
-  private playAction() {
-    this.logger.log(`Received event : ${ClientEvents.PLAY}`);
-    this.youtubeService.play("");
+  private playAction(socket: Socket) {
+    const guildId = this.getGuildId(socket);
+    this.logger.log(`Received event : ${ClientEvents.PLAY} (${guildId})`);
+    this.youtubeService.play(guildId);
   }
 
   @SubscribeMessage(ClientEvents.PAUSE)
-  private plauseAction() {
-    this.logger.log(`Received event : ${ClientEvents.PAUSE}`);
-    this.youtubeService.pause("");
+  private plauseAction(socket: Socket) {
+    const guildId = this.getGuildId(socket);
+    this.logger.log(`Received event : ${ClientEvents.PAUSE} (${guildId})`);
+    this.youtubeService.pause(guildId);
   }
 
   @SubscribeMessage(ClientEvents.NEXT)
-  private nextAction() {
-    this.logger.log(`Received event : ${ClientEvents.NEXT}`);
-    this.youtubeService.next("");
+  private nextAction(socket: Socket) {
+    const guildId = this.getGuildId(socket);
+    this.logger.log(`Received event : ${ClientEvents.NEXT} (${guildId})`);
+    this.youtubeService.next(guildId);
+  }
+
+  @SubscribeMessage(ClientEvents.JOIN_ROOM)
+  private joinRoom(socket: Socket, data: { guildId: string }) {
+    this.logger.log(`Received event : ${ClientEvents.JOIN_ROOM} (${data.guildId})`);
+    socket.leaveAll();
+    socket.join(data.guildId);
+    socket.emit(
+      ServerEvents.SYNC,
+      { state: this.youtubeService.getState(data.guildId) });
+  }
+
+  private getGuildId(socket: Socket): string {
+    return Object.keys(socket.rooms)[0];
   }
 }
