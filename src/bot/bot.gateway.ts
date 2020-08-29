@@ -25,6 +25,6 @@ export class BotGateway implements OnGatewayConnection {
   }
 
   handleConnection(client: any, ...args: any[]): any {
-    client.emit(this.botService.getState());
+    // client.emit(this.botService.getState());
   }
 }

@@ -10,7 +10,6 @@ import { Socket } from 'socket.io';
 import { TrackInfos } from './model/track-infos';
 import { PlayerState } from './model/player-state';
 import { GuildsService } from '../guilds/guilds.service';
-import { first } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -33,16 +32,18 @@ export class YoutubeService {
     private http: HttpClient,
     private guildsService: GuildsService
   ) {
-    this.guildsService.getSelectedGuild().pipe(first()).subscribe(g => this.currentGuild = g);
-    io(environment.websocket + 'player').on('connect', (socket) => {
-      this.socket = socket;
-      this.joinChannels();
-      this.bindToEvents();
-    });
+    this.socket = io(environment.websocket + 'player')
+      .on('connect', () => {
+        this.guildsService.getSelectedGuild().subscribe(g => {
+          this.currentGuild = g;
+          this.socket.emit(ServerEvents.YT_JOIN_ROOM, { guildId: g.id });
+        });
+        this.bindToEvents();
+      });
   }
 
   public addToPlaylist(track: TrackInfos) {
-    this.socket.to(this.currentGuild.id).emit(ClientEvents.ADD_TO_PLAYLIST, { track });
+    this.socket.emit(ClientEvents.ADD_TO_PLAYLIST, { track });
   }
 
   public nextSong(): void {
@@ -104,12 +105,6 @@ export class YoutubeService {
     this.socket.on(ServerEvents.YT_GET_PLAYLIST, playlist => this.onStateUpdate(playlist));
     this.socket.on(ServerEvents.YT_STATE_UPDATED, data => this.onStateUpdate(data.state));
     this.socket.on(ServerEvents.YT_PROGRESS_UPDATED, data => this.onProgressUpdate(data.progressSeconds));
-  }
-
-  private joinChannels() {
-    this.guildsService.getAvailableGuilds().subscribe(guilds => {
-      guilds.forEach(g => this.socket.join(g.id));
-    });
   }
 
   private onStatusUpdate(status: PlayerStatus) {

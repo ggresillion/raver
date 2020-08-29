@@ -8,7 +8,7 @@ import {Component, Input, OnInit} from '@angular/core';
 export class YoutubeThumbnailComponent implements OnInit {
 
   @Input()
-  public id: string;
+  public link: string;
 
   constructor() {
   }

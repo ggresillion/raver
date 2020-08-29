@@ -31,7 +31,7 @@
          fxLayoutAlign="start center"
          fxLayoutGap="16px"
          *ngIf="displayTitle && !!playlist[0]; else noTrack">
-      <app-youtube-thumbnail [id]="playlist[0].videoId"></app-youtube-thumbnail>
+      <app-youtube-thumbnail [link]="playlist[0].thumbnail"></app-youtube-thumbnail>
       <div>
         <span class="mat-h2">{{ playlist[0].title }}</span>
         <span> - </span>

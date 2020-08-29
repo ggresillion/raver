@@ -4,5 +4,6 @@ export enum ServerEvents {
   YT_GET_PLAYLIST = 'getPlaylist',
   YT_SYNC = 'sync',
   YT_STATE_UPDATED = 'stateUpdated',
-  YT_PROGRESS_UPDATED = 'progressUpdated'
+  YT_PROGRESS_UPDATED = 'progressUpdated',
+  YT_JOIN_ROOM = 'joinRoom'
 }
