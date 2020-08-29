@@ -40,13 +40,11 @@
         </mat-menu>
       </div>
     </mat-tab>
-    <mat-tab disabled>
-      <ng-template mat-tab-label>
-        <button (click)="openCreateCategoryDialog()" mat-icon-button>
-          <mat-icon style="color: green;">add_circle</mat-icon>
-        </button>
-      </ng-template>
-    </mat-tab>
   </mat-tab-group>
 </mat-card-content>
-<mat-slide-toggle [(ngModel)]="isEditing" id="edit-button" color="primary">Edit</mat-slide-toggle>
+<div class="tab-options">
+  <mat-slide-toggle [(ngModel)]="isEditing" id="edit-button" color="primary">Edit Mode</mat-slide-toggle>
+  <button mat-stroked-button (click)="openCreateCategoryDialog()">
+    <mat-icon style="color: #67b363;">add_circle</mat-icon> Create Category
+  </button>
+</div>

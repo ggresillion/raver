@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Guild } from '../models/guild';
 import { environment } from '../../environments/environment';
-import { Observable, ReplaySubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, ReplaySubject, Subject, BehaviorSubject } from 'rxjs';
+import { tap, take, first, shareReplay, skip, skipWhile } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'

@@ -21,7 +21,7 @@
     </label>
   </mat-form-field>
 </div>
-<mat-progress-bar *ngIf="uploadProgress" mode="determinate" [value]="uploadProgress | async">
+<mat-progress-bar *ngIf="uploadProgress" mode="determinate" [value]="uploadProgress">
 </mat-progress-bar>
 <div mat-dialog-actions>
   <button mat-button (click)="dialogRef.close()">Cancel</button>

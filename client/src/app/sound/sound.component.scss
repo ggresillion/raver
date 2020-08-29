@@ -1,16 +1,23 @@
 ::ng-deep .mat-tab-header {
-  margin-right: 100px;
+  padding-right: 335px;
 }
 
 ::ng-deep .mat-tab-body-content {
   overflow: hidden !important;
 }
 
-#edit-button {
+.tab-options {
   position: absolute;
-  top: 13px;
-  right: 12px;
+  top: 5px;
+  right: 8px;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  & > :not(:last-child) {
+    margin-right: 8px;
+  }
 }
 
 .edit-container {

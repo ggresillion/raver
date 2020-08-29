@@ -1,6 +1,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {CategoryService} from '../../../shared/services/category.service';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-create-category-dialog',
@@ -20,7 +21,8 @@ export class CreateCategoryDialogComponent implements OnInit {
   }
 
   createCategory() {
-    this.categoryService.createCategory(this.categoryName).subscribe(() => {
+    this.categoryService.createCategory(this.categoryName)
+    .pipe(take(1)).subscribe(() => {
       this.dialogRef.close();
     });
   }
