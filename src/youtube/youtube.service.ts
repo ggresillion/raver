@@ -18,7 +18,7 @@ import { Video } from 'ytsr';
 @Injectable()
 export class YoutubeService {
 
-  private playlist: Video[] = [];
+  private playlist: Map<string, Video[]> = new Map();
   private status: Map<string, PlayerStatus> = new Map();
   private totalLengthSeconds: number;
 
@@ -55,7 +55,7 @@ export class YoutubeService {
       .then(filters => {
         const filter = filters.get('Type').find(o => o.name === 'Video');
         var options = {
-          limit: 5,
+          limit: 10,
           nextpageRef: filter.ref,
         }
         return youtubeSearch(null, options);
@@ -80,11 +80,7 @@ export class YoutubeService {
 
   public async playSoundFromYoutube(guildId: string, link: string) {
     const res = await ytdlDiscord.stream(
-      link,
-      { highWaterMark: 1024 * 1024 * 10 },
-      ((current) => {
-        this.youtubeGateway.sendProgressUpdate(guildId, current);
-      }));
+      link);
     this.totalLengthSeconds = res.totalLengthSeconds;
     this.botService.playFromStream(
       guildId,
@@ -93,20 +89,24 @@ export class YoutubeService {
         this.status.set(guildId, PlayerStatus.PLAYING);
         this.propagateState(guildId);
       },
+      (progress) => {
+        this.youtubeGateway.sendProgressUpdate(guildId, progress / 1000);
+      },
       () => {
         this.status.set(guildId, PlayerStatus.IDLE);
+        this.next(guildId);
         this.propagateState(guildId);
       });
   }
 
-  public getPlaylist() {
-    return this.playlist;
+  public getPlaylist(guildId: string) {
+    return this.playlist.get(guildId);
   }
 
   public getState(guildId: string): PlayerState {
     return {
       status: this.status.get(guildId),
-      playlist: this.playlist,
+      playlist: this.playlist.get(guildId),
       totalLengthSeconds: this.totalLengthSeconds,
     };
   }
@@ -134,9 +134,54 @@ export class YoutubeService {
   }
 
   public next(guildId: string) {
+    if (!this.playlist.has(guildId)) {
+      return;
+    }
+    if (this.playlist.get(guildId).length <= 1) {
+      return;
+    }
     this.botService.stopStream(guildId);
-    this.playlist.splice(0, 1);
+    this.playlist.get(guildId).splice(0, 1);
     this.playSoundFromYoutube(guildId, this.playlist[0].link);
+    this.propagateState(guildId);
+  }
+
+  public moveUpwards(guildId: string, index: number): void {
+    const playlist = this.playlist.get(guildId);
+    if (!playlist) {
+      return;
+    }
+    if (playlist.length < index || index < 2) {
+      return;
+    }
+    playlist.splice(index - 1, 0, playlist.splice(index, 1)[0]);
+    this.playlist.set(guildId, playlist);
+    this.propagateState(guildId);
+  }
+
+  public moveDownwards(guildId: string, index: number): void {
+    const playlist = this.playlist.get(guildId);
+    if (!playlist) {
+      return;
+    }
+    if (playlist.length <= index) {
+      return;
+    }
+    playlist.splice(index, 0, playlist.splice(index - 1, 1)[0]);
+    this.playlist.set(guildId, playlist);
+    this.propagateState(guildId);
+  }
+
+  public removeFromPlaylist(guildId: string, index: number): void {
+    const playlist = this.playlist.get(guildId);
+    if (!playlist) {
+      return;
+    }
+    if (playlist.length <= index || index === 0) {
+      return;
+    }
+    playlist.splice(index, 1);
+    this.playlist.set(guildId, playlist);
     this.propagateState(guildId);
   }
 
@@ -156,7 +201,10 @@ export class YoutubeService {
   }
 
   private onAddToPlaylist(guildId: string, track: Video) {
-    this.playlist.push(track);
+    if (!this.playlist.has(guildId)) {
+      this.playlist.set(guildId, []);
+    }
+    this.playlist.get(guildId).push(track);
     if (this.status.get(guildId) === PlayerStatus.IDLE) {
       this.play(guildId);
     }
@@ -166,7 +214,7 @@ export class YoutubeService {
   private propagateState(guildId: string) {
     this.youtubeGateway.sendStateUpdate(guildId, {
       status: this.status.get(guildId) || PlayerStatus.NA,
-      playlist: this.playlist,
+      playlist: this.playlist.get(guildId),
       totalLengthSeconds: this.totalLengthSeconds,
     });
   }

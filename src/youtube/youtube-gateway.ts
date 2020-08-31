@@ -59,9 +59,10 @@ export class YoutubeGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage(ClientEvents.GET_PLAYLIST)
-  private getPlaylistAction(): TrackInfos[] {
-    this.logger.log(`Received event : ${ClientEvents.GET_PLAYLIST}`);
-    return this.youtubeService.getPlaylist();
+  private getPlaylistAction(socket: Socket): TrackInfos[] {
+    const guildId = this.getGuildId(socket);
+    this.logger.log(`Received event : ${ClientEvents.GET_PLAYLIST} (${guildId})`);
+    return this.youtubeService.getPlaylist(guildId);
   }
 
   @SubscribeMessage(ClientEvents.PLAY)
@@ -93,6 +94,27 @@ export class YoutubeGateway implements OnGatewayConnection {
     socket.emit(
       ServerEvents.SYNC,
       { state: this.youtubeService.getState(data.guildId) });
+  }
+
+  @SubscribeMessage(ClientEvents.MOVE_UPWARDS)
+  private moveUpwards(socket: Socket, data: { index: number }) {
+    const guildId = this.getGuildId(socket);
+    this.logger.log(`Received event : ${ClientEvents.MOVE_UPWARDS} (${guildId})`);
+    this.youtubeService.moveUpwards(guildId, data.index);
+  }
+
+  @SubscribeMessage(ClientEvents.MOVE_DOWNWARDS)
+  private moveDownwards(socket: Socket, data: { index: number }) {
+    const guildId = this.getGuildId(socket);
+    this.logger.log(`Received event : ${ClientEvents.MOVE_DOWNWARDS} (${guildId})`);
+    this.youtubeService.moveDownwards(guildId, data.index);
+  }
+
+  @SubscribeMessage(ClientEvents.REMOVE_FROM_PLAYLIST)
+  private removeFromPlaylist(socket: Socket, data: { index: number }) {
+    const guildId = this.getGuildId(socket);
+    this.logger.log(`Received event : ${ClientEvents.REMOVE_FROM_PLAYLIST} (${guildId})`);
+    this.youtubeService.removeFromPlaylist(guildId, data.index);
   }
 
   private getGuildId(socket: Socket): string {
