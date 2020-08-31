@@ -1,3 +1,5 @@
+@import 'src/styles.scss';
+
 .container {
   height: 100%;
   min-height: 100%;
@@ -26,8 +28,23 @@
 
   .playlist {
 
-    .playlist-content {
+    .track {
       width: 100%;
+
+      .actions {
+        float:right;
+
+        &>.disabled {
+          color: grey;
+          cursor: default;
+          pointer-events: none;
+        }
+
+        &>*{
+          cursor: pointer;
+          color: $primary;
+        }
+      }
 
       .playlist-play {
         float: right;
@@ -50,4 +67,8 @@
     width: 124px;
     height: 124px;
   }
+}
+
+button:not(:disabled) {
+  color: $primary;
 }

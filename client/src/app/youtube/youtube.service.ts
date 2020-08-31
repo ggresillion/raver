@@ -91,6 +91,18 @@ export class YoutubeService {
     return this.progressSubject.asObservable();
   }
 
+  public moveTrackUpwards(index: number): void {
+    this.socket.emit(ClientEvents.MOVE_UPWARDS, { index });
+  }
+
+  public moveTrackDownwards(index: number): void {
+    this.socket.emit(ClientEvents.MOVE_DOWNWARDS, { index });
+  }
+
+  public removeFromPlaylist(index: number): void {
+    this.socket.emit(ClientEvents.REMOVE_FROM_PLAYLIST, { index });
+  }
+
   private bindToEvents() {
     this.socket.on(ServerEvents.YT_SYNC, data => {
       const state = data.state;

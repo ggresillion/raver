@@ -1,9 +1,9 @@
-import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
-import {YoutubeService} from '../../youtube.service';
-import {TrackInfos} from '../../model/track-infos';
-import {PlayerStatus} from '../../model/player-status';
-import {MatTableDataSource} from '@angular/material/table';
-import {MatPaginator} from '@angular/material/paginator';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { YoutubeService } from '../../youtube.service';
+import { TrackInfos } from '../../model/track-infos';
+import { PlayerStatus } from '../../model/player-status';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-music-player',
@@ -19,7 +19,7 @@ export class MusicPlayerComponent implements OnInit {
   displayPlaylist = true;
 
   @Input()
-  pageSizeOptions = [10, 20, 30];
+  pageSizeOptions = [4];
 
   @Input()
   expanded = true;
@@ -40,12 +40,12 @@ export class MusicPlayerComponent implements OnInit {
 
   public status = PlayerStatus.IDLE;
 
-  constructor(private playlistService: YoutubeService) {
+  constructor(private youtubeService: YoutubeService) {
   }
 
-  ngOnInit() {
+  public ngOnInit() {
     this.setDataSourceAttributes();
-    this.playlistService.getState().subscribe((state) => {
+    this.youtubeService.getState().subscribe((state) => {
       this.status = state.status;
       this.playlist = state.playlist;
       if (state.totalLengthSeconds) {
@@ -53,7 +53,7 @@ export class MusicPlayerComponent implements OnInit {
       }
       this.setDataSourceAttributes();
     });
-    this.playlistService.getProgress().subscribe(progress => {
+    this.youtubeService.getProgress().subscribe(progress => {
       this.currentTime = Math.trunc(progress);
     });
   }
@@ -63,7 +63,7 @@ export class MusicPlayerComponent implements OnInit {
     this.setDataSourceAttributes();
   }
 
-  setDataSourceAttributes() {
+  public setDataSourceAttributes() {
     if (this.playlist) {
       const data = [...this.playlist];
       data.splice(0, 1);
@@ -72,9 +72,9 @@ export class MusicPlayerComponent implements OnInit {
     }
   }
 
-  nextSong(): void {
-    if (((this.playlistService.indexSong + 1) % this.paginator.pageSize) === 0 ||
-      (this.playlistService.indexSong + 1) === this.paginator.length) {
+  public nextSong(): void {
+    if (((this.youtubeService.indexSong + 1) % this.paginator.pageSize) === 0 ||
+      (this.youtubeService.indexSong + 1) === this.paginator.length) {
       if (this.paginator.hasNextPage()) {
         this.paginator.nextPage();
       } else if (!this.paginator.hasNextPage()) {
@@ -83,42 +83,42 @@ export class MusicPlayerComponent implements OnInit {
     }
     this.currentTime = 0;
     this.duration = 0.01;
-    this.playlistService.nextSong();
+    this.youtubeService.nextSong();
   }
 
-  previousSong(): void {
+  public previousSong(): void {
     this.currentTime = 0;
     this.duration = 0.01;
     if (!this.checkIfSongHasStartedSinceAtleastTwoSeconds()) {
-      if (((this.playlistService.indexSong) % this.paginator.pageSize) === 0 ||
-        (this.playlistService.indexSong) === 0) {
+      if (((this.youtubeService.indexSong) % this.paginator.pageSize) === 0 ||
+        (this.youtubeService.indexSong) === 0) {
         if (this.paginator.hasPreviousPage()) {
           this.paginator.previousPage();
         } else if (!this.paginator.hasPreviousPage()) {
           this.paginator.lastPage();
         }
       }
-      this.playlistService.previousSong();
+      this.youtubeService.previousSong();
     } else {
     }
   }
 
-  selectTrack(index: number): void {
-    this.playlistService.selectATrack(index);
+  public selectTrack(index: number): void {
+    this.youtubeService.selectATrack(index);
     setTimeout(() => {
       this.player.nativeElement.play();
     }, 0);
   }
 
-  checkIfSongHasStartedSinceAtleastTwoSeconds(): boolean {
+  public checkIfSongHasStartedSinceAtleastTwoSeconds(): boolean {
     return this.player.nativeElement.currentTime > 2;
   }
 
-  currTimePosChanged(event) {
+  public currTimePosChanged(event) {
     this.player.nativeElement.currentTime = event.value;
   }
 
-  bindPlayerEvent(): void {
+  public bindPlayerEvent(): void {
     this.player.nativeElement.addEventListener('playing', () => {
       this.isPlaying = true;
       this.duration = Math.floor(this.player.nativeElement.duration);
@@ -138,11 +138,31 @@ export class MusicPlayerComponent implements OnInit {
     });
   }
 
-  playPause() {
+  public playPause() {
     if (this.status === PlayerStatus.PLAYING) {
-      this.playlistService.pause();
+      this.youtubeService.pause();
     } else {
-      this.playlistService.play();
+      this.youtubeService.play();
     }
+  }
+
+  public getTrackPosition(track: TrackInfos): number {
+    return this.playlist.findIndex(t => t === track) + 1;
+  }
+
+  public moveUpwards(element: TrackInfos): void {
+    this.youtubeService.moveTrackUpwards(this.getIndex(element));
+  }
+
+  public moveDownwards(element: TrackInfos): void {
+    this.youtubeService.moveTrackDownwards(this.getIndex(element));
+  }
+
+  public removeFromPlaylist(element: TrackInfos): void {
+    this.youtubeService.removeFromPlaylist(this.getIndex(element));
+  }
+
+  public getIndex(element: TrackInfos): number {
+    return this.playlist.findIndex(t => t === element)
   }
 }

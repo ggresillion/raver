@@ -7,17 +7,15 @@
 .search-result {
   overflow-y: auto;
 
-  mat-icon {
-    font-size: 32px;
-    margin-right: 32px;
-    cursor: pointer;
-    color: $accent;
-    transition: all .1s ease-in;
+ .search-item {
+   padding: 4px;
+   padding-left: 8px;
+   cursor: pointer;
 
-    &:hover {
-      transform: scale(1.2);
-    }
-  }
+   &:hover {
+     background-color: rgba($color: $primary, $alpha: 1.0);
+   }
+ }
 }
 
 app-youtube-thumbnail {

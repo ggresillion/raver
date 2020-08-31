@@ -4,4 +4,7 @@ export enum ClientEvents {
     PLAY = 'play',
     PAUSE = 'pause',
     NEXT = 'next',
+    MOVE_UPWARDS = 'moveUpwards',
+    MOVE_DOWNWARDS = 'moveDownwards',
+    REMOVE_FROM_PLAYLIST = 'removeFromPlaylist'
 }

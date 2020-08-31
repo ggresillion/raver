@@ -1,9 +1,15 @@
 export interface TrackInfos {
-  author?: any;
-  channelTitle?: string;
-  description: string;
-  liveBroadcastContent?: string;
-  publishedAt?: Date;
-  thumbnail?: string;
+  live: boolean;
   title: string;
+  link: string;
+  thumbnail: string;
+  author: {
+    name: string;
+    ref: string;
+    verified: boolean;
+  };
+  description: string;
+  views: number;
+  duration: string | null;
+  uploaded_at: string | null;
 }

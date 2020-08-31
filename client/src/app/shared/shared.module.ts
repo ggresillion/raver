@@ -24,6 +24,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
   exports: [
@@ -51,7 +52,8 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     MatTableModule,
     MatPaginatorModule,
     FlexLayoutModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatTooltipModule
   ],
   declarations: [DraggableDirective, DropperDirective],
   providers: [CategoryService, BotService],

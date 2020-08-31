@@ -10,10 +10,11 @@ import { BotStateDTO } from './dto/bot-state.dto';
 import { BotStatus } from './dto/bot-status.enum';
 import { createReadStream } from 'fs';
 import { Bucket } from '../storage/bucket.enum';
-
+import * as fs from 'fs';
 @Injectable()
 export class BotService implements OnApplicationShutdown {
 
+  private readonly PROGRESS_POLLING_INTERVAL = 500;
   private readonly logger = new Logger(BotService.name);
   private readonly token = process.env.BOT_TOKEN;
   private client: Client;
@@ -56,7 +57,7 @@ export class BotService implements OnApplicationShutdown {
     this.dispatchers.set(guildId, dispatcher);
   }
 
-  public playFromStream(guildId: string, stream: Readable, onStart: () => void, onEnd: () => void) {
+  public playFromStream(guildId: string, stream: Readable, onStart: () => void, onProgress: (progress: number) => void, onEnd: () => void) {
     const connection = this.client.voice.connections
       .find((_, id) => id === guildId);
     if (!connection) {
@@ -69,11 +70,16 @@ export class BotService implements OnApplicationShutdown {
       this.logger.log('Playing from stream');
       onStart();
     });
-    dispatcher.on('end', () => {
+    const progressPolling = setInterval(() => {
+      onProgress(dispatcher.streamTime);
+    }, this.PROGRESS_POLLING_INTERVAL);
+    dispatcher.on('finish', () => {
+      clearInterval(progressPolling);
       this.dispatchers.delete(guildId);
       this.botStatusUpdate(guildId, BotStatus.IN_VOICE_CHANNEL);
       onEnd();
     });
+    this.dispatchers.set(guildId, dispatcher);
   }
 
   public pauseStream(guildId: string) {
@@ -87,6 +93,9 @@ export class BotService implements OnApplicationShutdown {
   }
 
   public stopStream(guildId: string) {
+    if (!this.dispatchers.has(guildId)) {
+      return;
+    }
     this.dispatchers.get(guildId).end();
     this.dispatchers.delete(guildId);
     this.logger.log('Stopped stream');
