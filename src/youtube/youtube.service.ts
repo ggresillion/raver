@@ -79,8 +79,7 @@ export class YoutubeService {
   }
 
   public async playSoundFromYoutube(guildId: string, link: string) {
-    const res = await ytdlDiscord.stream(
-      link);
+    const res = await ytdlDiscord.stream(link);
     this.totalLengthSeconds = res.totalLengthSeconds;
     this.botService.playFromStream(
       guildId,
@@ -115,7 +114,7 @@ export class YoutubeService {
     if (this.botService.isPlaying(guildId)) {
       this.botService.resumeStream(guildId);
     } else {
-      this.playSoundFromYoutube(guildId, this.playlist[0].link);
+      this.playSoundFromYoutube(guildId, this.playlist.get(guildId)[0].link);
     }
     this.status.set(guildId, PlayerStatus.PLAYING);
     this.propagateState(guildId);
@@ -142,7 +141,7 @@ export class YoutubeService {
     }
     this.botService.stopStream(guildId);
     this.playlist.get(guildId).splice(0, 1);
-    this.playSoundFromYoutube(guildId, this.playlist[0].link);
+    this.playSoundFromYoutube(guildId, this.playlist.get(guildId)[0].link);
     this.propagateState(guildId);
   }
 
