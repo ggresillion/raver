@@ -3,4 +3,5 @@ export enum PlayerStatus {
   PAUSED = 'paused',
   IDLE = 'idle',
   NA = 'na',
+  LOADING = 'loading'
 }

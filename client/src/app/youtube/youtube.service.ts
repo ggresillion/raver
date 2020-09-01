@@ -83,6 +83,10 @@ export class YoutubeService {
     this.socket.emit(ClientEvents.PLAY);
   }
 
+  public stop() {
+    this.socket.emit(ClientEvents.STOP)
+  }
+
   public pause() {
     this.socket.emit(ClientEvents.PAUSE);
   }

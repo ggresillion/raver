@@ -146,6 +146,10 @@ export class MusicPlayerComponent implements OnInit {
     }
   }
 
+  public stop() {
+    this.youtubeService.stop();
+  }
+
   public getTrackPosition(track: TrackInfos): number {
     return this.playlist.findIndex(t => t === track) + 1;
   }

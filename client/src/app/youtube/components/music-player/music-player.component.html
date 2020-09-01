@@ -1,12 +1,16 @@
 <mat-card class="container" fxLayout="column">
   <div class="player" fxLayout="column" fxLayoutGap="16px">
     <div class="player-container">
-      <button mat-button style="border-left: 1px solid #ddd;" [disabled]="true">
-        <mat-icon aria-hidden="true">skip_previous</mat-icon>
+      <button mat-button (click)="stop()" style="border-left: 1px solid #ddd;"
+        [disabled]="status === 'na' || !playlist || playlist.length <= 0">
+        <mat-icon aria-hidden="true">stop</mat-icon>
       </button>
       <button mat-button (click)='playPause()' style="border-left: 2px solid #ccc; border-right: 2px solid #ccc;"
-        [disabled]="status === 'na' || !playlist || playlist.length <= 0">
-        <mat-icon *ngIf="status !== 'playing'">play_arrow</mat-icon>
+        [disabled]="status === 'na' || status === 'loading' || !playlist || playlist.length <= 0">
+        <mat-icon *ngIf="status === 'loading'">
+          <mat-spinner diameter="24"></mat-spinner>
+        </mat-icon>
+        <mat-icon *ngIf="status !== 'playing' && status !== 'loading'">play_arrow</mat-icon>
         <mat-icon *ngIf="status === 'playing'">pause</mat-icon>
       </button>
       <button mat-button style="border-right: 1px solid #ddd;" (click)='nextSong();'

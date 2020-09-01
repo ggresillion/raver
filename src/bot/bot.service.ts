@@ -64,8 +64,8 @@ export class BotService implements OnApplicationShutdown {
       throw new UnprocessableEntityException('guild id not found');
     }
     const dispatcher = connection.play(stream, { type: 'opus' });
-    dispatcher.on('debug', this.logger.debug);
-    dispatcher.on('error', this.logger.error);
+    dispatcher.on('debug', debug => this.logger.debug(debug));
+    dispatcher.on('error', error => this.logger.error(error));
     dispatcher.on('start', () => {
       this.logger.log('Playing from stream');
       onStart();
@@ -74,6 +74,7 @@ export class BotService implements OnApplicationShutdown {
       onProgress(dispatcher.streamTime);
     }, this.PROGRESS_POLLING_INTERVAL);
     dispatcher.on('finish', () => {
+      onProgress(0);
       clearInterval(progressPolling);
       this.dispatchers.delete(guildId);
       this.botStatusUpdate(guildId, BotStatus.IN_VOICE_CHANNEL);
@@ -96,8 +97,7 @@ export class BotService implements OnApplicationShutdown {
     if (!this.dispatchers.has(guildId)) {
       return;
     }
-    this.dispatchers.get(guildId).end();
-    this.dispatchers.delete(guildId);
+    this.dispatchers.get(guildId).emit('finish');
     this.logger.log('Stopped stream');
   }
 

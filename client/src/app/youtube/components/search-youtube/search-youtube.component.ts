@@ -9,23 +9,28 @@ import { TrackInfos } from '../../model/track-infos';
 })
 export class SearchYoutubeComponent implements OnInit {
 
-  searchString = '';
-  videos: TrackInfos[] = [];
+  public searchString = '';
+  public videos: TrackInfos[] = [];
+  public loading = false;
 
   constructor(
     private readonly youtubeService: YoutubeService,
   ) {
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
   }
 
-  search() {
+  public search(): void {
+    this.loading = true;
     this.youtubeService.searchYoutube(this.searchString)
-      .subscribe(videos => this.videos = videos);
+      .subscribe(videos => {
+        this.videos = videos;
+        this.loading = false;
+      });
   }
 
-  addToPlaylist(video: TrackInfos) {
+  public addToPlaylist(video: TrackInfos): void {
     this.youtubeService.addToPlaylist(video);
   }
 

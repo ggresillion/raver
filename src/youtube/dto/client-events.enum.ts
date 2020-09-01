@@ -7,5 +7,6 @@ export enum ClientEvents {
   JOIN_ROOM = "joinRoom",
   MOVE_UPWARDS = 'moveUpwards',
   MOVE_DOWNWARDS = 'moveDownwards',
-  REMOVE_FROM_PLAYLIST = 'removeFromPlaylist'
+  REMOVE_FROM_PLAYLIST = 'removeFromPlaylist',
+  STOP = "stop"
 }

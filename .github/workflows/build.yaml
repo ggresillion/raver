@@ -53,7 +53,7 @@ jobs:
         id: cache
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx
+          key: ${{ runner.os }}-buildx-api
       -
         name: Docker Buildx (build)
         run: |
@@ -127,7 +127,7 @@ jobs:
         id: cache
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx
+          key: ${{ runner.os }}-buildx-client
       -
         name: Docker Buildx (build)
         run: |
