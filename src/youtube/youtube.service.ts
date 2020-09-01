@@ -14,12 +14,14 @@ import { BotStatus } from '../bot/dto/bot-status.enum';
 import { UploadDto } from './dto/upload.dto';
 import { Bucket } from '../storage/bucket.enum';
 import { Video } from 'ytsr';
+import { GuildDTO } from '../guild/dto/guild.dto';
 
 @Injectable()
 export class YoutubeService {
 
   private playlist: Map<string, Video[]> = new Map();
   private status: Map<string, PlayerStatus> = new Map();
+  private shouldNotPlayNext: Map<string, boolean> = new Map();
   private totalLengthSeconds: number;
 
   constructor(
@@ -29,9 +31,6 @@ export class YoutubeService {
     @Inject(forwardRef(() => YoutubeGateway))
     private readonly youtubeGateway: YoutubeGateway,
   ) {
-    // const botStatus = this.botService.getInfos().status;
-    // this.status = botStatus === BotStatus.CONNECTED || botStatus === BotStatus.IN_VOICE_CHANNEL
-    //   ? PlayerStatus.IDLE : PlayerStatus.NA;
     this.botService.onBotStatusUpdate((guildId, status) => this.onBotStatusUpdate(guildId, status));
     this.youtubeGateway.onAddToPlaylist((guildid, track) => this.onAddToPlaylist(guildid, track));
   }
@@ -92,9 +91,20 @@ export class YoutubeService {
         this.youtubeGateway.sendProgressUpdate(guildId, progress / 1000);
       },
       () => {
-        this.status.set(guildId, PlayerStatus.IDLE);
-        this.next(guildId);
-        this.propagateState(guildId);
+        if (!this.shouldNotPlayNext.get(guildId)) {
+          this.playlist.get(guildId).splice(0, 1);
+          if (this.playlist.get(guildId).length === 0) {
+            return;
+          }
+          this.status.set(guildId, PlayerStatus.LOADING);
+          this.youtubeGateway.sendStatusUpdate(guildId, PlayerStatus.LOADING);
+          this.playSoundFromYoutube(guildId, this.playlist.get(guildId)[0].link);
+          this.propagateState(guildId);
+        } else {
+          this.status.set(guildId, PlayerStatus.PAUSED);
+          this.youtubeGateway.sendStatusUpdate(guildId, PlayerStatus.PAUSED);
+        }
+        this.shouldNotPlayNext.delete(guildId);
       });
   }
 
@@ -111,25 +121,24 @@ export class YoutubeService {
   }
 
   public play(guildId: string) {
+    this.setStatus(guildId, PlayerStatus.LOADING);
     if (this.botService.isPlaying(guildId)) {
       this.botService.resumeStream(guildId);
+      this.setStatus(guildId, PlayerStatus.PLAYING);
     } else {
       this.playSoundFromYoutube(guildId, this.playlist.get(guildId)[0].link);
     }
-    this.status.set(guildId, PlayerStatus.PLAYING);
-    this.propagateState(guildId);
   }
 
   public pause(guildId: string) {
     this.botService.pauseStream(guildId);
     this.status.set(guildId, PlayerStatus.PAUSED);
     this.youtubeGateway.sendStatusUpdate(guildId, PlayerStatus.PAUSED);
-    this.propagateState(guildId);
   }
 
   public stop(guildId: string) {
+    this.shouldNotPlayNext.set(guildId, true);
     this.botService.stopStream(guildId);
-    this.propagateState(guildId);
   }
 
   public next(guildId: string) {
@@ -140,9 +149,6 @@ export class YoutubeService {
       return;
     }
     this.botService.stopStream(guildId);
-    this.playlist.get(guildId).splice(0, 1);
-    this.playSoundFromYoutube(guildId, this.playlist.get(guildId)[0].link);
-    this.propagateState(guildId);
   }
 
   public moveUpwards(guildId: string, index: number): void {
@@ -166,7 +172,7 @@ export class YoutubeService {
     if (playlist.length <= index) {
       return;
     }
-    playlist.splice(index, 0, playlist.splice(index - 1, 1)[0]);
+    playlist.splice(index + 1, 0, playlist.splice(index, 1)[0]);
     this.playlist.set(guildId, playlist);
     this.propagateState(guildId);
   }
@@ -187,15 +193,22 @@ export class YoutubeService {
   private onBotStatusUpdate(guildId: string, status: BotStatus) {
     switch (status) {
       case BotStatus.IN_VOICE_CHANNEL:
-        this.status.set(guildId, PlayerStatus.IDLE);
+        if (this.status.get(guildId) !== PlayerStatus.NA) {
+          return;
+        }
+        this.setStatus(guildId, PlayerStatus.IDLE);
         break;
       case BotStatus.CONNECTED:
-        this.status.set(guildId, PlayerStatus.NA);
+        this.setStatus(guildId, PlayerStatus.NA);
         break;
       case BotStatus.DISCONNECTED:
-        this.status.set(guildId, PlayerStatus.NA);
+        this.setStatus(guildId, PlayerStatus.NA);
         break;
     }
+  }
+
+  private setStatus(guildId: string, status: PlayerStatus): void {
+    this.status.set(guildId, status);
     this.youtubeGateway.sendStatusUpdate(guildId, this.status.get(guildId));
   }
 

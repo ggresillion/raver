@@ -79,6 +79,13 @@ export class YoutubeGateway implements OnGatewayConnection {
     this.youtubeService.pause(guildId);
   }
 
+  @SubscribeMessage(ClientEvents.STOP)
+  private stopAction(socket: Socket) {
+    const guildId = this.getGuildId(socket);
+    this.logger.log(`Received event : ${ClientEvents.STOP} (${guildId})`);
+    this.youtubeService.stop(guildId);
+  }
+
   @SubscribeMessage(ClientEvents.NEXT)
   private nextAction(socket: Socket) {
     const guildId = this.getGuildId(socket);
