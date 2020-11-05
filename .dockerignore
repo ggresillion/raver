@@ -5,6 +5,7 @@ client/
 dist/
 nginx/
 uploads/
+chart/
 .git
 Dockerfile
 .dockerignore

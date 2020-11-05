@@ -5,13 +5,13 @@
 replicaCount: 1
 
 api:
-  repository: discordsoundboard/api
+  repository: okteto.dev/discordsoundboard_api
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
 client:
-  repository: discordsoundboard/client
+  repository: okteto.dev/discordsoundboard_client
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
