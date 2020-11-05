@@ -1,6 +1,6 @@
 deploy:
-  - okteto build -t discordsoundboard/api:${OKTETO_GIT_COMMIT} .
-  - okteto build -t discordsoundboard/client:${OKTETO_GIT_COMMIT} client
+  - okteto build -t okteto.dev/discordsoundboard_api:${OKTETO_GIT_COMMIT} .
+  - okteto build -t okteto.dev/discordsoundboard_client:${OKTETO_GIT_COMMIT} client
   - helm upgrade --install discordsoundboard chart --set tag=${OKTETO_GIT_COMMIT}
 devs:
   - okteto.yml
