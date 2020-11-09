@@ -12,8 +12,6 @@ import { CategoryModule } from './category/category.module';
 import configuration from './config/configuration';
 import { YoutubeModule } from './youtube/youtube.module';
 import { GuildModule } from './guild/guild.module';
-import { join } from 'path';
-import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigService } from '@nestjs/config';
 import { ImageModule } from './image/image.module';
 
@@ -36,9 +34,6 @@ import { ImageModule } from './image/image.module';
     YoutubeModule,
     CategoryModule,
     GuildModule,
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, 'client'),
-    }),
     ImageModule,
   ],
   controllers: [AppController],

@@ -1,61 +1,77 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "discordsoundboard.fullname" . }}-api
+  name: api
   labels:
-    {{- include "discordsoundboard.labels" . | nindent 4 }}
+    tier: api
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
+  replicas: {{ .Values.api.replicas }}
   selector:
     matchLabels:
-      {{- include "discordsoundboard.selectorLabels" . | nindent 6 }}
+      tier: api
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
-        {{- include "discordsoundboard.selectorLabels" . | nindent 8 }}
+        tier: api
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "discordsoundboard.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: storage-claim
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.client.repository }}:{{ .Values.client.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.client.pullPolicy }}
+          image: "{{ .Values.api.repository }}:{{ .Values.api.tag | default .Chart.AppVersion }}"
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8000
               protocol: TCP
+          volumeMounts:
+            - name: storage
+              mountPath: /app/uploads
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: DB_HOST
+              value: discordsoundboard-postgresql
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret
+                  key: postgresqlPassword
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: secret
+                  key: clientId
+            - name: CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: secret
+                  key: clientSecret
+            - name: BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: secret
+                  key: botToken
           livenessProbe:
             httpGet:
-              path: /
-              port: http
+              path: /api
+              port: 8000
           readinessProbe:
             httpGet:
-              path: /
-              port: http
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+              path: /api
+              port: 8000
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: storage-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

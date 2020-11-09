@@ -1,12 +1,6 @@
-.idea/
-.vscode/
 node_modules/
-client/
 dist/
-nginx/
 uploads/
-chart/
-.git
 Dockerfile
 .dockerignore
 .env
