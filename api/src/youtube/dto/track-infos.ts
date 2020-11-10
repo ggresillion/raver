@@ -1,9 +1,13 @@
 export interface TrackInfos {
-  videoId?: string;
-  channelId?: string;
-  channelTitle?: string;
-  description: string;
-  publishedAt?: string;
-  thumbnails?: {default: {url: string}, medium: {url: string}, high: {url: string}};
   title: string;
+  link: string;
+  thumbnail: string;
+  author: {
+    name: string;
+    ref: string;
+    verified: boolean;
+  };
+  description: string;
+  views: number;
+  duration: number | null;
 }

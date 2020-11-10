@@ -7,8 +7,6 @@ import { YoutubeService } from './youtube.service';
 import { forwardRef, Inject, Logger } from '@nestjs/common';
 import { PlayerStatus } from './model/player-status';
 import { PlayerState } from './model/player-state';
-import { Guild } from 'discord.js';
-import { Video } from 'ytsr';
 
 @WebSocketGateway({ namespace: 'player' })
 export class YoutubeGateway implements OnGatewayConnection {
@@ -37,7 +35,7 @@ export class YoutubeGateway implements OnGatewayConnection {
     this.server.to(guildId).emit(ServerEvents.STATE_UPDATED, { state });
   }
 
-  public onAddToPlaylist(cb: (guildId: string, track: Video) => void) {
+  public onAddToPlaylist(cb: (guildId: string, track: TrackInfos) => void) {
     this.addToPlaylistListeners.push(cb);
   }
 

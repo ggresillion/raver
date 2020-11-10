@@ -54,3 +54,6 @@ jspm_packages
 # Serverless directories
 .serverless
 
+uploads
+dist
+package-lock.json

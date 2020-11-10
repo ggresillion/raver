@@ -8,18 +8,22 @@ import * as ytdlDiscord from './util/ytdl-wrapper';
 import * as ytdl from 'ytdl-core';
 import * as FFmpeg from 'fluent-ffmpeg';
 import { PlayerState } from './model/player-state';
-import * as youtubeSearch from 'ytsr';
 import { Sound } from '../sound/entity/sound.entity';
 import { BotStatus } from '../bot/dto/bot-status.enum';
 import { UploadDto } from './dto/upload.dto';
 import { Bucket } from '../storage/bucket.enum';
-import { Video } from 'ytsr';
-import { GuildDTO } from '../guild/dto/guild.dto';
+import youtube from 'scrape-youtube';
+import { TrackInfos } from './dto/track-infos';
+import { Video } from 'scrape-youtube/lib/interface';
+import fetch from 'node-fetch';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Image } from '../image/entity/image.entity';
 
 @Injectable()
 export class YoutubeService {
 
-  private playlist: Map<string, Video[]> = new Map();
+  private playlist: Map<string, TrackInfos[]> = new Map();
   private status: Map<string, PlayerStatus> = new Map();
   private shouldNotPlayNext: Map<string, boolean> = new Map();
   private totalLengthSeconds: number;
@@ -29,41 +33,49 @@ export class YoutubeService {
     private readonly storageService: StorageService,
     private readonly botService: BotService,
     @Inject(forwardRef(() => YoutubeGateway))
-    private readonly youtubeGateway: YoutubeGateway,
+    private readonly youtubeGateway: YoutubeGateway
   ) {
     this.botService.onBotStatusUpdate((guildId, status) => this.onBotStatusUpdate(guildId, status));
     this.youtubeGateway.onAddToPlaylist((guildid, track) => this.onAddToPlaylist(guildid, track));
   }
 
-  public async getVideoInfos(id: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      youtubeSearch(id, (err, result) => {
-        if (err) {
-          return reject(err);
-        }
-        if (result.items.length === 0) {
-          return reject('did not find any video');
-        }
-        return resolve(result.items[0]);
-      });
+  public async getVideoInfos(id: string): Promise<TrackInfos> {
+    const v = (await youtube.search(id)).videos[0];
+    return ({
+      title: v.title,
+      link: v.link,
+      thumbnail: v.thumbnail,
+      author: {
+        name: v.channel.name,
+        ref: v.channel.link,
+        verified: v.channel.verified
+      },
+      description: v.description,
+      views: v.views,
+      duration: v.duration
     });
   }
 
-  public async searchVideos(q: string): Promise<Video[]> {
-    return youtubeSearch.getFilters(q)
-      .then(filters => {
-        const filter = filters.get('Type').find(o => o.name === 'Video');
-        var options = {
-          limit: 10,
-          nextpageRef: filter.ref,
-        }
-        return youtubeSearch(null, options);
-      }
-      ).then(res => <Video[]>res.items);
+  public async searchVideos(q: string): Promise<TrackInfos[]> {
+    const search = await youtube.search(q);
+    return search.videos
+      .map((v: Video) => ({
+        title: v.title,
+        link: v.link,
+        thumbnail: v.thumbnail,
+        author: {
+          name: v.channel.name,
+          ref: v.channel.link,
+          verified: v.channel.verified
+        },
+        description: v.description,
+        views: v.views,
+        duration: v.duration
+      }));
   }
 
   public async uploadFromYoutube(upload: UploadDto): Promise<Sound> {
-    return new Promise((resolve) => {
+    const sound = await new Promise<Sound>((resolve, reject) => {
       const sound = this.soundService.createNewSoundEntity(upload.name, upload.categoryId, upload.guildId);
       const stream = ytdl(upload.url, { quality: 'lowestaudio' });
       FFmpeg({ source: stream })
@@ -73,8 +85,11 @@ export class YoutubeService {
         .save(this.storageService.getUploadDir(Bucket.SOUNDS) + '/' + sound.uuid)
         .on('end', () => {
           resolve(this.soundService.saveSoundEntity(sound));
-        });
+        })
+        .on('error', err => reject(err));
     });
+
+    return sound;
   }
 
   public async playSoundFromYoutube(guildId: string, link: string) {
@@ -212,7 +227,7 @@ export class YoutubeService {
     this.youtubeGateway.sendStatusUpdate(guildId, this.status.get(guildId));
   }
 
-  private onAddToPlaylist(guildId: string, track: Video) {
+  private onAddToPlaylist(guildId: string, track: TrackInfos) {
     if (!this.playlist.has(guildId)) {
       this.playlist.set(guildId, []);
     }
