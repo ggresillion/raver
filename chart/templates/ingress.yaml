@@ -12,6 +12,10 @@ spec:
             backend:
               serviceName: api
               servicePort: http
+          - path: /socket.io
+            backend:
+              serviceName: api
+              servicePort: http
           - path: /
             backend:
               serviceName: client
