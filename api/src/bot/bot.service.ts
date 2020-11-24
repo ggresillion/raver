@@ -1,16 +1,16 @@
 import { Injectable, Logger, OnApplicationShutdown, BadRequestException, UnprocessableEntityException } from '@nestjs/common';
-import { Client, Message, StreamDispatcher, VoiceChannel, GuildMember, Snowflake, Collection } from 'discord.js';
+import { Client, Message, StreamDispatcher, VoiceChannel, GuildMember, Snowflake, Collection, StreamType } from 'discord.js';
 import { Command } from './command.enum';
 import { StorageService } from '../storage/storage.service';
 import { BotGateway } from './bot.gateway';
-import { Readable } from 'stream';
+import { Readable, Stream } from 'stream';
 import { UserDTO } from '../user/dto/user.dto';
 import { GuildDTO } from '../guild/dto/guild.dto';
 import { BotStateDTO } from './dto/bot-state.dto';
 import { BotStatus } from './dto/bot-status.enum';
 import { createReadStream } from 'fs';
 import { Bucket } from '../storage/bucket.enum';
-import * as fs from 'fs';
+
 @Injectable()
 export class BotService implements OnApplicationShutdown {
 
@@ -35,52 +35,29 @@ export class BotService implements OnApplicationShutdown {
   }
 
   public playFile(uuid: string, guildId: string) {
-    const connection = this.client.voice.connections
-      .find((_, id) => id === guildId);
-    if (!connection) {
-      throw new UnprocessableEntityException('guild id not found');
-    }
     const path = this.storageService.getPathFromUUID(Bucket.SOUNDS, uuid);
-    const dispatcher = connection.play(createReadStream(path), {
-      type: 'ogg/opus'
-    });
-    dispatcher.on('debug', this.logger.debug);
-    dispatcher.on('error', this.logger.error);
-    dispatcher.on('start', () => {
-      this.logger.log(`Playing file ` + uuid);
-      this.botStatusUpdate(guildId, BotStatus.PLAYING);
-    });
-    dispatcher.on('end', () => {
-      this.dispatchers.delete(guildId);
-      this.botStatusUpdate(guildId, BotStatus.IN_VOICE_CHANNEL);
-    });
-    this.dispatchers.set(guildId, dispatcher);
+    this.play(guildId, createReadStream(path), { resumeOnInterupt: false, type: 'ogg/opus' },
+      () => {
+        this.logger.log(`Playing file ` + uuid);
+      },
+      () => { });
   }
 
-  public playFromStream(guildId: string, stream: Readable, onStart: () => void, onProgress: (progress: number) => void, onEnd: () => void) {
-    const connection = this.client.voice.connections
-      .find((_, id) => id === guildId);
-    if (!connection) {
-      throw new UnprocessableEntityException('guild id not found');
-    }
-    const dispatcher = connection.play(stream, { type: 'opus' });
-    dispatcher.on('debug', debug => this.logger.debug(debug));
-    dispatcher.on('error', error => this.logger.error(error));
-    dispatcher.on('start', () => {
-      this.logger.log('Playing from stream');
-      onStart();
-    });
-    const progressPolling = setInterval(() => {
-      onProgress(dispatcher.streamTime);
-    }, this.PROGRESS_POLLING_INTERVAL);
-    dispatcher.on('finish', () => {
-      onProgress(0);
-      clearInterval(progressPolling);
-      this.dispatchers.delete(guildId);
-      this.botStatusUpdate(guildId, BotStatus.IN_VOICE_CHANNEL);
-      onEnd();
-    });
-    this.dispatchers.set(guildId, dispatcher);
+  public playFromStream(guildId: string, stream: Readable, onStart: () => void, onProgress: (progress: number) => void, onEnd: (stop: boolean) => void) {
+
+    let progressPolling;
+    this.play(guildId, stream, { resumeOnInterupt: true, type: 'opus' },
+      (dispatcher) => {
+        progressPolling = setInterval(() => {
+          onProgress(dispatcher.streamTime);
+        }, this.PROGRESS_POLLING_INTERVAL);
+        onStart();
+      },
+      (stop) => {
+        onProgress(0);
+        clearInterval(progressPolling);
+        onEnd(stop);
+      });
   }
 
   public pauseStream(guildId: string) {
@@ -97,7 +74,7 @@ export class BotService implements OnApplicationShutdown {
     if (!this.dispatchers.has(guildId)) {
       return;
     }
-    this.dispatchers.get(guildId).emit('finish');
+    this.dispatchers.get(guildId).emit('stop');
     this.logger.log('Stopped stream');
   }
 
@@ -129,24 +106,43 @@ export class BotService implements OnApplicationShutdown {
     }
   }
 
-  private botStatusUpdate(guildId: string, status: BotStatus): void {
-    this.logger.log(`Bot status: ${status}`);
-    this.onStatusChangeListeners.forEach(cb => cb(guildId, status));
-    const state: BotStateDTO = {
-      guilds: this.client.guilds.cache.map(g => ({
-        id: g.id,
-        status: this.client.voice.connections.some(c => c.channel.guild.id === g.id)
-          ? BotStatus.IN_VOICE_CHANNEL
-          : BotStatus.CONNECTED,
-      })),
-    };
-    this.botGateway.sendStateUpdate(state);
-  }
-
   public getStatus(guildId: string): BotStatus {
     return this.client.voice.connections.some(c => c.channel.guild.id === guildId)
       ? BotStatus.IN_VOICE_CHANNEL
       : BotStatus.CONNECTED;
+  }
+
+  private play(guildId: string,
+    stream: Readable,
+    settings: { resumeOnInterupt: boolean, type: StreamType },
+    onStart: (progress: StreamDispatcher) => void,
+    onEnd: (stop?: boolean) => void) {
+    const connection = this.client.voice.connections
+      .find((_, id) => id === guildId);
+    if (!connection) {
+      throw new UnprocessableEntityException('guild id not found');
+    }
+    if (this.dispatchers.has(guildId)) {
+      this.stopStream(guildId);
+    }
+    const dispatcher = connection.play(stream, { type: settings.type });
+    dispatcher.on('debug', debug => this.logger.debug(debug));
+    dispatcher.on('error', error => this.logger.error(error));
+    dispatcher.on('start', () => {
+      this.logger.log('Playing from stream');
+      onStart(dispatcher);
+    });
+    dispatcher.on('finish', () => {
+      this.dispatchers.delete(guildId);
+      this.botStatusUpdate(guildId, BotStatus.IN_VOICE_CHANNEL);
+      onEnd();
+    });
+    dispatcher.on('stop', () => {
+      dispatcher.destroy();
+      this.dispatchers.delete(guildId);
+      onEnd(true);
+    });
+    this.dispatchers.set(guildId, dispatcher);
   }
 
   private bindToEvents() {
@@ -174,6 +170,20 @@ export class BotService implements OnApplicationShutdown {
           break;
       }
     });
+  }
+
+  private botStatusUpdate(guildId: string, status: BotStatus): void {
+    this.logger.log(`Bot status: ${status}`);
+    this.onStatusChangeListeners.forEach(cb => cb(guildId, status));
+    const state: BotStateDTO = {
+      guilds: this.client.guilds.cache.map(g => ({
+        id: g.id,
+        status: this.client.voice.connections.some(c => c.channel.guild.id === g.id)
+          ? BotStatus.IN_VOICE_CHANNEL
+          : BotStatus.CONNECTED,
+      })),
+    };
+    this.botGateway.sendStateUpdate(state);
   }
 
   private async onJoinCommand(message: Message) {

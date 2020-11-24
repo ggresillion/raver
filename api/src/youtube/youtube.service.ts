@@ -105,21 +105,27 @@ export class YoutubeService {
       (progress) => {
         this.youtubeGateway.sendProgressUpdate(guildId, progress / 1000);
       },
-      () => {
-        if (!this.shouldNotPlayNext.get(guildId)) {
-          this.playlist.get(guildId).splice(0, 1);
-          if (this.playlist.get(guildId).length === 0) {
-            return;
-          }
-          this.status.set(guildId, PlayerStatus.LOADING);
-          this.youtubeGateway.sendStatusUpdate(guildId, PlayerStatus.LOADING);
-          this.playSoundFromYoutube(guildId, this.playlist.get(guildId)[0].link);
-          this.propagateState(guildId);
+      (stop) => {
+        console.log('stop', stop)
+        if(stop) {
+          this.status.set(guildId, PlayerStatus.IDLE);
+          this.youtubeGateway.sendStatusUpdate(guildId, PlayerStatus.IDLE);
         } else {
-          this.status.set(guildId, PlayerStatus.PAUSED);
-          this.youtubeGateway.sendStatusUpdate(guildId, PlayerStatus.PAUSED);
+          if (!this.shouldNotPlayNext.get(guildId)) {
+            this.playlist.get(guildId).splice(0, 1);
+            if (this.playlist.get(guildId).length === 0) {
+              return;
+            }
+            this.status.set(guildId, PlayerStatus.LOADING);
+            this.youtubeGateway.sendStatusUpdate(guildId, PlayerStatus.LOADING);
+            this.playSoundFromYoutube(guildId, this.playlist.get(guildId)[0].link);
+            this.propagateState(guildId);
+          } else {
+            this.status.set(guildId, PlayerStatus.PAUSED);
+            this.youtubeGateway.sendStatusUpdate(guildId, PlayerStatus.PAUSED);
+          }
+          this.shouldNotPlayNext.delete(guildId);
         }
-        this.shouldNotPlayNext.delete(guildId);
       });
   }
 
@@ -164,6 +170,8 @@ export class YoutubeService {
       return;
     }
     this.botService.stopStream(guildId);
+    this.playlist.get(guildId).splice(0, 1);
+    this.play(guildId);
   }
 
   public moveUpwards(guildId: string, index: number): void {

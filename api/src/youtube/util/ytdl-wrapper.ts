@@ -26,10 +26,10 @@ async function stream(url: string, options = {})
   const info = await ytdl.getInfo(url);
   // Prefer opus
   const format = info.formats.find(filter);
-  const canDemux = format && info.length_seconds !== '0';
+  const canDemux = format && info['length_seconds'] !== '0';
   if (canDemux) {
     options = { ...options, filter };
-  } else if (info.length_seconds !== '0') {
+  } else if (info['length_seconds'] !== '0') {
     options = { ...options, filter: 'audioonly' };
   }
   if (canDemux) {
@@ -37,7 +37,7 @@ async function stream(url: string, options = {})
     const s = ytdl.downloadFromInfo(info, options)
       .on('response', res => {
         const totalSize = res.headers['content-length'];
-        return { stream: s, totalLengthSeconds: parseInt(info.length_seconds, 10) };
+        return { stream: s, totalLengthSeconds: parseInt(info.videoDetails.lengthSeconds, 10) };
       })
       .pipe(demuxer)
       .on('end', () => demuxer.destroy());
@@ -61,7 +61,7 @@ async function stream(url: string, options = {})
       transcoder.destroy();
       opus.destroy();
     });
-    return { stream: s, totalLengthSeconds: parseInt(info.length_seconds, 10) };
+    return { stream: s, totalLengthSeconds: parseInt(info.videoDetails.lengthSeconds, 10) };
   }
 }
 

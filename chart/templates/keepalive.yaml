@@ -1,0 +1,17 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: keepalive
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: keepalive
+            image: bitnami/kubectl
+            command: ["/bin/sh", "-c"]
+            args: 
+              - "kubectl get deployments,statefulsets -o name | xargs -I {} kubectl patch {} -p=\'{\"metadata\": {\"annotations\": {\"last-updated\": \"\'$(date +%s)\'\"}}}\'"
+          restartPolicy: OnFailure
