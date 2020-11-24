@@ -1,6 +1,6 @@
-FROM node:12.18.3-alpine3.11 
+FROM node
 
-RUN apk add --no-cache build-base python ffmpeg
+RUN apt-get update && apt-get install -y build-essential ffmpeg
 
 WORKDIR /app
 

@@ -108,7 +108,7 @@ export class SoundService {
     readable.push(buffer);
     readable.push(null);
 
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       ffmpeg(readable)
         .audioBitrate(128)
         .audioBitrate(128)
