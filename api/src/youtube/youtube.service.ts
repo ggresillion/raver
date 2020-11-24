@@ -15,17 +15,12 @@ import { Bucket } from '../storage/bucket.enum';
 import youtube from 'scrape-youtube';
 import { TrackInfos } from './dto/track-infos';
 import { Video } from 'scrape-youtube/lib/interface';
-import fetch from 'node-fetch';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Image } from '../image/entity/image.entity';
 
 @Injectable()
 export class YoutubeService {
 
   private playlist: Map<string, TrackInfos[]> = new Map();
   private status: Map<string, PlayerStatus> = new Map();
-  private shouldNotPlayNext: Map<string, boolean> = new Map();
   private totalLengthSeconds: number;
 
   constructor(
@@ -106,25 +101,18 @@ export class YoutubeService {
         this.youtubeGateway.sendProgressUpdate(guildId, progress / 1000);
       },
       (stop) => {
-        console.log('stop', stop)
-        if(stop) {
+        if (stop) {
           this.status.set(guildId, PlayerStatus.IDLE);
           this.youtubeGateway.sendStatusUpdate(guildId, PlayerStatus.IDLE);
         } else {
-          if (!this.shouldNotPlayNext.get(guildId)) {
-            this.playlist.get(guildId).splice(0, 1);
-            if (this.playlist.get(guildId).length === 0) {
-              return;
-            }
-            this.status.set(guildId, PlayerStatus.LOADING);
-            this.youtubeGateway.sendStatusUpdate(guildId, PlayerStatus.LOADING);
-            this.playSoundFromYoutube(guildId, this.playlist.get(guildId)[0].link);
-            this.propagateState(guildId);
-          } else {
-            this.status.set(guildId, PlayerStatus.PAUSED);
-            this.youtubeGateway.sendStatusUpdate(guildId, PlayerStatus.PAUSED);
+          this.playlist.get(guildId).splice(0, 1);
+          if (this.playlist.get(guildId).length === 0) {
+            return;
           }
-          this.shouldNotPlayNext.delete(guildId);
+          this.status.set(guildId, PlayerStatus.LOADING);
+          this.youtubeGateway.sendStatusUpdate(guildId, PlayerStatus.LOADING);
+          this.playSoundFromYoutube(guildId, this.playlist.get(guildId)[0].link);
+          this.propagateState(guildId);
         }
       });
   }
@@ -158,7 +146,6 @@ export class YoutubeService {
   }
 
   public stop(guildId: string) {
-    this.shouldNotPlayNext.set(guildId, true);
     this.botService.stopStream(guildId);
   }
 
@@ -171,6 +158,7 @@ export class YoutubeService {
     }
     this.botService.stopStream(guildId);
     this.playlist.get(guildId).splice(0, 1);
+    this.propagateState(guildId);
     this.play(guildId);
   }
 

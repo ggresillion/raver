@@ -1,5 +1,5 @@
-<mat-card class="container" fxLayout="column">
-  <div class="player" fxLayout="column" fxLayoutGap="16px">
+<mat-card class="container" fxLayout="column" fxFlex>
+  <div class="player" fxLayout="column" fxLayoutGap="16px" fxFlex="25">
     <div class="player-container">
       <button mat-button (click)="stop()" style="border-left: 1px solid #ddd;"
         [disabled]="status === 'na' || !playlist || playlist.length <= 0">
@@ -41,7 +41,7 @@
     </ng-template>
   </div>
 
-  <div class="playlist" fxLayout="column" fxLayoutAlign="space-between" fxFlex>
+  <div class="playlist" fxLayout="column" fxLayoutAlign="space-between" fxFlex="30">
     <div fxLayout="column" fxFlex>
       <h2>Playlist</h2>
       <table class="track" mat-table [dataSource]="dataSource" *ngIf="playlist && dataSource.data.length > 0">

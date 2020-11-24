@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnApplicationShutdown, BadRequestException, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationShutdown, UnprocessableEntityException } from '@nestjs/common';
 import { Client, Message, StreamDispatcher, VoiceChannel, GuildMember, Snowflake, Collection, StreamType } from 'discord.js';
 import { Command } from './command.enum';
 import { StorageService } from '../storage/storage.service';

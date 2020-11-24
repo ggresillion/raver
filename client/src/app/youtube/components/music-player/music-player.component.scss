@@ -1,8 +1,15 @@
 @import 'src/styles.scss';
 
+:host {
+  height: 100%;
+  min-height: 100%;
+  max-height: 100%;
+}
+
 .container {
   height: 100%;
   min-height: 100%;
+  max-height: 100%;
 
   .player-container {
     display: flex;
@@ -22,8 +29,8 @@
   }
 
   .current-song, .playlist {
-    margin-top: 16px;
-    padding-top: 12px;
+    // margin-top: 16px;
+    // padding-top: 12px;
   }
 
   .playlist {
