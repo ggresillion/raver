@@ -4,10 +4,6 @@ export interface TrackInfos {
   thumbnail: string;
   author: {
     name: string;
-    ref: string;
-    verified: boolean;
   };
-  description: string;
-  views: number;
   duration: number | null;
 }

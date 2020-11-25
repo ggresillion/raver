@@ -12,9 +12,9 @@ import { Sound } from '../sound/entity/sound.entity';
 import { BotStatus } from '../bot/dto/bot-status.enum';
 import { UploadDto } from './dto/upload.dto';
 import { Bucket } from '../storage/bucket.enum';
-import youtube from './scraper';
+import youtube from 'scrape-yt';
 import { TrackInfos } from './dto/track-infos';
-import { Video } from 'scrape-youtube/lib/interface';
+import { Video, VideoDetailed } from 'scrape-yt';
 
 @Injectable()
 export class YoutubeService {
@@ -35,38 +35,16 @@ export class YoutubeService {
   }
 
   public async getVideoInfos(id: string): Promise<TrackInfos> {
-    const v = (await youtube.search(id)).videos[0];
-    return ({
-      title: v.title,
-      link: v.link,
-      thumbnail: v.thumbnail,
-      author: {
-        name: v.channel.name,
-        ref: v.channel.link,
-        verified: v.channel.verified
-      },
-      description: v.description,
-      views: v.views,
-      duration: v.duration
-    });
+    const v = await youtube.getVideo(id);
+    return this.mapToTrackInfos(v as Video);
   }
 
   public async searchVideos(q: string): Promise<TrackInfos[]> {
-    const search = await youtube.search(q);
-    return search.videos
-      .map((v: Video) => ({
-        title: v.title,
-        link: v.link,
-        thumbnail: v.thumbnail,
-        author: {
-          name: v.channel.name,
-          ref: v.channel.link,
-          verified: v.channel.verified
-        },
-        description: v.description,
-        views: v.views,
-        duration: v.duration
-      }));
+    const search = await youtube.search(q, {
+      type: "video"
+    });
+    return search
+      .map(this.mapToTrackInfos);
   }
 
   public async uploadFromYoutube(upload: UploadDto): Promise<Sound> {
@@ -103,17 +81,18 @@ export class YoutubeService {
       (stop) => {
         if (stop) {
           this.status.set(guildId, PlayerStatus.IDLE);
-          this.youtubeGateway.sendStatusUpdate(guildId, PlayerStatus.IDLE);
         } else {
           this.playlist.get(guildId).splice(0, 1);
           if (this.playlist.get(guildId).length === 0) {
+            this.propagateState(guildId);
+            this.status.set(guildId, PlayerStatus.IDLE);
             return;
           }
           this.status.set(guildId, PlayerStatus.LOADING);
-          this.youtubeGateway.sendStatusUpdate(guildId, PlayerStatus.LOADING);
           this.playSoundFromYoutube(guildId, this.playlist.get(guildId)[0].link);
           this.propagateState(guildId);
         }
+        this.youtubeGateway.sendStatusUpdate(guildId, this.status.get(guildId));
       });
   }
 
@@ -199,6 +178,18 @@ export class YoutubeService {
     playlist.splice(index, 1);
     this.playlist.set(guildId, playlist);
     this.propagateState(guildId);
+  }
+
+  private mapToTrackInfos(v: Video | VideoDetailed): TrackInfos {
+    return ({
+      title: v.title,
+      link: 'https://www.youtube.com/watch?v=' + v.id,
+      thumbnail: v.thumbnail,
+      author: {
+        name: v.channel.name
+      },
+      duration: v.duration
+    });
   }
 
   private onBotStatusUpdate(guildId: string, status: BotStatus) {
