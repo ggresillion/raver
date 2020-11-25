@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { BotService } from '../bot/bot.service';
 import { environment } from '../../environments/environment';
 import * as querystring from 'querystring';
+import { BotStateDTO } from '../bot/model/bot-state.dto';
 
 @Component({
   selector: 'app-home',
@@ -22,6 +23,7 @@ export class HomeComponent implements OnInit {
   public guilds: Guild[];
   public selectedGuild: Guild;
   public activatedRoute: any;
+  public state: BotStateDTO;
 
   constructor(
     private readonly authService: AuthService,
@@ -44,6 +46,9 @@ export class HomeComponent implements OnInit {
     this.activatedRoute = /[^/]*$/.exec(this.location.path())[0];
     this.location.onUrlChange(url => {
       this.activatedRoute = /[^/]*$/.exec(url)[0];
+    });
+    this.botService.getState().subscribe(state => {
+      this.state = state;
     });
   }
 
@@ -101,5 +106,10 @@ export class HomeComponent implements OnInit {
 
   public joinMyChannel(): void {
     this.botService.joinMyChannel().subscribe(() => { });
+  }
+
+  public setVolume(volume: number) {
+    console.log(volume)
+    this.botService.setVolume(volume);
   }
 }

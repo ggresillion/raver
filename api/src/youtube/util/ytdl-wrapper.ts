@@ -36,7 +36,6 @@ async function stream(url: string, options = {})
     const demuxer = new prism.opus.WebmDemuxer();
     const s = ytdl.downloadFromInfo(info, options)
       .on('response', res => {
-        const totalSize = res.headers['content-length'];
         return { stream: s, totalLengthSeconds: parseInt(info.videoDetails.lengthSeconds, 10) };
       })
       .pipe(demuxer)

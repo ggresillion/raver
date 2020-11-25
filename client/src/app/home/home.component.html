@@ -9,12 +9,8 @@
       <mat-icon>music_video</mat-icon>
       <span>SoundBoard</span>
     </div>
-    <div class="link"
-         fxLayout="row"
-         fxLayoutAlign="start center"
-         fxLayoutGap="12px"
-         [ngClass]="{'active': isLinkSelected('youtube')}"
-         (click)="navigateTo('youtube')">
+    <div class="link" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="12px"
+      [ngClass]="{'active': isLinkSelected('youtube')}" (click)="navigateTo('youtube')">
       <mat-icon svgIcon="youtube"></mat-icon>
       <span>Youtube</span>
     </div>
@@ -29,7 +25,7 @@
     </mat-form-field>
   </div>
   <div class="profile">
-    <img class="avatar" >
+    <img class="avatar">
   </div>
 </mat-toolbar>
 <!-- left panel -->
@@ -48,8 +44,12 @@
         </div>
         <!-- <app-bot-status></app-bot-status> -->
       </div>
-      <div class="side-bottom"  fxFlex fxLayout="column">
-        <button class="bot-join" mat-stroked-button (click)="joinMyChannel()"><mat-icon>record_voice_over</mat-icon> Join my channel</button>
+      <div class="side-bottom" fxFlex fxLayout="column">
+        <button class="bot-join" mat-stroked-button (click)="joinMyChannel()">
+          <mat-icon>record_voice_over</mat-icon> Join my channel
+        </button>
+        <span class="label">Volume</span>
+        <mat-slider [value]="state ? state.volume : 0" (change)="setVolume($event.value)" [disabled]="!state" min="0" max="1" step="0.1"></mat-slider>
         <div class="guilds" fxFlex fxLayout="column">
           <h2>Guilds</h2>
           <mat-spinner *ngIf="!guilds" fxFlexAlign="center"></mat-spinner>

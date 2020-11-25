@@ -6,7 +6,6 @@ import { BotGateway } from './bot.gateway';
 import { Readable, Stream } from 'stream';
 import { UserDTO } from '../user/dto/user.dto';
 import { GuildDTO } from '../guild/dto/guild.dto';
-import { BotStateDTO } from './dto/bot-state.dto';
 import { BotStatus } from './dto/bot-status.enum';
 import { createReadStream } from 'fs';
 import { Bucket } from '../storage/bucket.enum';
@@ -15,10 +14,14 @@ import { Bucket } from '../storage/bucket.enum';
 export class BotService implements OnApplicationShutdown {
 
   private readonly PROGRESS_POLLING_INTERVAL = 500;
+  private readonly DEFAULT_VOLUME = 0.5;
+
   private readonly logger = new Logger(BotService.name);
   private readonly token = process.env.BOT_TOKEN;
+
   private client: Client;
   private dispatchers: Map<string, StreamDispatcher> = new Map<string, StreamDispatcher>();
+  private volumes: Map<string, number> = new Map();
   private onStatusChangeListeners: ((guildId: string, status: BotStatus) => void)[] = [];
 
   constructor(
@@ -112,6 +115,24 @@ export class BotService implements OnApplicationShutdown {
       : BotStatus.CONNECTED;
   }
 
+  public setVolume(guildId: string, volume: number) {
+    this.volumes.set(guildId, volume);
+    this.logger.debug(`(${guildId}) Changed volume to: ${volume}`)
+    this.propagateState(guildId);
+  }
+  
+  public getState(guildId: string) {
+    return {
+      guilds: this.client.guilds.cache.map(g => ({
+        id: g.id,
+        status: this.client.voice.connections.some(c => c.channel.guild.id === g.id)
+          ? BotStatus.IN_VOICE_CHANNEL
+          : BotStatus.CONNECTED,
+      })),
+      volume: this.getVolume(guildId)
+    };
+  }
+
   private play(guildId: string,
     stream: Readable,
     settings: { resumeOnInterupt: boolean, type: StreamType },
@@ -125,7 +146,7 @@ export class BotService implements OnApplicationShutdown {
     if (this.dispatchers.has(guildId)) {
       this.stopStream(guildId);
     }
-    const dispatcher = connection.play(stream, { type: settings.type });
+    const dispatcher = connection.play(stream, { type: settings.type, volume: this.getVolume(guildId) });
     dispatcher.on('debug', debug => this.logger.debug(debug));
     dispatcher.on('error', error => this.logger.error(error));
     dispatcher.on('start', () => {
@@ -175,15 +196,7 @@ export class BotService implements OnApplicationShutdown {
   private botStatusUpdate(guildId: string, status: BotStatus): void {
     this.logger.log(`Bot status: ${status}`);
     this.onStatusChangeListeners.forEach(cb => cb(guildId, status));
-    const state: BotStateDTO = {
-      guilds: this.client.guilds.cache.map(g => ({
-        id: g.id,
-        status: this.client.voice.connections.some(c => c.channel.guild.id === g.id)
-          ? BotStatus.IN_VOICE_CHANNEL
-          : BotStatus.CONNECTED,
-      })),
-    };
-    this.botGateway.sendStateUpdate(state);
+    this.propagateState(guildId);
   }
 
   private async onJoinCommand(message: Message) {
@@ -222,5 +235,13 @@ export class BotService implements OnApplicationShutdown {
       return;
     }
     this.client.login(this.token);
+  }
+
+  private getVolume(guildId: string): number {
+    return this.volumes.has(guildId) ? this.volumes.get(guildId) : this.DEFAULT_VOLUME;
+  }
+
+  private propagateState(guildId: string) {
+    this.botGateway.sendStateUpdate(guildId, this.getState(guildId));
   }
 }
