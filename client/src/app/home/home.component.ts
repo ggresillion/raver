@@ -87,7 +87,6 @@ export class HomeComponent implements OnInit {
     window.open(`${environment.discord.api}?${querystring.encode({
       client_id: environment.discord.clientId,
       permissions: environment.discord.permissions,
-      redirect_uri: location.href,
       scope: environment.discord.scope,
     })}`);
   }
