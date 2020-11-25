@@ -47,12 +47,11 @@
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.3",
     "scrape-youtube": "^2.0.1",
+    "sodium": "^3.0.2",
     "typeorm": "^0.2.29",
     "typescript": "^4.0.5",
     "uuid": "^8.3.1",
-    "ytdl-core": "^4.0.3",
-    "ytsr": "^1.0.4",
-    "zlib-sync": "^0.1.7"
+    "ytdl-core": "^4.0.3"
   },
   "devDependencies": {
     "@nestjs/testing": "^7.5.1",

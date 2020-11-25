@@ -16,4 +16,8 @@ export class YoutubeThumbnailComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  public getLink(): string {
+    return this.link.replace('hqdefault', 'mqdefault');
+  }
+
 }

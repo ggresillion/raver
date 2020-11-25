@@ -12,7 +12,7 @@ import { Sound } from '../sound/entity/sound.entity';
 import { BotStatus } from '../bot/dto/bot-status.enum';
 import { UploadDto } from './dto/upload.dto';
 import { Bucket } from '../storage/bucket.enum';
-import youtube from 'scrape-youtube';
+import youtube from './scraper';
 import { TrackInfos } from './dto/track-infos';
 import { Video } from 'scrape-youtube/lib/interface';
 

@@ -109,7 +109,6 @@ export class HomeComponent implements OnInit {
   }
 
   public setVolume(volume: number) {
-    console.log(volume)
     this.botService.setVolume(volume);
   }
 }

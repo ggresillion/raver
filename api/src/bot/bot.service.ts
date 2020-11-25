@@ -117,10 +117,13 @@ export class BotService implements OnApplicationShutdown {
 
   public setVolume(guildId: string, volume: number) {
     this.volumes.set(guildId, volume);
+    if (this.dispatchers.has(guildId)) {
+      this.dispatchers.get(guildId).setVolume(volume);
+    }
     this.logger.debug(`(${guildId}) Changed volume to: ${volume}`)
     this.propagateState(guildId);
   }
-  
+
   public getState(guildId: string) {
     return {
       guilds: this.client.guilds.cache.map(g => ({
