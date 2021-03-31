@@ -149,7 +149,7 @@ export class BotService implements OnApplicationShutdown {
     if (this.dispatchers.has(guildId)) {
       this.stopStream(guildId);
     }
-    const dispatcher = connection.play(stream, { type: settings.type, volume: this.getVolume(guildId) });
+    const dispatcher = connection.play(stream, { type: settings.type, volume: this.getVolume(guildId), highWaterMark: 50 });
     dispatcher.on('debug', debug => this.logger.debug(debug));
     dispatcher.on('error', error => this.logger.error(error));
     dispatcher.on('start', () => {

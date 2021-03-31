@@ -1,0 +1,8 @@
+icon: https://apps.okteto.com/movies/icon.png
+deploy:
+  - okteto build -t okteto.dev/api:${OKTETO_GIT_COMMIT} api
+  - okteto build -t okteto.dev/client:${OKTETO_GIT_COMMIT} client
+  - helm upgrade --install discordsoundboard chart --set tag=${OKTETO_GIT_COMMIT}
+devs:
+  - api/okteto.yml
+  - client/okteto.yml
