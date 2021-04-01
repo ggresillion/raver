@@ -1,10 +1,10 @@
 api:
-  repository: okteto.dev/discordsoundboard_api
+  repository: ggresillion/discordsoundboard_api
   tag: ""
   replicaCount: 1
 
 client:
-  repository: okteto.dev/discordsoundboard_client
+  repository: ggresillion/discordsoundboard_client
   tag: ""
   replicaCount: 1
 
