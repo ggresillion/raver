@@ -1,9 +1,9 @@
-import {BadRequestException, Controller, Get, Query, Req, Res, UnauthorizedException} from '@nestjs/common';
-import {Request, Response} from 'express';
-import {AuthService} from './auth.service';
+import { BadRequestException, Controller, Get, Query, Req, Res, UnauthorizedException } from '@nestjs/common';
+import { Request, Response } from 'express';
+import { AuthService } from './auth.service';
 import fetch from 'node-fetch';
-import {ConfigService} from '@nestjs/config';
-import {URLSearchParams} from 'url';
+import { ConfigService } from '@nestjs/config';
+import { URLSearchParams } from 'url';
 
 @Controller('auth')
 export class AuthController {
@@ -13,7 +13,6 @@ export class AuthController {
   private readonly scopes = ['identify', 'guilds'];
 
   constructor(
-    private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {
   }
@@ -27,7 +26,7 @@ export class AuthController {
   }
 
   @Get('token')
-  public async token(@Req() req: Request, @Res() res: Response, @Query('code')code: string) {
+  public async token(@Req() req: Request, @Res() res: Response, @Query('code') code: string) {
     if (!code) {
       throw new BadRequestException();
     }

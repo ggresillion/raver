@@ -74,6 +74,7 @@ jobs:
         with:
           kubeconfig: '${{ secrets.KUBECONFIG }}'
           exec: |
+            export POSTGRESQL_PASSWORD=$(kubectl get secret --namespace ggresillion discordsoundboard-postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode) &&
             helm upgrade --install discordsoundboard chart \
             --set api.tag=${GITHUB_SHA} \
             --set client.tag=${GITHUB_SHA} \
