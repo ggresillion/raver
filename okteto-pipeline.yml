@@ -1,8 +1,0 @@
-icon: https://raw.githubusercontent.com/ggresillion/DiscordSoundBoard/master/client/src/favicon.svg
-deploy:
-  - okteto build -t okteto.dev/api:${OKTETO_GIT_COMMIT} api
-  - okteto build -t okteto.dev/client:${OKTETO_GIT_COMMIT} client
-  - helm upgrade --install discordsoundboard chart --set api.tag=${OKTETO_GIT_COMMIT} --set client.tag=${OKTETO_GIT_COMMIT} --set clientId="${CLIENT_ID}" --set clientSecret="${CLIENT_SECRET}" --set botToken="${BOT_TOKEN}"
-devs:
-  - api/okteto.yml
-  - client/okteto.yml
