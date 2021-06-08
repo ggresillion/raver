@@ -37,8 +37,8 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: secret
-                  key: postgresqlPassword
+                  name: discordsoundboard-postgresql
+                  key: postgresql-password
             - name: CLIENT_ID
               valueFrom:
                 secretKeyRef:
