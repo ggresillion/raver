@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ action ]
 
-env:https://github.com/ggresillion/DiscordSoundBoard
+env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
