@@ -1,4 +1,4 @@
-import { getVoiceConnection, joinVoiceChannel, StreamType } from '@discordjs/voice';
+import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, getVoiceConnection, joinVoiceChannel, StreamType } from '@discordjs/voice';
 import { Injectable, Logger, OnApplicationShutdown, UnprocessableEntityException } from '@nestjs/common';
 import { Client, Intents, Message, VoiceChannel } from 'discord.js';
 import { createReadStream } from 'fs';
@@ -21,7 +21,7 @@ export class BotService implements OnApplicationShutdown {
   private readonly token = process.env.BOT_TOKEN;
 
   private client: Client;
-  private dispatchers: Map<string, any> = new Map<string, any>();
+  private audioPlayers: Map<string, AudioPlayer> = new Map<string, AudioPlayer>();
   private volumes: Map<string, number> = new Map();
   private onStatusChangeListeners: ((guildId: string, status: BotStatus) => void)[] = [];
 
@@ -29,7 +29,7 @@ export class BotService implements OnApplicationShutdown {
     private readonly storageService: StorageService,
     private readonly botGateway: BotGateway,
   ) {
-    this.client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+    this.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_VOICE_STATES] });
     this.connect();
     this.bindToEvents();
   }
@@ -65,25 +65,25 @@ export class BotService implements OnApplicationShutdown {
   }
 
   public pauseStream(guildId: string) {
-    this.dispatchers.get(guildId).pause();
+    this.audioPlayers.get(guildId).pause();
     this.logger.log('Paused stream');
   }
 
   public resumeStream(guildId: string) {
-    this.dispatchers.get(guildId).resume();
+    this.audioPlayers.get(guildId).unpause();
     this.logger.log('Resumed stream');
   }
 
   public stopStream(guildId: string) {
-    if (!this.dispatchers.has(guildId)) {
+    if (!this.audioPlayers.has(guildId)) {
       return;
     }
-    this.dispatchers.get(guildId).emit('stop');
+    this.audioPlayers.get(guildId).stop();
     this.logger.log('Stopped stream');
   }
 
   public isPlaying(guildId: string): boolean {
-    return this.dispatchers.has(guildId);
+    return this.audioPlayers.has(guildId);
   }
 
   public onBotStatusUpdate(cb: (guildId: string, status: BotStatus) => void) {
@@ -100,7 +100,13 @@ export class BotService implements OnApplicationShutdown {
   }
 
   public async joinMyChannel(user: UserDTO): Promise<void> {
-    console.log(this.client.users.fetch(user.id));
+    this.client.guilds.cache
+      .forEach(async g => {
+        const member = await g.members.fetch(user.id);
+        if (member.voice.channel) {
+          joinVoiceChannel({ guildId: g.id, channelId: member.voice.channel.id, adapterCreator: g.voiceAdapterCreator })
+        }
+      })
   }
 
   public getStatus(guildId: string): BotStatus {
@@ -110,8 +116,8 @@ export class BotService implements OnApplicationShutdown {
 
   public setVolume(guildId: string, volume: number) {
     this.volumes.set(guildId, volume);
-    if (this.dispatchers.has(guildId)) {
-      this.dispatchers.get(guildId).setVolume(volume);
+    if (this.audioPlayers.has(guildId)) {
+      // this.audioPlayers.get(guildId).setVolume(volume);
     }
     this.logger.debug(`(${guildId}) Changed volume to: ${volume}`)
     this.propagateState(guildId);
@@ -138,27 +144,33 @@ export class BotService implements OnApplicationShutdown {
     if (!connection) {
       throw new UnprocessableEntityException('guild id not found');
     }
-    if (this.dispatchers.has(guildId)) {
+    if (this.audioPlayers.has(guildId)) {
       this.stopStream(guildId);
     }
-    // const dispatcher = connection.play(stream, { type: settings.type, volume: this.getVolume(guildId), highWaterMark: 50 });
-    // dispatcher.on('debug', debug => this.logger.debug(debug));
-    // dispatcher.on('error', error => this.logger.error(error));
-    // dispatcher.on('start', () => {
+
+    const player = createAudioPlayer();
+
+    connection.subscribe(player);
+
+    player.on('debug', debug => this.logger.debug(debug));
+    player.on('error', error => this.logger.error(error));
+    // player.on(AudioPlayerStatus.Playing, () => {
     //   this.logger.log('Playing from stream');
-    //   onStart(dispatcher);
+    //   onStart(player);
     // });
-    // dispatcher.on('finish', () => {
-    //   this.dispatchers.delete(guildId);
+    // player.on(AudioPlayerStatus.Idle, () => {
+    //   this.audioPlayers.delete(guildId);
     //   this.botStatusUpdate(guildId, BotStatus.IN_VOICE_CHANNEL);
     //   onEnd();
     // });
-    // dispatcher.on('stop', () => {
-    //   dispatcher.destroy();
-    //   this.dispatchers.delete(guildId);
+    // player.on(AudioPlayerStatus.Paused, () => {
+    //   player.destroy();
+    //   this.audioPlayers.delete(guildId);
     //   onEnd(true);
     // });
-    // this.dispatchers.set(guildId, dispatcher);
+    this.audioPlayers.set(guildId, player);
+    const audio = createAudioResource(stream, { inputType: StreamType.OggOpus });
+    player.play(audio);
   }
 
   private bindToEvents() {
