@@ -19,6 +19,7 @@ import { ImageModule } from './image/image.module';
   imports: [
     ConfigModule.forRoot({
       load: [configuration],
+      isGlobal: true
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

@@ -1,16 +1,16 @@
-FROM node
+FROM node:alpine
 
-RUN apt-get update && apt-get install -y build-essential ffmpeg
+RUN apk update && apk add ffmpeg make gcc g++ libtool autoconf automake python3
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
+RUN yarn install
 
 COPY . .
 
-RUN npm run build
+RUN yarn build
 
 EXPOSE 8000
 

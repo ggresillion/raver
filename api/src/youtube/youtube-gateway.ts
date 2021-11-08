@@ -1,5 +1,5 @@
 import { OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Client, Server, Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { ClientEvents } from './dto/client-events.enum';
 import { TrackInfos } from './dto/track-infos';
 import { ServerEvents } from './dto/server-events.enum';
@@ -94,7 +94,7 @@ export class YoutubeGateway implements OnGatewayConnection {
   @SubscribeMessage(ClientEvents.JOIN_ROOM)
   private joinRoom(socket: Socket, data: { guildId: string }) {
     this.logger.log(`Received event : ${ClientEvents.JOIN_ROOM} (${data.guildId})`);
-    socket.leaveAll();
+    // socket.leaveAll();
     socket.join(data.guildId);
     socket.emit(
       ServerEvents.SYNC,

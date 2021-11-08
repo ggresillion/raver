@@ -32,7 +32,7 @@ export class BotGateway implements OnGatewayConnection {
   @SubscribeMessage(ClientEvents.JOIN_ROOM)
   private joinRoom(socket: Socket, data: { guildId: string }) {
     this.logger.log(`Received event : ${ClientEvents.JOIN_ROOM} (${data.guildId})`);
-    socket.leaveAll();
+    // socket.leaveAll();
     socket.join(data.guildId);
     socket.emit(
       ServerEvents.STATE_UPDATE,

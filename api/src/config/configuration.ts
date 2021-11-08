@@ -33,10 +33,10 @@ const config = {
   },
 };
 
-const isProd = process.env.NODE_ENV === 'production';
-if (isProd) {
+const isDev = process.env.NODE_ENV === 'development';
+if (!isDev) {
   logger.log('Production configuration loaded');
 } else {
   logger.log('Development configuration loaded');
 }
-export default () => config[process.env.NODE_ENV || 'development'];
+export default () => config[process.env.NODE_ENV || 'production'];

@@ -1,10 +1,9 @@
-import {NestFactory} from '@nestjs/core';
-import {AppModule} from './app.module';
-import {ValidationPipe} from '@nestjs/common';
-import * as dotenv from 'dotenv';
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
-  dotenv.config();
   const app = await NestFactory.create(AppModule, {
     logger: ['log', 'error', 'warn', 'debug'],
   });
@@ -12,6 +11,6 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.enableCors();
   app.enableShutdownHooks();
-  await app.listen(app.get('ConfigService').get('port'));
+  await app.listen(app.get(ConfigService).get('port'));
 }
 bootstrap();

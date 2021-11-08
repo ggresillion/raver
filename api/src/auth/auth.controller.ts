@@ -1,9 +1,10 @@
 import { BadRequestException, Controller, Get, Query, Req, Res, UnauthorizedException } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { AuthService } from './auth.service';
 import fetch from 'node-fetch';
 import { ConfigService } from '@nestjs/config';
 import { URLSearchParams } from 'url';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 @Controller('auth')
 export class AuthController {
@@ -14,6 +15,7 @@ export class AuthController {
 
   constructor(
     private readonly configService: ConfigService,
+    private readonly httpService: HttpService
   ) {
   }
 
@@ -38,20 +40,18 @@ export class AuthController {
     params.append('code', code);
     params.append('redirect_uri', redirect);
     params.append('scope', this.scopes.join('%20'));
-    const response = await fetch('https://discordapp.com/api/oauth2/token',
+    const response = await firstValueFrom(this.httpService.post('https://discordapp.com/api/oauth2/token',
       {
-        method: 'POST',
         headers: {
           Authorization: `Basic ${creds}`,
         },
         body: params
-      });
-    const body = await response.json();
-    if (!response.ok) {
-      throw new UnauthorizedException(body.error_description);
+      }));
+    if (response.status === 200) {
+      throw new UnauthorizedException(response.data['error_description']);
     }
-    const accessToken = body.access_token;
-    const refreshToken = body.refresh_token;
+    const accessToken = response.data['access_token'];
+    const refreshToken = response.data['refresh_token'];
     res.redirect(`${this.configService.get('clientUrl') ? this.configService.get('clientUrl') : `${host}/#/`}` +
       `login?accessToken=${accessToken}&refreshToken=${refreshToken}`);
   }

@@ -1,13 +1,14 @@
-import {Injectable, Scope, UnauthorizedException} from '@nestjs/common';
-import fetch from 'node-fetch';
-import {UserDTO} from '../user/dto/user.dto';
-import {GuildDTO} from '../guild/dto/guild.dto';
-import {BotService} from '../bot/bot.service';
+import { Injectable, Scope } from '@nestjs/common';
+import { UserDTO } from '../user/dto/user.dto';
+import { GuildDTO } from '../guild/dto/guild.dto';
+import { BotService } from '../bot/bot.service';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom, map } from 'rxjs';
 
-@Injectable({scope: Scope.REQUEST})
+@Injectable({ scope: Scope.REQUEST })
 export class DiscordService {
 
-  constructor(private readonly botService: BotService) {
+  constructor(private readonly botService: BotService, private readonly httpService: HttpService) {
   }
 
   private readonly discordApi = 'http://discordapp.com/api';
@@ -21,16 +22,11 @@ export class DiscordService {
    * Get connected user information from the discord API
    */
   public async getUser(): Promise<UserDTO> {
-    return fetch(`${this.discordApi}/users/@me`, {
+    return firstValueFrom(this.httpService.get(`${this.discordApi}/users/@me`, {
       headers: {
         Authorization: `Bearer ${this.token}`,
-      },
-    }).then(res => {
-      if (!res.ok) {
-        throw new UnauthorizedException('Failed to contact Discord API');
       }
-      return res.json();
-    });
+    }).pipe(map(res => res.data)));
   }
 
   /**
@@ -38,14 +34,10 @@ export class DiscordService {
    * @param user user
    */
   public async getMyGuilds(user: UserDTO): Promise<GuildDTO[]> {
-    const res = await fetch(`${this.discordApi}/users/@me/guilds`, {
+    return firstValueFrom(this.httpService.get(`${this.discordApi}/users/@me/guilds`, {
       headers: {
         Authorization: `Bearer ${this.token}`,
-      },
-    });
-    if (!res.ok) {
-      throw new UnauthorizedException('Failed to contact Discord API');
-    }
-    return this.botService.setIsBotInGuild(user, await res.json() as GuildDTO[]);
+      }
+    }).pipe(map(res => this.botService.setIsBotInGuild(user, res.data as GuildDTO[]))));
   }
 }

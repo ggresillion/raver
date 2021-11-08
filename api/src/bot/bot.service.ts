@@ -1,14 +1,15 @@
+import { getVoiceConnection, joinVoiceChannel, StreamType } from '@discordjs/voice';
 import { Injectable, Logger, OnApplicationShutdown, UnprocessableEntityException } from '@nestjs/common';
-import { Client, Message, StreamDispatcher, VoiceChannel, GuildMember, Snowflake, Collection, StreamType } from 'discord.js';
-import { Command } from './command.enum';
-import { StorageService } from '../storage/storage.service';
-import { BotGateway } from './bot.gateway';
-import { Readable, Stream } from 'stream';
-import { UserDTO } from '../user/dto/user.dto';
-import { GuildDTO } from '../guild/dto/guild.dto';
-import { BotStatus } from './dto/bot-status.enum';
+import { Client, Intents, Message, VoiceChannel } from 'discord.js';
 import { createReadStream } from 'fs';
+import { Readable } from 'stream';
+import { GuildDTO } from '../guild/dto/guild.dto';
 import { Bucket } from '../storage/bucket.enum';
+import { StorageService } from '../storage/storage.service';
+import { UserDTO } from '../user/dto/user.dto';
+import { BotGateway } from './bot.gateway';
+import { Command } from './command.enum';
+import { BotStatus } from './dto/bot-status.enum';
 
 @Injectable()
 export class BotService implements OnApplicationShutdown {
@@ -20,7 +21,7 @@ export class BotService implements OnApplicationShutdown {
   private readonly token = process.env.BOT_TOKEN;
 
   private client: Client;
-  private dispatchers: Map<string, StreamDispatcher> = new Map<string, StreamDispatcher>();
+  private dispatchers: Map<string, any> = new Map<string, any>();
   private volumes: Map<string, number> = new Map();
   private onStatusChangeListeners: ((guildId: string, status: BotStatus) => void)[] = [];
 
@@ -28,13 +29,13 @@ export class BotService implements OnApplicationShutdown {
     private readonly storageService: StorageService,
     private readonly botGateway: BotGateway,
   ) {
-    this.client = new Client();
+    this.client = new Client({ intents: [Intents.FLAGS.GUILDS] });
     this.connect();
     this.bindToEvents();
   }
 
   public onApplicationShutdown(signal?: string): any {
-    this.client.voice.connections.forEach(co => co.disconnect());
+    // this.client.voice.connections.forEach(co => co.disconnect());
   }
 
   public playFile(uuid: string, guildId: string) {
@@ -93,25 +94,17 @@ export class BotService implements OnApplicationShutdown {
     return guilds.map(guild => {
       return {
         ...guild,
-        isBotInGuild: this.client.guilds.cache.array().some(g => g.id === guild.id),
+        isBotInGuild: this.client.guilds.cache.some(g => g.id === guild.id),
       };
     });
   }
 
   public async joinMyChannel(user: UserDTO): Promise<void> {
-    for (let channel of this.client.channels.cache.array()
-      .filter(c => c instanceof VoiceChannel)) {
-      const members = <Collection<Snowflake, GuildMember>>channel['members'];
-      if (members.array().find(m => m.id === user.id)) {
-        await this.joinChannel(<VoiceChannel>channel);
-        return;
-      }
-    }
+    console.log(this.client.users.fetch(user.id));
   }
 
   public getStatus(guildId: string): BotStatus {
-    return this.client.voice.connections.some(c => c.channel.guild.id === guildId)
-      ? BotStatus.IN_VOICE_CHANNEL
+    return getVoiceConnection(guildId) ? BotStatus.IN_VOICE_CHANNEL
       : BotStatus.CONNECTED;
   }
 
@@ -128,7 +121,7 @@ export class BotService implements OnApplicationShutdown {
     return {
       guilds: this.client.guilds.cache.map(g => ({
         id: g.id,
-        status: this.client.voice.connections.some(c => c.channel.guild.id === g.id)
+        status: getVoiceConnection(guildId)
           ? BotStatus.IN_VOICE_CHANNEL
           : BotStatus.CONNECTED,
       })),
@@ -138,35 +131,34 @@ export class BotService implements OnApplicationShutdown {
 
   private play(guildId: string,
     stream: Readable,
-    settings: { resumeOnInterupt: boolean, type: StreamType },
-    onStart: (progress: StreamDispatcher) => void,
+    settings: { resumeOnInterupt: boolean, type: any },
+    onStart: (progress: any) => void,
     onEnd: (stop?: boolean) => void) {
-    const connection = this.client.voice.connections
-      .find((_, id) => id === guildId);
+    const connection = getVoiceConnection(guildId);
     if (!connection) {
       throw new UnprocessableEntityException('guild id not found');
     }
     if (this.dispatchers.has(guildId)) {
       this.stopStream(guildId);
     }
-    const dispatcher = connection.play(stream, { type: settings.type, volume: this.getVolume(guildId), highWaterMark: 50 });
-    dispatcher.on('debug', debug => this.logger.debug(debug));
-    dispatcher.on('error', error => this.logger.error(error));
-    dispatcher.on('start', () => {
-      this.logger.log('Playing from stream');
-      onStart(dispatcher);
-    });
-    dispatcher.on('finish', () => {
-      this.dispatchers.delete(guildId);
-      this.botStatusUpdate(guildId, BotStatus.IN_VOICE_CHANNEL);
-      onEnd();
-    });
-    dispatcher.on('stop', () => {
-      dispatcher.destroy();
-      this.dispatchers.delete(guildId);
-      onEnd(true);
-    });
-    this.dispatchers.set(guildId, dispatcher);
+    // const dispatcher = connection.play(stream, { type: settings.type, volume: this.getVolume(guildId), highWaterMark: 50 });
+    // dispatcher.on('debug', debug => this.logger.debug(debug));
+    // dispatcher.on('error', error => this.logger.error(error));
+    // dispatcher.on('start', () => {
+    //   this.logger.log('Playing from stream');
+    //   onStart(dispatcher);
+    // });
+    // dispatcher.on('finish', () => {
+    //   this.dispatchers.delete(guildId);
+    //   this.botStatusUpdate(guildId, BotStatus.IN_VOICE_CHANNEL);
+    //   onEnd();
+    // });
+    // dispatcher.on('stop', () => {
+    //   dispatcher.destroy();
+    //   this.dispatchers.delete(guildId);
+    //   onEnd(true);
+    // });
+    // this.dispatchers.set(guildId, dispatcher);
   }
 
   private bindToEvents() {
@@ -204,7 +196,7 @@ export class BotService implements OnApplicationShutdown {
 
   private async onJoinCommand(message: Message) {
     const channel = message.member.voice.channel;
-    if (channel) {
+    if (channel && channel instanceof VoiceChannel) {
       await this.joinChannel(channel);
     } else {
       await message.reply('You need to join a voice channel first!');
@@ -214,7 +206,7 @@ export class BotService implements OnApplicationShutdown {
   private async joinChannel(channel: VoiceChannel): Promise<void> {
     if (channel) {
       try {
-        await channel.join();
+        await joinVoiceChannel({ channelId: channel.id, guildId: channel.guild.id, adapterCreator: channel.guild.voiceAdapterCreator })
         this.logger.log(`Bot connected in channel ${channel.name} (${channel.id})`);
         this.botStatusUpdate(channel.guild.id, BotStatus.IN_VOICE_CHANNEL);
       } catch (e) {
@@ -224,11 +216,11 @@ export class BotService implements OnApplicationShutdown {
   }
 
   private onLeaveCommand(message: Message) {
-    const voice = message.guild.voice;
+    const voice = getVoiceConnection(message.channel.id);
     if (voice) {
-      this.logger.debug(`Bot disconnected from channel ${voice.channel.name} (${voice.channel.id})`);
+      this.logger.debug(`Bot disconnected from channel ${message.channel.id}`);
       this.botStatusUpdate(message.guild.id, BotStatus.CONNECTED);
-      voice.connection.disconnect();
+      voice.destroy();
     }
   }
 
