@@ -5,8 +5,7 @@ import { BotService } from '../bot/bot.service';
 import { YoutubeGateway } from './youtube-gateway';
 import { PlayerStatus } from './model/player-status';
 import * as ytdlDiscord from './util/ytdl-wrapper';
-import * as ytdl from 'ytdl-core';
-import * as FFmpeg from 'fluent-ffmpeg';
+import ytdl from 'ytdl-core';
 import { PlayerState } from './model/player-state';
 import { Sound } from '../sound/entity/sound.entity';
 import { BotStatus } from '../bot/dto/bot-status.enum';
@@ -15,6 +14,7 @@ import { Bucket } from '../storage/bucket.enum';
 import youtube from 'scrape-yt';
 import { TrackInfos } from './dto/track-infos';
 import { Video, VideoDetailed } from 'scrape-yt';
+import Ffmpeg from 'fluent-ffmpeg';
 
 @Injectable()
 export class YoutubeService {
@@ -51,7 +51,7 @@ export class YoutubeService {
     const sound = await new Promise<Sound>((resolve, reject) => {
       const sound = this.soundService.createNewSoundEntity(upload.name, upload.categoryId, upload.guildId);
       const stream = ytdl(upload.url, { quality: 'lowestaudio' });
-      FFmpeg({ source: stream })
+      Ffmpeg({ source: stream })
         .audioBitrate(128)
         .withNoVideo()
         .toFormat('opus')

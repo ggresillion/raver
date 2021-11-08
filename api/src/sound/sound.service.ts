@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BotService } from '../bot/bot.service';
 import { SoundDto } from './dto/sound.dto';
 import { Image } from '../image/entity/image.entity';
-import * as ffmpeg from 'fluent-ffmpeg';
+import Ffmpeg from 'fluent-ffmpeg';
 import { Bucket } from '../storage/bucket.enum';
 import { Readable } from 'stream';
 
@@ -109,7 +109,7 @@ export class SoundService {
     readable.push(null);
 
     await new Promise<void>((resolve, reject) => {
-      ffmpeg(readable)
+      Ffmpeg(readable)
         .audioBitrate(128)
         .audioBitrate(128)
         .withNoVideo()
