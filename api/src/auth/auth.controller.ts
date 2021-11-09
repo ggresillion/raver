@@ -1,6 +1,5 @@
 import { BadRequestException, Controller, Get, Query, Req, Res, UnauthorizedException } from '@nestjs/common';
 import { Request, Response } from 'express';
-import fetch from 'node-fetch';
 import { ConfigService } from '@nestjs/config';
 import { URLSearchParams } from 'url';
 import { HttpService } from '@nestjs/axios';
@@ -40,19 +39,22 @@ export class AuthController {
     params.append('code', code);
     params.append('redirect_uri', redirect);
     params.append('scope', this.scopes.join('%20'));
-    const response = await firstValueFrom(this.httpService.post('https://discordapp.com/api/oauth2/token',
-      {
-        headers: {
-          Authorization: `Basic ${creds}`,
-        },
-        body: params
-      }));
-    if (response.status === 200) {
-      throw new UnauthorizedException(response.data['error_description']);
+
+    try {
+      const response = await firstValueFrom(this.httpService.post('https://discordapp.com/api/oauth2/token', params,
+        {
+          headers: {
+            Authorization: `Basic ${creds}`,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }));
+      const accessToken = response.data['access_token'];
+      const refreshToken = response.data['refresh_token'];
+      res.redirect(`${this.configService.get('clientUrl') ? this.configService.get('clientUrl') : `${host}/#/`}` +
+        `login?accessToken=${accessToken}&refreshToken=${refreshToken}`);
+    } catch (e) {
+      throw new UnauthorizedException(e.response.data.error_description);
     }
-    const accessToken = response.data['access_token'];
-    const refreshToken = response.data['refresh_token'];
-    res.redirect(`${this.configService.get('clientUrl') ? this.configService.get('clientUrl') : `${host}/#/`}` +
-      `login?accessToken=${accessToken}&refreshToken=${refreshToken}`);
+
   }
 }
