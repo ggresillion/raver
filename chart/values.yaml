@@ -1,10 +1,12 @@
+repository: ghcr.io/ggresillion
+
 api:
-  repository: okteto.dev/discordsoundboard_api
+  image: discordsoundboard_api
   tag: ""
   replicaCount: 1
 
 client:
-  repository: okteto.dev/discordsoundboard_frontend
+  image: discordsoundboard_client
   tag: ""
   replicaCount: 1
 
@@ -14,3 +16,8 @@ postgresql:
   persistence:
     enabled: true
     size: 150Mi
+
+secrets:
+  clientId: ""
+  clientSecret: ""
+  botToken: ""
