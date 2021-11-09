@@ -21,7 +21,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
-          image: "{{ .Values.api.repository }}:{{ .Values.api.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.repository }}/{{ .Values.api.image }}:{{ .Values.api.tag | default .Chart.AppVersion }}"
           ports:
             - name: http
               containerPort: 8000
@@ -37,7 +37,7 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: discordsoundboard-postgresql
+                  name: {{ .Release.Name }}-postgresql
                   key: postgresql-password
             - name: CLIENT_ID
               valueFrom:

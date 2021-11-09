@@ -17,7 +17,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
-          image: "{{ .Values.client.repository }}:{{ .Values.client.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.repository }}/{{ .Values.client.image }}:{{ .Values.client.tag | default .Chart.AppVersion }}"
           ports:
             - name: http
               containerPort: 80
