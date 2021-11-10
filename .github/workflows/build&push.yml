@@ -81,5 +81,5 @@ jobs:
       - name: Deploy
         uses: WyriHaximus/github-action-helm3@v2
         with:
-          exec: helm upgrade ${{ env.APP_NAME }} chart --install --set secrets.clientId=${{ secrets.CLIENT_ID }} --set secrets.clientSecret=${{ secrets.CLIENT_SECRET }} --set secrets.botToken=${{ secrets.BOT_TOKEN }} --set api.tag=${{ steps.meta.outputs.tags }} --set client.tag=${{ steps.meta.outputs.tags }}
+          exec: helm repo update && helm upgrade ${{ env.APP_NAME }} chart --install --set secrets.clientId=${{ secrets.CLIENT_ID }} --set secrets.clientSecret=${{ secrets.CLIENT_SECRET }} --set secrets.botToken=${{ secrets.BOT_TOKEN }} --set api.tag=${{ steps.meta.outputs.tags }} --set client.tag=${{ steps.meta.outputs.tags }}
           kubeconfig: '${{ secrets.KUBECONFIG }}'
