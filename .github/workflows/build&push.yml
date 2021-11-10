@@ -2,9 +2,9 @@ name: Build & Push Docker images, update Helm release
 
 on:
   push:
-    branches: [ action ]
+    branches: [ master ]
   pull_request:
-    branches: [ action ]
+    branches: [ master ]
 
 env:
   REGISTRY: ghcr.io
