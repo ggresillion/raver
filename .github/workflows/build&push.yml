@@ -75,6 +75,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   push-with-helm:
+    runs-on: 'ubuntu-latest'
     steps:
       - name: Deploy
         uses: WyriHaximus/github-action-helm3@v2
