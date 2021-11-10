@@ -76,6 +76,7 @@ jobs:
 
   push-with-helm:
     runs-on: 'ubuntu-latest'
+    needs: [build-and-push-api, build-and-push-client]
     steps:
       - name: Deploy
         uses: WyriHaximus/github-action-helm3@v2
