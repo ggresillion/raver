@@ -8,7 +8,6 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/ggresillion/discordsoundboard/youtube"
@@ -16,7 +15,6 @@ import (
 
 func init() {
 	flag.StringVar(&token, "t", "", "Bot Token")
-	flag.Parse()
 }
 
 var token string
@@ -24,6 +22,8 @@ var buffer = make([][]byte, 0)
 var s *discordgo.Session
 
 func main() {
+
+	flag.Parse()
 
 	if token == "" {
 		log.Print("No token provided.")
@@ -86,7 +86,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// check if the message is "!airhorn"
-	if strings.HasPrefix(m.Content, "!p") {
+	if strings.HasPrefix(m.Content, "p") {
 		handlePlaySoundMessage(s, m)
 	}
 }
@@ -144,27 +144,7 @@ func playSound(guildID, channelID string) (err error) {
 		return err
 	}
 
-	// Sleep for a specified amount of time before playing the sound
-	time.Sleep(250 * time.Millisecond)
-
-	// Start speaking.
-	vc.Speaking(true)
-
-	youtube.PlayFromYoutube(vc, "1MLQXVoZE00")
-
-	// Send the buffer data.
-	for _, buff := range buffer {
-		vc.OpusSend <- buff
-	}
-
-	// Stop speaking
-	vc.Speaking(false)
-
-	// Sleep for a specificed amount of time before ending.
-	time.Sleep(250 * time.Millisecond)
-
-	// Disconnect from the provided voice channel.
-	vc.Disconnect()
+	youtube.PlayFromYoutube(vc, "tUlthCngK9U")
 
 	return nil
 }
