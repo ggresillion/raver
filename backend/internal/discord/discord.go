@@ -1,4 +1,4 @@
-package main
+package discord
 
 import (
 	"flag"
@@ -10,7 +10,7 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/ggresillion/discordsoundboard/youtube"
+	"github.com/ggresillion/discordsoundboard/backend/internal/youtube"
 )
 
 func init() {
@@ -21,7 +21,7 @@ var token string
 var buffer = make([][]byte, 0)
 var s *discordgo.Session
 
-func main() {
+func StartBot() {
 
 	flag.Parse()
 

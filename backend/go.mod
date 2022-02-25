@@ -1,4 +1,4 @@
-module github.com/ggresillion/discordsoundboard
+module github.com/ggresillion/discordsoundboard/backend
 
 go 1.17
 
