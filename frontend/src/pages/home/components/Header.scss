@@ -1,0 +1,17 @@
+.header {
+    background-color: blueviolet;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+    width: 100%;
+    top: 0;
+    left: 0;
+    color: white;
+    background: #03a9f4;
+    background: linear-gradient(90deg, rgba(3, 169, 244, 1) 35%, rgba(109, 5, 255, 0.6194852941176471) 100%);
+
+    .logo {
+        height: calc(100% - 12px);
+    }
+}

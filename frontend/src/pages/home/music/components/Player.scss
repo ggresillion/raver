@@ -1,0 +1,81 @@
+.player {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 80px;
+    width: 100vw;
+    padding: 2px 16px;
+    background-color: rgb(53, 53, 53);
+    filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    color: white;
+
+    .track {
+        display: flex;
+        justify-content: space-between;
+        gap: 26px;
+
+        .track-thumbnail {
+            height: 50px;
+            filter: none;
+        }
+
+        .track-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 4px 0;
+
+            .track-name {
+                font-family: "Roboto-Thin";
+            }
+
+            .track-artist {
+                font-family: "Roboto";
+            }
+        }
+    }
+
+    .controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .progress-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        img {
+            height: 36px;
+            filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
+            cursor: pointer;
+            user-select: none;
+
+            &:hover {
+                transform: scale(1.05);
+            }
+        }
+    }
+
+    .volume {
+        width: 300px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        .progress-inner {
+            background: none;
+            background-color: #03a9f4;
+        }
+    }
+
+    .progress-bar {
+        width: 500px;
+    }
+}
