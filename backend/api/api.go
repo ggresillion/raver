@@ -52,6 +52,10 @@ func (a *API) Listen() {
 	r.Get("/api/guilds", a.discordAPI.getGuilds)
 	r.Get("/api/guilds/{guildID}/player", a.musicAPI.getState)
 	r.Post("/api/guilds/{guildID}/addToPlaylist", a.musicAPI.addToPlaylist)
+	r.Post("/api/guilds/{guildID}/moveInPlaylist", a.musicAPI.moveInPlaylist)
+	r.Post("/api/guilds/{guildID}/removeFromPlaylist", a.musicAPI.removeFromPlaylist)
+	r.Post("/api/guilds/{guildID}/play", a.musicAPI.play)
+	r.Post("/api/guilds/{guildID}/pause", a.musicAPI.pause)
 
 	r.Get("/api/music/search", a.musicAPI.search)
 

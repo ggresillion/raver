@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ggresillion/discordsoundboard/backend/internal"
 	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
+	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 )
 
 type BotSubscriber struct {
@@ -29,8 +29,8 @@ func (s *BotSubscriber) SubscribeToIncomingMessages() {
 	}()
 }
 
-func (s *BotSubscriber) HandleJoinMessage(m internal.Message) {
-	p := &internal.JoinRoomPayload{}
+func (s *BotSubscriber) HandleJoinMessage(m messaging.Message) {
+	p := &messaging.JoinRoomPayload{}
 	m.CastPayload(p)
 
 	if p.RoomID == "" {
