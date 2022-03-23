@@ -1,18 +1,19 @@
-import { Guilds } from "./components/Guilds";
-import { Header } from "./components/Header";
+import React from 'react';
+import { Guilds } from './components/Guilds';
+import { Header } from './components/Header';
 import './Home.scss';
-import { Music } from "./music/Music";
+import { Music } from './music/Music';
 
 export function Home() {
 
-    return (
-        <div>
-            <Header />
-            <Guilds />
+  return (
+    <div>
+      <Header />
+      <Guilds />
 
-            <div className="main">
-                <Music />
-            </div>
-        </div>
-    )
+      <div className="main">
+        <Music />
+      </div>
+    </div>
+  );
 }

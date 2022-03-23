@@ -13,10 +13,10 @@ export const musicPlayerSlice = createSlice({
   reducers: {
     updatePlayerState: (_, action: PayloadAction<MusicPlayerState>) => {
       return { playerState: action.payload };
-    }
-  }
+    },
+  },
 });
 
-export const { updatePlayerState } = musicPlayerSlice.actions
+export const { updatePlayerState } = musicPlayerSlice.actions;
 
-export default musicPlayerSlice.reducer
+export default musicPlayerSlice.reducer;

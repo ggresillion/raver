@@ -51,7 +51,7 @@ func (a *AuthAPI) authCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprint("http://localhost:8080?accessToken=", token.AccessToken, "&refreshToken=", token.RefreshToken), http.StatusPermanentRedirect)
+	http.Redirect(w, r, fmt.Sprint("http://localhost:3000?accessToken=", token.AccessToken, "&refreshToken=", token.RefreshToken), http.StatusPermanentRedirect)
 }
 
 func getToken(r *http.Request) *string {

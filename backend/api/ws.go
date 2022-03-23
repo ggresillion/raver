@@ -4,15 +4,15 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/ggresillion/discordsoundboard/backend/internal"
+	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 	"github.com/gorilla/websocket"
 )
 
 type WSAPI struct {
-	hub *internal.Hub
+	hub *messaging.Hub
 }
 
-func NewWSAPI(hub *internal.Hub) *WSAPI {
+func NewWSAPI(hub *messaging.Hub) *WSAPI {
 	return &WSAPI{hub: hub}
 }
 
@@ -21,7 +21,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func (a *WSAPI) writePump(conn *websocket.Conn, client *internal.Client) {
+func (a *WSAPI) writePump(conn *websocket.Conn, client *messaging.Client) {
 	s := client.ToSend()
 	for {
 		m := <-s
@@ -29,9 +29,9 @@ func (a *WSAPI) writePump(conn *websocket.Conn, client *internal.Client) {
 	}
 }
 
-func (a *WSAPI) readPump(conn *websocket.Conn, client *internal.Client) {
+func (a *WSAPI) readPump(conn *websocket.Conn, client *messaging.Client) {
 	for {
-		m := internal.Message{}
+		m := messaging.Message{}
 		err := conn.ReadJSON(&m)
 		if err != nil {
 			conn.Close()
@@ -51,7 +51,7 @@ func (a *WSAPI) handleConnection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := internal.NewClient(a.hub)
+	client := messaging.NewClient(a.hub)
 	a.hub.Register(client)
 
 	go a.readPump(conn, client)

@@ -4,12 +4,14 @@ import (
 	"bufio"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
+	"log"
 
 	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
-	"github.com/ggresillion/discordsoundboard/backend/internal"
-	music "github.com/ggresillion/discordsoundboard/backend/internal/music"
+	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
+	"github.com/ggresillion/discordsoundboard/backend/internal/music"
 	"github.com/raitonoberu/ytmusic"
 )
 
@@ -20,10 +22,10 @@ const (
 )
 
 type YoutubeConnector struct {
-	hub *internal.Hub
+	hub *messaging.Hub
 }
 
-func NewYoutubeConnector(hub *internal.Hub) YoutubeConnector {
+func NewYoutubeConnector(hub *messaging.Hub) YoutubeConnector {
 	return YoutubeConnector{hub}
 }
 
@@ -110,6 +112,8 @@ func (y YoutubeConnector) Play(v *discordgo.VoiceConnection, id string) error {
 		dgvoice.SendPCM(v, send)
 		close <- true
 	}()
+
+	log.Println(fmt.Sprint("playing from youtube:", id))
 
 	for {
 		// read data from ffmpeg stdout

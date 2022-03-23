@@ -1,5 +1,6 @@
-import { webSocketClient } from "./websocket";
+import { Guild } from './model/guild';
+import { webSocketClient } from './websocket';
 
-export async function joinGuild(guildId: string) {
-    await webSocketClient.join(guildId);
+export async function joinGuild(guild: Guild) {
+  await webSocketClient.join(guild.id);
 }

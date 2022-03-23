@@ -1,5 +1,6 @@
 export enum PlayerStatus {
-    PLAYING,
-    PAUSED,
-    BUFFERING
+  PLAYING = 'PLAYING',
+  PAUSED = 'PAUSED',
+  BUFFERING = 'BUFFERING',
+  IDLE = 'IDLE'
 }

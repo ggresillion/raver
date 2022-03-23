@@ -1,21 +1,22 @@
 package bot
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/ggresillion/discordsoundboard/backend/internal"
 	"github.com/ggresillion/discordsoundboard/backend/internal/config"
+	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 )
 
 type Bot struct {
-	hub     *internal.Hub
+	hub     *messaging.Hub
 	session *discordgo.Session
 }
 
-func NewBot(hub *internal.Hub) *Bot {
+func NewBot(hub *messaging.Hub) *Bot {
 	return &Bot{hub: hub, session: nil}
 }
 
@@ -142,6 +143,19 @@ func handlePlaySoundMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // 	return nil
 // }
+
+func (b *Bot) JoinChannel(guildID, userID string) (*discordgo.VoiceConnection, error) {
+	g, err := b.session.Guild(guildID)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range g.VoiceStates {
+		if userID == v.UserID {
+			return b.session.ChannelVoiceJoin(guildID, v.ChannelID, false, true)
+		}
+	}
+	return nil, errors.New("user not in a voice channel")
+}
 
 func (b *Bot) GetGuild(id string) (*discordgo.Guild, error) {
 	return b.session.Guild(id)
