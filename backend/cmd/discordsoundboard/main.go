@@ -17,8 +17,6 @@ func main() {
 	log.SetOutput(os.Stdout)
 
 	hub := messaging.NewHub()
-	youtubeConnector := youtube.NewYoutubeConnector(hub)
-	musicManager := music.NewMusicPlayerManager(youtubeConnector, hub)
 
 	// Start bot
 	b := bot.NewBot(hub)
@@ -26,6 +24,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	youtubeConnector := youtube.NewYoutubeConnector(hub)
+	musicManager := music.NewMusicPlayerManager(youtubeConnector, hub, b)
 
 	// Messages
 	botSubscriber := bot.NewBotSubscriber(b)
@@ -38,7 +39,8 @@ func main() {
 	discordAPI := api.NewDiscordAPI()
 	musicAPI := api.NewMusicAPI(musicManager)
 	wsAPI := api.NewWSAPI(hub)
-	api := api.NewAPI(authAPI, discordAPI, musicAPI, wsAPI)
+	botAPI := api.NewBotAPI(b)
+	api := api.NewAPI(authAPI, discordAPI, musicAPI, wsAPI, botAPI)
 
 	api.Listen()
 }

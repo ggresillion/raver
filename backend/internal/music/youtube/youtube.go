@@ -85,6 +85,10 @@ func (y YoutubeConnector) Find(ID string) (*music.Track, error) {
 
 func (y YoutubeConnector) Play(v *discordgo.VoiceConnection, id string) error {
 
+	if v == nil {
+		return errors.New("voice connection is nil")
+	}
+
 	// Send "speaking" packet over the voice websocket
 	err := v.Speaking(true)
 	if err != nil {

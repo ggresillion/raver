@@ -8,28 +8,28 @@ import (
 	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 )
 
-type BotSubscriber struct {
+type BotGateway struct {
 	bot *Bot
 }
 
-func NewBotSubscriber(bot *Bot) *BotSubscriber {
-	return &BotSubscriber{bot}
+func NewBotSubscriber(bot *Bot) *BotGateway {
+	return &BotGateway{bot}
 }
 
-func (s *BotSubscriber) SubscribeToIncomingMessages() {
-	c := s.bot.hub.Subscribe()
+func (g *BotGateway) SubscribeToIncomingMessages() {
+	c := g.bot.hub.Subscribe()
 	go func() {
 		for {
 			m := <-c
 			switch m.MessageType {
 			case "websocket/join":
-				s.HandleJoinMessage(m)
+				g.HandleJoinMessage(m)
 			}
 		}
 	}()
 }
 
-func (s *BotSubscriber) HandleJoinMessage(m messaging.Message) {
+func (g *BotGateway) HandleJoinMessage(m messaging.Message) {
 	p := &messaging.JoinRoomPayload{}
 	m.CastPayload(p)
 

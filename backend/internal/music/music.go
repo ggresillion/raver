@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
 	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 )
 
@@ -17,14 +18,15 @@ type MusicPlayer struct {
 	guildID   string
 	connector MusicConnector
 	state     *MusicPlayerState
-	voice     *discordgo.VoiceConnection
 	hub       *messaging.Hub
+	bot       *bot.Bot
 }
 
 type MusicPlayerManager struct {
 	players   map[string]*MusicPlayer
 	connector MusicConnector
 	hub       *messaging.Hub
+	bot       *bot.Bot
 }
 
 type Track struct {
@@ -39,14 +41,18 @@ type Track struct {
 type MusicPlayerState struct {
 	Status   MusicPlayerStatus `json:"status"`
 	Playlist []Track           `json:"playlist"`
+	Progress int               `json:"progress"`
 }
 
-func NewMusicPlayerManager(connector MusicConnector, hub *messaging.Hub) *MusicPlayerManager {
-	return &MusicPlayerManager{
+func NewMusicPlayerManager(connector MusicConnector, hub *messaging.Hub, bot *bot.Bot) *MusicPlayerManager {
+	m := &MusicPlayerManager{
 		players:   make(map[string]*MusicPlayer),
 		connector: connector,
 		hub:       hub,
+		bot:       bot,
 	}
+	m.registerCommands()
+	return m
 }
 
 func (m *MusicPlayerManager) GetPlayer(guildID string) (*MusicPlayer, error) {
@@ -68,6 +74,7 @@ func (m *MusicPlayerManager) GetPlayer(guildID string) (*MusicPlayer, error) {
 			Status:   IDLE,
 			Playlist: make([]Track, 0),
 		},
+		bot: m.bot,
 	}
 	m.players[guildID] = p
 	return p, nil
@@ -87,15 +94,15 @@ func (p *MusicPlayer) SetState(newState *MusicPlayerState) *MusicPlayerState {
 	return newState
 }
 
-func (p *MusicPlayer) AddToPlaylist(ID string) error {
+func (p *MusicPlayer) AddToPlaylist(ID string) (*Track, error) {
 	t, err := p.connector.Find(ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	p.state.Playlist = append(p.state.Playlist, *t)
 	p.PropagateState()
-	return nil
+	return t, nil
 }
 
 func (p *MusicPlayer) MoveInPlaylist(from, to int) {
@@ -112,11 +119,20 @@ func (p *MusicPlayer) RemoveFromPlaylist(ID string) {
 	p.PropagateState()
 }
 
-func (p *MusicPlayer) Play() {
+func (p *MusicPlayer) Play() error {
 	s := p.GetState()
-	p.connector.Play(p.voice, p.state.Playlist[0].ID)
+	vc, err := p.bot.GetVoiceConnection(p.guildID)
+	if err != nil {
+		return err
+	}
+
+	err = p.connector.Play(vc, p.state.Playlist[0].ID)
+	if err != nil {
+		return err
+	}
 	s.Status = Playing
 	p.SetState(s)
+	return nil
 }
 
 func (p *MusicPlayer) Pause() {
