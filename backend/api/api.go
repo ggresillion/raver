@@ -14,6 +14,7 @@ type API struct {
 	discordAPI *DiscordAPI
 	musicAPI   *MusicAPI
 	wsAPI      *WSAPI
+	botAPI     *BotAPI
 }
 
 func NewAPI(
@@ -21,8 +22,9 @@ func NewAPI(
 	discordAPI *DiscordAPI,
 	musicAPI *MusicAPI,
 	wsAPI *WSAPI,
+	botAPI *BotAPI,
 ) *API {
-	return &API{authAPI, discordAPI, musicAPI, wsAPI}
+	return &API{authAPI, discordAPI, musicAPI, wsAPI, botAPI}
 }
 
 func (a *API) Listen() {
@@ -56,6 +58,7 @@ func (a *API) Listen() {
 	r.Post("/api/guilds/{guildID}/removeFromPlaylist", a.musicAPI.removeFromPlaylist)
 	r.Post("/api/guilds/{guildID}/play", a.musicAPI.play)
 	r.Post("/api/guilds/{guildID}/pause", a.musicAPI.pause)
+	r.Post("/api/guilds/{guildID}/join", a.botAPI.joinChannel)
 
 	r.Get("/api/music/search", a.musicAPI.search)
 

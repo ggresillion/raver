@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/ggresillion/discordsoundboard/backend/internal/config"
@@ -12,15 +11,15 @@ import (
 )
 
 type Bot struct {
-	hub     *messaging.Hub
-	session *discordgo.Session
+	hub              *messaging.Hub
+	session          *discordgo.Session
+	voiceStates      map[string][]*discordgo.VoiceState
+	voiceConnections map[string]*discordgo.VoiceConnection
 }
 
 func NewBot(hub *messaging.Hub) *Bot {
-	return &Bot{hub: hub, session: nil}
+	return &Bot{hub: hub, session: nil, voiceStates: make(map[string][]*discordgo.VoiceState), voiceConnections: make(map[string]*discordgo.VoiceConnection)}
 }
-
-var buffer = make([][]byte, 0)
 
 func (b *Bot) StartBot() error {
 
@@ -31,127 +30,50 @@ func (b *Bot) StartBot() error {
 	}
 
 	var err error
-
-	// Create a new Discord session using the provided bot token.
 	b.session, err = discordgo.New("Bot " + token)
 	if err != nil {
 		return fmt.Errorf("error creating Discord session: %w", err)
 	}
 
-	// Register ready as a callback for the ready events.
 	b.session.AddHandler(ready)
+	b.session.AddHandler(b.guildCreate)
 
-	// Register messageCreate as a callback for the messageCreate events.
-	b.session.AddHandler(messageCreate)
+	b.session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildVoiceStates | discordgo.IntentsGuildMembers
 
-	// Register guildCreate as a callback for the guildCreate events.
-	b.session.AddHandler(guildCreate)
-
-	// We need information about guilds (which includes their channels),
-	// messages and voice states.
-	b.session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsGuildVoiceStates
-
-	// Open the websocket and begin listening.
 	err = b.session.Open()
 	if err != nil {
-		return fmt.Errorf("error opening Discord session: ", err)
+		return fmt.Errorf("error opening Discord session: %w", err)
 	}
 
-	// Wait here until CTRL-C or other term signal is received.
+	b.registerCommands()
+
 	log.Println("bot is now running")
 	return nil
 }
 
-// This function will be called (due to AddHandler above) when the bot receives
-// the "ready" event from Discord.
 func ready(s *discordgo.Session, event *discordgo.Ready) {
-
-	// Set the playing status.
+	log.Printf("logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 	s.UpdateGameStatus(0, "!dsb")
 }
 
-// This function will be called (due to AddHandler above) every time a new
-// message is created on any channel that the autenticated bot has access to.
-func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-
-	// Ignore all messages created by the bot itself
-	// This isn't required in this specific example but it's a good practice.
-	if m.Author.ID == s.State.User.ID {
-		return
-	}
-
-	// check if the message is "!airhorn"
-	if strings.HasPrefix(m.Content, "p") {
-		handlePlaySoundMessage(s, m)
-	}
+func (b *Bot) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
+	b.voiceStates[event.Guild.ID] = event.VoiceStates
 }
 
-// This function will be called (due to AddHandler above) every time a new
-// guild is joined.
-func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
-
-	if event.Guild.Unavailable {
-		return
-	}
-
-	for _, channel := range event.Guild.Channels {
-		if channel.ID == event.Guild.ID {
-			// _, _ = s.ChannelMessageSend(channel.ID, "Airhorn is ready! Type !airhorn while in a voice channel to play a sound.")
-			return
-		}
-	}
-}
-
-func handlePlaySoundMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
-	// Find the channel that the message came from.
-	c, err := s.State.Channel(m.ChannelID)
-	if err != nil {
-		// Could not find channel.
-		return
-	}
-
-	// Find the guild for that channel.
-	g, err := s.State.Guild(c.GuildID)
-	if err != nil {
-		// Could not find guild.
-		return
-	}
-
-	// Look for the message sender in that guild's current voice states.
-	for _, vs := range g.VoiceStates {
-		if vs.UserID == m.Author.ID {
-			// err = playSound(g.ID, vs.ChannelID)
-			if err != nil {
-				fmt.Println("Error playing sound:", err)
-			}
-
-			return
-		}
-	}
-}
-
-// playSound plays the current buffer to the provided channel.
-// func playSound(guildID, channelID string) (err error) {
-
-// 	// Join the provided voice channel.
-// 	vc, err := Session.ChannelVoiceJoin(guildID, channelID, false, true)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	youtube.PlayFromYoutube(vc, "tUlthCngK9U")
-
-// 	return nil
-// }
-
-func (b *Bot) JoinChannel(guildID, userID string) (*discordgo.VoiceConnection, error) {
-	g, err := b.session.Guild(guildID)
+func (b *Bot) JoinUserChannel(guildID, userID string) (*discordgo.VoiceConnection, error) {
+	g, err := b.session.State.Guild(guildID)
 	if err != nil {
 		return nil, err
 	}
 	for _, v := range g.VoiceStates {
-		if userID == v.UserID {
-			return b.session.ChannelVoiceJoin(guildID, v.ChannelID, false, true)
+		if v.UserID == userID {
+			defer log.Printf("joinned voice channel for guildID %s and userID %s", guildID, userID)
+			vc, err := b.session.ChannelVoiceJoin(guildID, v.ChannelID, false, true)
+			if err != nil {
+				return nil, err
+			}
+			b.voiceConnections[guildID] = vc
+			return vc, nil
 		}
 	}
 	return nil, errors.New("user not in a voice channel")
@@ -159,4 +81,20 @@ func (b *Bot) JoinChannel(guildID, userID string) (*discordgo.VoiceConnection, e
 
 func (b *Bot) GetGuild(id string) (*discordgo.Guild, error) {
 	return b.session.Guild(id)
+}
+
+func (b *Bot) GetVoiceConnectionOrJoin(guildID, userID string) (*discordgo.VoiceConnection, error) {
+	vc := b.voiceConnections[guildID]
+	if vc != nil {
+		return vc, nil
+	}
+	return b.JoinUserChannel(userID, guildID)
+}
+
+func (b *Bot) GetVoiceConnection(guildID string) (*discordgo.VoiceConnection, error) {
+	vc := b.voiceConnections[guildID]
+	if vc != nil {
+		return vc, nil
+	}
+	return nil, fmt.Errorf("bot is not connected in a voice channel for guildID %s", guildID)
 }

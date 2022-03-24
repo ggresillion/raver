@@ -2,33 +2,33 @@ package music
 
 import "github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 
-type MusicSubscriber struct {
+type MusicGateway struct {
 	manager *MusicPlayerManager
 	hub     *messaging.Hub
 }
 
-func NewMusicSubscriber(manager *MusicPlayerManager, hub *messaging.Hub) *MusicSubscriber {
-	return &MusicSubscriber{manager, hub}
+func NewMusicSubscriber(manager *MusicPlayerManager, hub *messaging.Hub) *MusicGateway {
+	return &MusicGateway{manager, hub}
 }
 
-func (s *MusicSubscriber) SubscribeToIncomingMessages() {
-	c := s.hub.Subscribe()
+func (g *MusicGateway) SubscribeToIncomingMessages() {
+	c := g.hub.Subscribe()
 	go func() {
 		for {
 			m := <-c
 			switch m.MessageType {
 			case "musicPlayer/updatePlayerState":
-				s.HandleStateUpdate(m)
+				g.HandleStateUpdate(m)
 			}
 		}
 	}()
 }
 
-func (s *MusicSubscriber) HandleStateUpdate(m messaging.Message) {
+func (g *MusicGateway) HandleStateUpdate(m messaging.Message) {
 	state := &MusicPlayerState{}
 	m.CastPayload(state)
 
-	player, err := s.manager.GetPlayer(m.RoomID)
+	player, err := g.manager.GetPlayer(m.RoomID)
 	if err != nil {
 		m.Error(err)
 	}
