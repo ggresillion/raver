@@ -4,6 +4,8 @@ import (
 	"io"
 	"os/exec"
 
+	_ "embed"
+
 	"github.com/ggresillion/discordsoundboard/backend/internal/config"
 )
 

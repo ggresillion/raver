@@ -56,7 +56,7 @@ class WebSocketClient {
     });
   }
 
-  onMessage<T>(cb: (message: Message<T>) => void) {
+  onMessage(cb: (message: Message<any>) => void) {
     this.messageSubscribers.push(cb);
   }
 }

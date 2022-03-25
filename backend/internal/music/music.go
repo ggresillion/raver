@@ -11,7 +11,7 @@ import (
 type MusicConnector interface {
 	Search(q string, p uint) ([]Track, error)
 	Find(ID string) (*Track, error)
-	Play(v *discordgo.VoiceConnection, id string) error
+	Play(v *discordgo.VoiceConnection, id string) (chan bool, error)
 }
 
 type MusicPlayer struct {
@@ -119,20 +119,20 @@ func (p *MusicPlayer) RemoveFromPlaylist(ID string) {
 	p.PropagateState()
 }
 
-func (p *MusicPlayer) Play() error {
+func (p *MusicPlayer) Play() (chan bool, error) {
 	s := p.GetState()
 	vc, err := p.bot.GetVoiceConnection(p.guildID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = p.connector.Play(vc, p.state.Playlist[0].ID)
+	close, err := p.connector.Play(vc, p.state.Playlist[0].ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	s.Status = Playing
 	p.SetState(s)
-	return nil
+	return close, nil
 }
 
 func (p *MusicPlayer) Pause() {

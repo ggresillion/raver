@@ -83,16 +83,16 @@ func (y YoutubeConnector) Find(ID string) (*music.Track, error) {
 	}, nil
 }
 
-func (y YoutubeConnector) Play(v *discordgo.VoiceConnection, id string) error {
+func (y YoutubeConnector) Play(v *discordgo.VoiceConnection, id string) (chan bool, error) {
 
 	if v == nil {
-		return errors.New("voice connection is nil")
+		return nil, errors.New("voice connection is nil")
 	}
 
 	// Send "speaking" packet over the voice websocket
 	err := v.Speaking(true)
 	if err != nil {
-		return errors.New("couldn't set speaking")
+		return nil, errors.New("couldn't set speaking")
 	}
 
 	// Send not "speaking" packet over the websocket when we finish
@@ -109,32 +109,37 @@ func (y YoutubeConnector) Play(v *discordgo.VoiceConnection, id string) error {
 	ffmpegbuf := bufio.NewReaderSize(pcm, 16384)
 
 	send := make(chan []int16, 2)
-	defer close(send)
 
-	close := make(chan bool)
+	end := make(chan bool)
 	go func() {
 		dgvoice.SendPCM(v, send)
-		close <- true
+		end <- true
 	}()
 
 	log.Println(fmt.Sprint("playing from youtube:", id))
 
-	for {
-		// read data from ffmpeg stdout
-		audiobuf := make([]int16, frameSize*channels)
-		err = binary.Read(ffmpegbuf, binary.LittleEndian, &audiobuf)
-		if err == io.EOF || err == io.ErrUnexpectedEOF {
-			return nil
-		}
-		if err != nil {
-			return errors.New("error reading from ffmpeg stdout")
-		}
+	go func() {
+		defer close(send)
+		for {
+			// read data from ffmpeg stdout
+			audiobuf := make([]int16, frameSize*channels)
+			err = binary.Read(ffmpegbuf, binary.LittleEndian, &audiobuf)
+			if err == io.EOF || err == io.ErrUnexpectedEOF {
+				return
+			}
+			if err != nil {
+				log.Println("error reading from ffmpeg stdout")
+				return
+			}
 
-		// Send received PCM to the sendPCM channel
-		select {
-		case send <- audiobuf:
-		case <-close:
-			return nil
+			// Send received PCM to the sendPCM channel
+			select {
+			case send <- audiobuf:
+			case <-end:
+				return
+			}
 		}
-	}
+	}()
+
+	return end, nil
 }
