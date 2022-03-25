@@ -18,52 +18,46 @@ func (m *MusicPlayerManager) registerCommands() {
 				Type:        discordgo.ApplicationCommandOptionString,
 			},
 		},
-	}, func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-
-		if i.Type != discordgo.InteractionApplicationCommand {
-			return
-		}
-
-		data := i.ApplicationCommandData()
-		if len(data.Options) == 0 {
-			return
-		}
-		ID := data.Options[0].StringValue()
-
-		t, err := m.play(i.GuildID, ID)
-		if err != nil {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: err.Error(),
-				},
-			})
-			return
-		}
-
-		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("Adding %s to queue", t.Title),
-			},
-		})
-	})
+	}, m.play)
 }
 
-func (m *MusicPlayerManager) play(guildID, ID string) (*Track, error) {
-	p, err := m.GetPlayer(guildID)
+func (m *MusicPlayerManager) play(s *discordgo.Session, i *discordgo.InteractionCreate) {
+
+	if i.Type != discordgo.InteractionApplicationCommand {
+		return
+	}
+
+	data := i.ApplicationCommandData()
+	if len(data.Options) == 0 {
+		return
+	}
+	ID := data.Options[0].StringValue()
+
+	p, err := m.GetPlayer(i.GuildID)
 	if err != nil {
-		return nil, fmt.Errorf("cannot get player for guildID %s", guildID)
+		respond(s, i, fmt.Sprintf("cannot get player for guildID %s", i.GuildID))
+		return
 	}
 
 	t, err := p.AddToPlaylist(ID)
 	if err != nil {
-		return nil, fmt.Errorf("error while adding song to playlist %s", err)
+		respond(s, i, fmt.Sprintf("error while adding song to playlist %s", err.Error()))
+		return
 	}
 
-	err = p.Play()
+	_, err = p.Play()
 	if err != nil {
-		return nil, fmt.Errorf("error while playing the song %s", err)
+		respond(s, i, fmt.Sprintf("error while playing the song %s", err.Error()))
+		return
 	}
-	return t, nil
+	respond(s, i, fmt.Sprintf("Adding %s to queue", t.Title))
+}
+
+func respond(s *discordgo.Session, i *discordgo.InteractionCreate, m string) {
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: m,
+		},
+	})
 }

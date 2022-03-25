@@ -64,6 +64,8 @@ func (a *API) Listen() {
 
 	r.Get("/ws", a.wsAPI.handleConnection)
 
+	r.Handle("/*", http.FileServer(http.Dir("./static")))
+
 	// Start API
 	log.Println("listening on 8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
