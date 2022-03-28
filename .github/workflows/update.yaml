@@ -60,7 +60,7 @@ jobs:
       - uses: actions/checkout@v1
 
       - name: "Deploy"
-        uses: "deliverybot/helm@v1.7.1"
+        uses: glopezep/helm@v1.7.1
         with:
           release: "discordsoundboard"
           namespace: "ggresillion"
