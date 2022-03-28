@@ -59,5 +59,6 @@ jobs:
         with:
           helmv3: 3.7.2
           command: |
+            mkdir ~/.kube
             echo $KUBECONFIGVAR >> ~/.kube/config
             helmv3 upgrade --install --set image.tag=${{needs.build-and-push-image.outputs.tag}} discordsounboard chart
