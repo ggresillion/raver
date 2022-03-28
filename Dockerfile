@@ -28,6 +28,10 @@ FROM alpine:3.15.2
 
 WORKDIR /app
 
+RUN apk add curl ffmpeg
+
+RUN curl -L https://yt-dl.org/downloads/latest/youtube-dl -o youtube-dl
+
 COPY --from=frontend /app/dist /app/static
 
 COPY --from=backend /app/discordsoundboard /app/discordsoundboard
