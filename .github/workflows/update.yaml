@@ -55,6 +55,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: "ubuntu-latest"
+    container: alpine/helm:3.8.1
     needs: build-and-push-image
     env:
       TAG: ${{ needs.build-and-push-image.outputs.tag }}
@@ -63,15 +64,13 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - run: |
+      - name: Copy KUBECONFIG to ~/.kube/config
+        run: |
           mkdir ~/.kube
-          echo $KUBECONFIG > ~/.kube/config"
-          cat ~/.kube/config
+          echo $KUBECONFIG | base64 -d > ~/.kube/config
         env:
           KUBECONFIG: ${{ secrets.KUBECONFIG }}
 
-      - uses: stefanprodan/kube-tools@v1
-        with:
-          helmv3: 3.7.2
-          command: |
-            helmv3 upgrade --install --set image.tag=$TAG $NAME $CHART
+      - name: Perform the helm upgrade
+        run: |
+          helm upgrade --install --set image.tag=$TAG $NAME $CHART
