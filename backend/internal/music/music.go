@@ -20,6 +20,7 @@ type MusicPlayer struct {
 	state     *MusicPlayerState
 	hub       *messaging.Hub
 	bot       *bot.Bot
+	close     chan bool
 }
 
 type MusicPlayerManager struct {
@@ -130,6 +131,7 @@ func (p *MusicPlayer) Play() (chan bool, error) {
 	if err != nil {
 		return nil, err
 	}
+	p.close = close
 	s.Status = Playing
 	p.SetState(s)
 	return close, nil
@@ -139,6 +141,39 @@ func (p *MusicPlayer) Pause() {
 	s := p.GetState()
 	s.Status = Paused
 	p.SetState(s)
+}
+
+func (p *MusicPlayer) Stop() {
+	p.close <- true
+	s := p.GetState()
+	s.Status = Paused
+	p.SetState(s)
+}
+
+func (p *MusicPlayer) Skip() error {
+	s := p.GetState()
+
+	if len(s.Playlist) == 0 {
+		s.Status = IDLE
+		s.Playlist = []Track{}
+		p.PropagateState()
+		return nil
+	}
+
+	vc, err := p.bot.GetVoiceConnection(p.guildID)
+	if err != nil {
+		return err
+	}
+
+	p.close <- true
+	close, err := p.connector.Play(vc, p.state.Playlist[0].ID)
+	if err != nil {
+		return err
+	}
+	p.close = close
+	s.Status = Playing
+	p.SetState(s)
+	return nil
 }
 
 func (p *MusicPlayer) PropagateState() {

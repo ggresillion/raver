@@ -54,18 +54,23 @@ func (b *Bot) join(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	userID := i.Member.User.ID
 	_, err := b.JoinUserChannel(guildID, userID)
 	if err != nil {
-		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: "Please join a voice channel first",
-			},
-		})
+		respond(s, i, "Please join a voice channel first")
 		return
 	}
+	respond(s, i, "I just joined your voice channel")
+}
+
+func (b *Bot) leave(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	guildID := i.GuildID
+	b.LeaveChannel(guildID)
+	respond(s, i, "I left the channel")
+}
+
+func respond(s *discordgo.Session, i *discordgo.InteractionCreate, m string) {
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: "I just joined your voice channel",
+			Content: m,
 		},
 	})
 }

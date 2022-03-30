@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"errors"
 	"fmt"
 	"log"
 
@@ -58,43 +57,4 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 
 func (b *Bot) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 	b.voiceStates[event.Guild.ID] = event.VoiceStates
-}
-
-func (b *Bot) JoinUserChannel(guildID, userID string) (*discordgo.VoiceConnection, error) {
-	g, err := b.session.State.Guild(guildID)
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range g.VoiceStates {
-		if v.UserID == userID {
-			defer log.Printf("joinned voice channel for guildID %s and userID %s", guildID, userID)
-			vc, err := b.session.ChannelVoiceJoin(guildID, v.ChannelID, false, true)
-			if err != nil {
-				return nil, err
-			}
-			b.voiceConnections[guildID] = vc
-			return vc, nil
-		}
-	}
-	return nil, errors.New("user not in a voice channel")
-}
-
-func (b *Bot) GetGuild(id string) (*discordgo.Guild, error) {
-	return b.session.Guild(id)
-}
-
-func (b *Bot) GetVoiceConnectionOrJoin(guildID, userID string) (*discordgo.VoiceConnection, error) {
-	vc := b.voiceConnections[guildID]
-	if vc != nil {
-		return vc, nil
-	}
-	return b.JoinUserChannel(userID, guildID)
-}
-
-func (b *Bot) GetVoiceConnection(guildID string) (*discordgo.VoiceConnection, error) {
-	vc := b.voiceConnections[guildID]
-	if vc != nil {
-		return vc, nil
-	}
-	return nil, fmt.Errorf("bot is not connected in a voice channel for guildID %s", guildID)
 }
