@@ -46,6 +46,7 @@ func (b *Bot) StartBot() error {
 
 	b.session.AddHandler(ready)
 	b.session.AddHandler(b.guildCreate)
+	b.session.AddHandler(b.commandHandler)
 
 	b.session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildVoiceStates | discordgo.IntentsGuildMembers
 
@@ -72,7 +73,7 @@ func (b *Bot) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 func (b *Bot) GetGuildVoice(guildId string) *BotAudio {
 	gv := b.guildVoices[guildId]
 	if gv == nil {
-		gv = &BotAudio{guildId: guildId, bot: b, audioStatus: Buffering}
+		gv = &BotAudio{guildId: guildId, bot: b, audioStatus: NotConnected}
 		b.guildVoices[guildId] = gv
 	}
 	return gv
