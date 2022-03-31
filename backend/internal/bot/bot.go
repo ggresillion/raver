@@ -14,10 +14,11 @@ type Bot struct {
 	session          *discordgo.Session
 	voiceStates      map[string][]*discordgo.VoiceState
 	voiceConnections map[string]*discordgo.VoiceConnection
+	ready            bool
 }
 
 func NewBot(hub *messaging.Hub) *Bot {
-	return &Bot{hub: hub, session: nil, voiceStates: make(map[string][]*discordgo.VoiceState), voiceConnections: make(map[string]*discordgo.VoiceConnection)}
+	return &Bot{hub: hub, session: nil, voiceStates: make(map[string][]*discordgo.VoiceState), voiceConnections: make(map[string]*discordgo.VoiceConnection), ready: false}
 }
 
 func (b *Bot) StartBot() error {
@@ -45,6 +46,7 @@ func (b *Bot) StartBot() error {
 	}
 
 	b.registerCommands()
+	b.ready = true
 
 	log.Println("bot is now running")
 	return nil

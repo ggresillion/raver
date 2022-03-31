@@ -11,29 +11,7 @@ var (
 	commandHandlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate) = make(map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate))
 )
 
-func (b *Bot) RegisterCommand(command *discordgo.ApplicationCommand, handler func(s *discordgo.Session, i *discordgo.InteractionCreate)) {
-	commands = append(commands, command)
-	commandHandlers[command.Name] = handler
-
-	_, err := b.session.ApplicationCommandCreate(b.session.State.User.ID, "", command)
-	if err != nil {
-		log.Fatalf("error trying to register command %s %s", command.Name, err)
-	}
-	log.Printf("registered bot command %s", command.Name)
-}
-
 func (b *Bot) registerCommands() {
-
-	commands := []*discordgo.ApplicationCommand{
-		{
-			Name:        "join",
-			Type:        discordgo.ChatApplicationCommand,
-			Description: "Join the current channel",
-		},
-	}
-
-	commandHandlers["join"] = b.join
-
 	b.session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
 			h(s, i)
@@ -49,28 +27,14 @@ func (b *Bot) registerCommands() {
 	}
 }
 
-func (b *Bot) join(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	guildID := i.GuildID
-	userID := i.Member.User.ID
-	_, err := b.JoinUserChannel(guildID, userID)
-	if err != nil {
-		respond(s, i, "Please join a voice channel first")
-		return
+func (b *Bot) RegisterCommand(command *discordgo.ApplicationCommand, handler func(s *discordgo.Session, i *discordgo.InteractionCreate)) {
+	commands = append(commands, command)
+	commandHandlers[command.Name] = handler
+	if b.ready {
+		_, err := b.session.ApplicationCommandCreate(b.session.State.User.ID, "", command)
+		if err != nil {
+			log.Fatalf("error trying to register command %s %s", command.Name, err)
+		}
+		log.Printf("registered bot command %s", command.Name)
 	}
-	respond(s, i, "I just joined your voice channel")
-}
-
-func (b *Bot) leave(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	guildID := i.GuildID
-	b.LeaveChannel(guildID)
-	respond(s, i, "I left the channel")
-}
-
-func respond(s *discordgo.Session, i *discordgo.InteractionCreate, m string) {
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: m,
-		},
-	})
 }

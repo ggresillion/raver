@@ -46,14 +46,12 @@ type MusicPlayerState struct {
 }
 
 func NewMusicPlayerManager(connector MusicConnector, hub *messaging.Hub, bot *bot.Bot) *MusicPlayerManager {
-	m := &MusicPlayerManager{
+	return &MusicPlayerManager{
 		players:   make(map[string]*MusicPlayer),
 		connector: connector,
 		hub:       hub,
 		bot:       bot,
 	}
-	m.registerCommands()
-	return m
 }
 
 func (m *MusicPlayerManager) GetPlayer(guildID string) (*MusicPlayer, error) {
