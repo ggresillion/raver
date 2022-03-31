@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
 )
 
 // Play a song
@@ -31,6 +32,10 @@ func (c *CommandHandler) play() (*discordgo.ApplicationCommand, func(s *discordg
 			if err != nil {
 				respond(s, i, fmt.Sprintf("cannot get player for guildID %s", i.GuildID))
 				return
+			}
+
+			if p.BotAudio().Status() == bot.NotConnected {
+				p.BotAudio().JoinUserChannel(i.User.ID)
 			}
 
 			t, err := p.AddToPlaylist(ID)
@@ -69,12 +74,14 @@ func (c *CommandHandler) stop() (*discordgo.ApplicationCommand, func(s *discordg
 	return &discordgo.ApplicationCommand{
 			Name:        "stop",
 			Description: "Stop the current song",
-		}, func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			_, err := c.musicManager.GetPlayer(i.GuildID)
+		},
+		func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			p, err := c.musicManager.GetPlayer(i.GuildID)
 			if err != nil {
 				respond(s, i, fmt.Sprintf("cannot get player for guildID %s", i.GuildID))
 				return
 			}
+			p.Stop()
 			respond(s, i, "Stoped current song")
 		}
 }
@@ -90,7 +97,7 @@ func (c *CommandHandler) clear() (*discordgo.ApplicationCommand, func(s *discord
 				respond(s, i, fmt.Sprintf("cannot get player for guildID %s", i.GuildID))
 				return
 			}
-			p.Skip()
+			p.ClearPlaylist()
 			respond(s, i, "Stoped current song")
 		}
 }
@@ -99,15 +106,35 @@ func (c *CommandHandler) clear() (*discordgo.ApplicationCommand, func(s *discord
 // Automatically play the next song if the playlist is not empty
 func (c *CommandHandler) skip() (*discordgo.ApplicationCommand, func(s *discordgo.Session, i *discordgo.InteractionCreate)) {
 	return &discordgo.ApplicationCommand{
-		Name:        "skip",
-		Description: "Skip the current song",
-	}, func(s *discordgo.Session, i *discordgo.InteractionCreate) {}
+			Name:        "skip",
+			Description: "Skip the current song",
+		}, func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			p, err := c.musicManager.GetPlayer(i.GuildID)
+			if err != nil {
+				respond(s, i, fmt.Sprintf("cannot get player for guildID %s", i.GuildID))
+				return
+			}
+			p.Skip()
+			respond(s, i, "Skipped song")
+		}
 }
 
 // Return the current playlist
 func (c *CommandHandler) playlist() (*discordgo.ApplicationCommand, func(s *discordgo.Session, i *discordgo.InteractionCreate)) {
 	return &discordgo.ApplicationCommand{
-		Name:        "playlist",
-		Description: "Show the current playlist",
-	}, func(s *discordgo.Session, i *discordgo.InteractionCreate) {}
+			Name:        "playlist",
+			Description: "Show the current playlist",
+		}, func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			p, err := c.musicManager.GetPlayer(i.GuildID)
+			if err != nil {
+				respond(s, i, fmt.Sprintf("cannot get player for guildID %s", i.GuildID))
+				return
+			}
+			playlist := p.Playlist()
+			sPlaylist := ""
+			for _, track := range playlist {
+				sPlaylist = sPlaylist + track.Title
+			}
+			respond(s, i, "Playlist: "+sPlaylist)
+		}
 }

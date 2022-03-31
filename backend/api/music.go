@@ -30,6 +30,11 @@ type RemoveFromPlaylistPayload struct {
 	Index string `json:"index"`
 }
 
+type MusicStateResponse struct {
+	Playlist []music.Track `json:"playlist"`
+	Status   string        `json:"status"`
+}
+
 func (c *MusicAPI) search(w http.ResponseWriter, r *http.Request) {
 	queries, ok := r.URL.Query()["q"]
 
@@ -57,9 +62,12 @@ func (c *MusicAPI) getState(w http.ResponseWriter, r *http.Request) {
 		HandleInternalServerError(w, err)
 	}
 
-	state := player.GetState()
+	response := &MusicStateResponse{
+		Playlist: player.Playlist(),
+		Status:   player.BotAudio().Status().String(),
+	}
 
-	json.NewEncoder(w).Encode(state)
+	json.NewEncoder(w).Encode(response)
 }
 
 func (c *MusicAPI) addToPlaylist(w http.ResponseWriter, r *http.Request) {
@@ -79,9 +87,12 @@ func (c *MusicAPI) addToPlaylist(w http.ResponseWriter, r *http.Request) {
 
 	player.AddToPlaylist(body.ID)
 
-	state := player.GetState()
+	response := &MusicStateResponse{
+		Playlist: player.Playlist(),
+		Status:   player.BotAudio().Status().String(),
+	}
 
-	json.NewEncoder(w).Encode(state)
+	json.NewEncoder(w).Encode(response)
 }
 
 func (c *MusicAPI) moveInPlaylist(w http.ResponseWriter, r *http.Request) {
@@ -101,9 +112,12 @@ func (c *MusicAPI) moveInPlaylist(w http.ResponseWriter, r *http.Request) {
 
 	player.MoveInPlaylist(body.From, body.To)
 
-	state := player.GetState()
+	response := &MusicStateResponse{
+		Playlist: player.Playlist(),
+		Status:   player.BotAudio().Status().String(),
+	}
 
-	json.NewEncoder(w).Encode(state)
+	json.NewEncoder(w).Encode(response)
 }
 
 func (c *MusicAPI) removeFromPlaylist(w http.ResponseWriter, r *http.Request) {
@@ -123,9 +137,12 @@ func (c *MusicAPI) removeFromPlaylist(w http.ResponseWriter, r *http.Request) {
 
 	player.RemoveFromPlaylist(body.Index)
 
-	state := player.GetState()
+	response := &MusicStateResponse{
+		Playlist: player.Playlist(),
+		Status:   player.BotAudio().Status().String(),
+	}
 
-	json.NewEncoder(w).Encode(state)
+	json.NewEncoder(w).Encode(response)
 }
 
 func (c *MusicAPI) play(w http.ResponseWriter, r *http.Request) {
@@ -138,9 +155,12 @@ func (c *MusicAPI) play(w http.ResponseWriter, r *http.Request) {
 
 	player.Play()
 
-	state := player.GetState()
+	response := &MusicStateResponse{
+		Playlist: player.Playlist(),
+		Status:   player.BotAudio().Status().String(),
+	}
 
-	json.NewEncoder(w).Encode(state)
+	json.NewEncoder(w).Encode(response)
 }
 
 func (c *MusicAPI) pause(w http.ResponseWriter, r *http.Request) {
@@ -153,7 +173,10 @@ func (c *MusicAPI) pause(w http.ResponseWriter, r *http.Request) {
 
 	player.Play()
 
-	state := player.GetState()
+	response := &MusicStateResponse{
+		Playlist: player.Playlist(),
+		Status:   player.BotAudio().Status().String(),
+	}
 
-	json.NewEncoder(w).Encode(state)
+	json.NewEncoder(w).Encode(response)
 }

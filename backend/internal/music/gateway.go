@@ -33,6 +33,6 @@ func (g *MusicGateway) HandleStateUpdate(m messaging.Message) {
 		m.Error(err)
 	}
 
-	player.state = state
-	player.PropagateState()
+	player.playlist = state.Playlist
+	player.propagateState()
 }

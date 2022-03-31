@@ -16,9 +16,9 @@ type MusicConnector interface {
 type MusicPlayer struct {
 	guildID   string
 	connector MusicConnector
-	state     *MusicPlayerState
 	hub       *messaging.Hub
-	bot       *bot.Bot
+	botAudio  *bot.BotAudio
+	playlist  []Track
 }
 
 type MusicPlayerManager struct {
@@ -38,9 +38,8 @@ type Track struct {
 }
 
 type MusicPlayerState struct {
-	Status   MusicPlayerStatus `json:"status"`
-	Playlist []Track           `json:"playlist"`
-	Progress int               `json:"progress"`
+	Status   bot.AudioStatus `json:"status"`
+	Playlist []Track         `json:"playlist"`
 }
 
 func NewMusicPlayerManager(connector MusicConnector, hub *messaging.Hub, bot *bot.Bot) *MusicPlayerManager {
@@ -67,11 +66,8 @@ func (m *MusicPlayerManager) GetPlayer(guildID string) (*MusicPlayer, error) {
 		guildID:   guildID,
 		connector: m.connector,
 		hub:       m.hub,
-		state: &MusicPlayerState{
-			Status:   IDLE,
-			Playlist: make([]Track, 0),
-		},
-		bot: m.bot,
+		botAudio:  m.bot.GetGuildVoice(guildID),
+		playlist:  []Track{},
 	}
 	m.players[guildID] = p
 	return p, nil
@@ -81,88 +77,87 @@ func (m *MusicPlayerManager) Search(query string, page uint) ([]Track, error) {
 	return m.connector.Search(query, page)
 }
 
-func (p *MusicPlayer) GetState() *MusicPlayerState {
-	return p.state
-}
-
-func (p *MusicPlayer) SetState(newState *MusicPlayerState) *MusicPlayerState {
-	p.state = newState
-	p.PropagateState()
-	return newState
-}
-
 func (p *MusicPlayer) AddToPlaylist(ID string) (*Track, error) {
 	t, err := p.connector.Find(ID)
 	if err != nil {
 		return nil, err
 	}
 
-	p.state.Playlist = append(p.state.Playlist, *t)
-	p.PropagateState()
+	p.playlist = append(p.playlist, *t)
+	p.propagateState()
 	return t, nil
 }
 
 func (p *MusicPlayer) MoveInPlaylist(from, to int) {
-	p.state.Playlist = move(p.state.Playlist, from, to)
-	p.PropagateState()
+	p.playlist = move(p.playlist, from, to)
+	p.propagateState()
 }
 
 func (p *MusicPlayer) RemoveFromPlaylist(ID string) {
-	for i, t := range p.state.Playlist {
+	for i, t := range p.playlist {
 		if t.ID == ID {
-			p.state.Playlist = remove(p.state.Playlist, i)
+			p.playlist = remove(p.playlist, i)
 		}
 	}
-	p.PropagateState()
+	p.propagateState()
 }
 
 func (p *MusicPlayer) Play() error {
-	s := p.GetState()
-	err := p.connector.Play(p.guildID, p.state.Playlist[0].ID)
+	err := p.connector.Play(p.guildID, p.playlist[0].ID)
 	if err != nil {
 		return err
 	}
-	s.Status = Playing
-	p.SetState(s)
+	p.propagateState()
 	return nil
 }
 
 func (p *MusicPlayer) Pause() {
-	p.bot.GetGuildVoice(p.guildID).Pause()
-	s := p.GetState()
-	s.Status = Paused
-	p.SetState(s)
+	p.botAudio.Pause()
+	p.propagateState()
 }
 
 func (p *MusicPlayer) Stop() {
-	s := p.GetState()
-	s.Status = Paused
-	p.SetState(s)
+	p.botAudio.Stop()
+	p.propagateState()
 }
 
 func (p *MusicPlayer) Skip() error {
-	s := p.GetState()
-
-	if len(s.Playlist) == 0 {
-		s.Status = IDLE
-		s.Playlist = []Track{}
-		p.PropagateState()
+	if len(p.playlist) == 0 {
+		p.playlist = []Track{}
+		p.propagateState()
 		return nil
 	}
 
-	err := p.connector.Play(p.guildID, p.state.Playlist[0].ID)
+	err := p.connector.Play(p.guildID, p.playlist[0].ID)
 	if err != nil {
 		return err
 	}
-	s.Status = Playing
-	p.SetState(s)
+	p.propagateState()
 	return nil
 }
 
-func (p *MusicPlayer) PropagateState() {
+func (p *MusicPlayer) ClearPlaylist() {
+	p.playlist = []Track{}
+	p.propagateState()
+}
+
+func (p *MusicPlayer) Playlist() []Track {
+	return p.playlist
+}
+
+func (p *MusicPlayer) BotAudio() *bot.BotAudio {
+	return p.botAudio
+}
+
+func (p *MusicPlayer) propagateState() {
+	payload := MusicPlayerState{
+		Status:   p.botAudio.Status(),
+		Playlist: p.playlist,
+	}
+
 	m := messaging.Message{
 		MessageType: "musicPlayer/updatePlayerState",
-		Payload:     p.state,
+		Payload:     payload,
 		RoomID:      p.guildID,
 	}
 	p.hub.Send(m)
