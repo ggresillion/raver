@@ -9,14 +9,6 @@ import (
 	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 )
 
-type AudioState int
-
-const (
-	Playing AudioState = iota
-	IDLE
-	Paused
-)
-
 type Bot struct {
 	hub         *messaging.Hub
 	session     *discordgo.Session
@@ -29,7 +21,7 @@ type BotAudio struct {
 	bot             *Bot
 	voiceStates     []*discordgo.VoiceState
 	voiceConnection *discordgo.VoiceConnection
-	audioState      AudioState
+	audioStatus     AudioStatus
 	pause           chan bool
 	stop            chan error
 }
@@ -62,7 +54,6 @@ func (b *Bot) StartBot() error {
 		return fmt.Errorf("error opening Discord session: %w", err)
 	}
 
-	b.registerCommands()
 	b.ready = true
 
 	log.Println("bot is now running")
@@ -81,7 +72,7 @@ func (b *Bot) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 func (b *Bot) GetGuildVoice(guildId string) *BotAudio {
 	gv := b.guildVoices[guildId]
 	if gv == nil {
-		gv = &BotAudio{guildId: guildId, bot: b, audioState: IDLE}
+		gv = &BotAudio{guildId: guildId, bot: b, audioStatus: Buffering}
 		b.guildVoices[guildId] = gv
 	}
 	return gv

@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 
-	"github.com/bwmarrin/discordgo"
 	"github.com/jonas747/dca"
 )
 
@@ -19,23 +18,24 @@ func (b *BotAudio) LeaveChannel() {
 	b.voiceConnection = nil
 }
 
-func (b *BotAudio) JoinUserChannel(userID string) (*discordgo.VoiceConnection, error) {
+func (b *BotAudio) JoinUserChannel(userID string) error {
 	g, err := b.bot.session.State.Guild(b.guildId)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	for _, v := range g.VoiceStates {
 		if v.UserID == userID {
 			defer log.Printf("joinned voice channel for guildID %s and userID %s", b.guildId, userID)
 			vc, err := b.bot.session.ChannelVoiceJoin(b.guildId, v.ChannelID, false, true)
 			if err != nil {
-				return nil, err
+				return err
 			}
 			b.voiceConnection = vc
-			return vc, nil
+			b.audioStatus = IDLE
+			return nil
 		}
 	}
-	return nil, errors.New("user not in a voice channel")
+	return errors.New("user not in a voice channel")
 }
 
 func (b *BotAudio) Play(url string) error {
@@ -69,6 +69,8 @@ func (b *BotAudio) Play(url string) error {
 
 	go func() {
 		defer encodingSession.Cleanup()
+		defer close(pause)
+		defer close(done)
 
 		ss := dca.NewStream(encodingSession, v, done)
 
@@ -77,8 +79,16 @@ func (b *BotAudio) Play(url string) error {
 				select {
 				case p := <-pause:
 					ss.SetPaused(p)
+					if p {
+						b.audioStatus = Paused
+					} else {
+						b.audioStatus = Playing
+					}
 				case <-done:
 					encodingSession.Stop()
+					b.audioStatus = IDLE
+					b.pause = nil
+					b.stop = nil
 					return
 				}
 			}
@@ -90,7 +100,7 @@ func (b *BotAudio) Play(url string) error {
 		}
 	}()
 
-	b.audioState = Playing
+	b.audioStatus = Playing
 	b.pause = pause
 	b.stop = done
 
@@ -98,11 +108,21 @@ func (b *BotAudio) Play(url string) error {
 }
 
 func (b *BotAudio) Pause() {
-	if b.audioState == Playing {
-		b.pause <- true
-		b.audioState = Paused
-	} else if b.audioState == Paused {
-		b.pause <- false
-		b.audioState = Playing
+	if b.pause == nil {
+		return
 	}
+
+	if b.audioStatus == Playing {
+		b.pause <- true
+	} else if b.audioStatus == Paused {
+		b.pause <- false
+	}
+}
+
+func (b *BotAudio) Stop() {
+	b.stop <- nil
+}
+
+func (b *BotAudio) Status() AudioStatus {
+	return b.audioStatus
 }
