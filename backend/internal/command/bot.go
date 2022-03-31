@@ -14,7 +14,7 @@ func (c *CommandHandler) join() (*discordgo.ApplicationCommand, func(s *discordg
 		func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			guildID := i.GuildID
 			userID := i.Member.User.ID
-			_, err := c.bot.JoinUserChannel(guildID, userID)
+			_, err := c.bot.GetGuildVoice(guildID).JoinUserChannel(userID)
 			if err != nil {
 				respond(s, i, "Please join a voice channel first")
 				return
@@ -32,7 +32,7 @@ func (c *CommandHandler) leave() (*discordgo.ApplicationCommand, func(s *discord
 		},
 		func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			guildID := i.GuildID
-			c.bot.LeaveChannel(guildID)
+			c.bot.GetGuildVoice(guildID).LeaveChannel()
 			respond(s, i, "I left the channel")
 		}
 }

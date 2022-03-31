@@ -9,16 +9,33 @@ import (
 	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 )
 
+type AudioState int
+
+const (
+	Playing AudioState = iota
+	IDLE
+	Paused
+)
+
 type Bot struct {
-	hub              *messaging.Hub
-	session          *discordgo.Session
-	voiceStates      map[string][]*discordgo.VoiceState
-	voiceConnections map[string]*discordgo.VoiceConnection
-	ready            bool
+	hub         *messaging.Hub
+	session     *discordgo.Session
+	ready       bool
+	guildVoices map[string]*BotAudio
+}
+
+type BotAudio struct {
+	guildId         string
+	bot             *Bot
+	voiceStates     []*discordgo.VoiceState
+	voiceConnection *discordgo.VoiceConnection
+	audioState      AudioState
+	pause           chan bool
+	stop            chan error
 }
 
 func NewBot(hub *messaging.Hub) *Bot {
-	return &Bot{hub: hub, session: nil, voiceStates: make(map[string][]*discordgo.VoiceState), voiceConnections: make(map[string]*discordgo.VoiceConnection), ready: false}
+	return &Bot{hub: hub, session: nil, guildVoices: make(map[string]*BotAudio), ready: false}
 }
 
 func (b *Bot) StartBot() error {
@@ -58,5 +75,14 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 }
 
 func (b *Bot) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
-	b.voiceStates[event.Guild.ID] = event.VoiceStates
+	b.GetGuildVoice(event.Guild.ID).voiceStates = event.VoiceStates
+}
+
+func (b *Bot) GetGuildVoice(guildId string) *BotAudio {
+	gv := b.guildVoices[guildId]
+	if gv == nil {
+		gv = &BotAudio{guildId: guildId, bot: b, audioState: IDLE}
+		b.guildVoices[guildId] = gv
+	}
+	return gv
 }
