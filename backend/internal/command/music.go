@@ -35,7 +35,7 @@ func (c *CommandHandler) play() (*discordgo.ApplicationCommand, func(s *discordg
 			}
 
 			if p.BotAudio().Status() == bot.NotConnected {
-				p.BotAudio().JoinUserChannel(i.User.ID)
+				p.BotAudio().JoinUserChannel(i.Member.User.ID)
 			}
 
 			t, err := p.AddToPlaylist(ID)
