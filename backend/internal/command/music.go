@@ -39,7 +39,7 @@ func (c *CommandHandler) play() (*discordgo.ApplicationCommand, func(s *discordg
 				return
 			}
 
-			_, err = p.Play()
+			err = p.Play()
 			if err != nil {
 				respond(s, i, fmt.Sprintf("error while playing the song %s", err.Error()))
 				return

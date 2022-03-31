@@ -1,17 +1,10 @@
 package youtube
 
 import (
-	"bufio"
-	"encoding/binary"
-	"errors"
-	"fmt"
-	"io"
-	"log"
-
-	"github.com/bwmarrin/dgvoice"
-	"github.com/bwmarrin/discordgo"
+	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
 	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 	"github.com/ggresillion/discordsoundboard/backend/internal/music"
+	ytdl "github.com/kkdai/youtube/v2"
 	"github.com/raitonoberu/ytmusic"
 )
 
@@ -23,10 +16,11 @@ const (
 
 type YoutubeConnector struct {
 	hub *messaging.Hub
+	bot *bot.Bot
 }
 
-func NewYoutubeConnector(hub *messaging.Hub) YoutubeConnector {
-	return YoutubeConnector{hub}
+func NewYoutubeConnector(hub *messaging.Hub, bot *bot.Bot) YoutubeConnector {
+	return YoutubeConnector{hub, bot}
 }
 
 func check(err error) {
@@ -83,63 +77,20 @@ func (y YoutubeConnector) Find(ID string) (*music.Track, error) {
 	}, nil
 }
 
-func (y YoutubeConnector) Play(v *discordgo.VoiceConnection, id string) (chan bool, error) {
+func (y YoutubeConnector) Play(guildId, query string) error {
 
-	if v == nil {
-		return nil, errors.New("voice connection is nil")
-	}
-
-	// Send "speaking" packet over the voice websocket
-	err := v.Speaking(true)
+	client := ytdl.Client{}
+	video, err := client.GetVideo(query)
 	if err != nil {
-		return nil, errors.New("couldn't set speaking")
+		return err
 	}
 
-	// Send not "speaking" packet over the websocket when we finish
-	defer func() {
-		v.Speaking(false)
-	}()
+	formats := video.Formats.WithAudioChannels()
 
-	youtube, err := getStreamFromYoutube(id)
-	check(err)
+	url, err := client.GetStreamURL(video, &formats[0])
+	if err != nil {
+		return err
+	}
 
-	pcm, err := convertToPCM(youtube)
-	check(err)
-
-	ffmpegbuf := bufio.NewReaderSize(pcm, 16384)
-
-	send := make(chan []int16, 2)
-
-	end := make(chan bool)
-	go func() {
-		dgvoice.SendPCM(v, send)
-		end <- true
-	}()
-
-	log.Println(fmt.Sprint("playing from youtube:", id))
-
-	go func() {
-		defer close(send)
-		for {
-			// read data from ffmpeg stdout
-			audiobuf := make([]int16, frameSize*channels)
-			err = binary.Read(ffmpegbuf, binary.LittleEndian, &audiobuf)
-			if err == io.EOF || err == io.ErrUnexpectedEOF {
-				return
-			}
-			if err != nil {
-				log.Println("error reading from ffmpeg stdout")
-				return
-			}
-
-			// Send received PCM to the sendPCM channel
-			select {
-			case send <- audiobuf:
-			case <-end:
-				return
-			}
-		}
-	}()
-
-	return end, nil
+	return y.bot.GetGuildVoice(guildId).Play(url)
 }

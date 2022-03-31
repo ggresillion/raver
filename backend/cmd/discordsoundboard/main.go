@@ -27,7 +27,7 @@ func main() {
 	}
 
 	// Deps
-	youtubeConnector := youtube.NewYoutubeConnector(hub)
+	youtubeConnector := youtube.NewYoutubeConnector(hub, b)
 	musicManager := music.NewMusicPlayerManager(youtubeConnector, hub, b)
 
 	// Handle commands

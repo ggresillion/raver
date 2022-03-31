@@ -32,5 +32,5 @@ func (a *BotAPI) joinChannel(w http.ResponseWriter, r *http.Request) {
 		HandleInternalServerError(w, err)
 	}
 
-	a.bot.JoinUserChannel(guildID, user.ID)
+	a.bot.GetGuildVoice(guildID).JoinUserChannel(user.ID)
 }
