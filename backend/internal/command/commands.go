@@ -12,16 +12,18 @@ type CommandHandler struct {
 }
 
 // Command handler is responsible for handling bot slash commands
-func NewCommandHandler(bot *bot.Bot, musicManager *music.MusicPlayerManager) *CommandHandler {
-	h := &CommandHandler{bot, musicManager}
-	h.bot.RegisterCommand(h.join())
-	h.bot.RegisterCommand(h.leave())
-	h.bot.RegisterCommand(h.play())
-	h.bot.RegisterCommand(h.pause())
-	h.bot.RegisterCommand(h.stop())
-	h.bot.RegisterCommand(h.clear())
-	h.bot.RegisterCommand(h.skip())
-	h.bot.RegisterCommand(h.playlist())
+func NewCommandHandler(b *bot.Bot, musicManager *music.MusicPlayerManager) *CommandHandler {
+	h := &CommandHandler{b, musicManager}
+	h.bot.RegisterCommands([]*bot.CommandAndHandler{
+		h.join(),
+		h.leave(),
+		h.play(),
+		h.pause(),
+		h.stop(),
+		h.clear(),
+		h.skip(),
+		h.playlist(),
+	})
 	return h
 }
 

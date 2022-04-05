@@ -49,6 +49,7 @@ func (y YoutubeConnector) Search(q string, p uint) ([]music.Track, error) {
 			Thumbnail: t.Thumbnails[0].URL,
 			Album:     t.Album.Name,
 			Duration:  uint(t.Duration),
+			URL:       "https://www.youtube.com/watch?v=" + string(t.VideoID),
 		})
 	}
 	return tracks, nil

@@ -35,6 +35,7 @@ type Track struct {
 	Album     string `json:"album"`
 	Thumbnail string `json:"thumbnail"`
 	Duration  uint   `json:"duration"`
+	URL       string `json:"url"`
 }
 
 type MusicPlayerState struct {
