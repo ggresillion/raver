@@ -6,6 +6,11 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+type CommandAndHandler struct {
+	Command *discordgo.ApplicationCommand
+	Handler func(s *discordgo.Session, i *discordgo.InteractionCreate)
+}
+
 var (
 	commandHandlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate) = make(map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate))
 )
@@ -16,11 +21,20 @@ func (b *Bot) commandHandler(s *discordgo.Session, i *discordgo.InteractionCreat
 	}
 }
 
-func (b *Bot) RegisterCommand(command *discordgo.ApplicationCommand, handler func(s *discordgo.Session, i *discordgo.InteractionCreate)) {
-	_, err := b.session.ApplicationCommandCreate(b.session.State.User.ID, "", command)
-	if err != nil {
-		log.Fatalf("error trying to register command %s %s", command.Name, err)
+func (b *Bot) RegisterCommands(commandsAndHandlers []*CommandAndHandler) {
+	var commands []*discordgo.ApplicationCommand
+
+	for _, c := range commandsAndHandlers {
+		commands = append(commands, c.Command)
+		commandHandlers[c.Command.Name] = c.Handler
 	}
-	commandHandlers[command.Name] = handler
-	log.Printf("registered bot command %s", command.Name)
+
+	createdCommands, err := b.session.ApplicationCommandBulkOverwrite(b.session.State.User.ID, "", commands)
+	if err != nil {
+		log.Fatalf("error trying to register commands %s", err)
+	}
+
+	for _, c := range createdCommands {
+		log.Printf("registered bot command %s", c.Name)
+	}
 }
