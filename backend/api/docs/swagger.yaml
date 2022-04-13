@@ -1,0 +1,424 @@
+basePath: /api
+definitions:
+  api.AddToPlaylistPayload:
+    properties:
+      id:
+        type: string
+    type: object
+  api.HTTPError:
+    properties:
+      message:
+        type: string
+    type: object
+  api.MoveInPlaylistPayload:
+    properties:
+      from:
+        type: integer
+      to:
+        type: integer
+    type: object
+  api.MusicStateResponse:
+    properties:
+      playlist:
+        items:
+          $ref: '#/definitions/music.Track'
+        type: array
+      status:
+        type: string
+    type: object
+  api.RemoveFromPlaylistPayload:
+    properties:
+      index:
+        type: string
+    type: object
+  discord.Guild:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  music.Track:
+    properties:
+      album:
+        type: string
+      artist:
+        type: string
+      duration:
+        type: integer
+      id:
+        type: string
+      thumbnail:
+        type: string
+      title:
+        type: string
+      url:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is the DiscordSoundBoard API.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: DiscordSoundBoard API
+  version: "1.0"
+paths:
+  /auth/callback:
+    get:
+      consumes:
+      - application/json
+      description: Callback that redirects to the frontend once logged in
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      summary: Callback
+      tags:
+      - auth
+  /auth/login:
+    get:
+      consumes:
+      - application/json
+      description: Redirects to login page
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      summary: Login
+      tags:
+      - auth
+  /guilds:
+    get:
+      consumes:
+      - application/json
+      description: Get the list of all guilds for the connected user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/discord.Guild'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      summary: Get guilds
+      tags:
+      - guilds
+  /guilds/{guildID}/addToPlaylist:
+    post:
+      consumes:
+      - application/json
+      description: Adds the track to the playlist
+      parameters:
+      - description: Guild ID
+        in: path
+        name: guildID
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.AddToPlaylistPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.MusicStateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      summary: Add to playlist
+      tags:
+      - music
+  /guilds/{guildID}/join:
+    post:
+      consumes:
+      - application/json
+      description: Join the user voice channel
+      parameters:
+      - description: Guild ID
+        in: path
+        name: guildID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.MusicStateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      security:
+      - Authentication: []
+      summary: Join the channel
+      tags:
+      - bot
+  /guilds/{guildID}/moveInPlaylist:
+    post:
+      consumes:
+      - application/json
+      description: Moves a track position in playlist
+      parameters:
+      - description: Guild ID
+        in: path
+        name: guildID
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.MoveInPlaylistPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.MusicStateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      summary: Move in playlist
+      tags:
+      - music
+  /guilds/{guildID}/pause:
+    post:
+      consumes:
+      - application/json
+      description: Pause the current track
+      parameters:
+      - description: Guild ID
+        in: path
+        name: guildID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.MusicStateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      summary: Pause
+      tags:
+      - music
+  /guilds/{guildID}/play:
+    post:
+      consumes:
+      - application/json
+      description: Play the current track
+      parameters:
+      - description: Guild ID
+        in: path
+        name: guildID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.MusicStateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      summary: Play
+      tags:
+      - music
+  /guilds/{guildID}/player:
+    get:
+      description: Gets the music player state
+      parameters:
+      - description: Guild ID
+        in: path
+        name: guildID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.MusicStateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      summary: Get player
+      tags:
+      - music
+  /guilds/{guildID}/removeFromPlaylist:
+    post:
+      consumes:
+      - application/json
+      description: Removes a track from the playlist
+      parameters:
+      - description: Guild ID
+        in: path
+        name: guildID
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.RemoveFromPlaylistPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.MusicStateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      summary: Remove from playlist
+      tags:
+      - music
+  /music/search:
+    get:
+      consumes:
+      - application/json
+      description: Searches for a song
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/music.Track'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      summary: Search
+      tags:
+      - music
+securityDefinitions:
+  Authentication:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -24,9 +24,6 @@ dist-ssr
 *.sw?
 
 # Go
-backend/.env
 .env
 **/__debug_bin
-
-# App
-youtube-dl
+out/

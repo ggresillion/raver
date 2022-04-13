@@ -1,12 +1,10 @@
 package api
 
 import (
-	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/music"
-	"github.com/go-chi/chi/v5"
+	"github.com/labstack/echo/v4"
 )
 
 type MusicAPI struct {
@@ -35,148 +33,199 @@ type MusicStateResponse struct {
 	Status   string        `json:"status"`
 }
 
-func (c *MusicAPI) search(w http.ResponseWriter, r *http.Request) {
-	queries, ok := r.URL.Query()["q"]
+// Search godoc
+// @Summary      Search
+// @Description  Searches for a song
+// @Tags         music
+// @Accept       json
+// @Produce      json
+// @Success      200  {array}   music.Track
+// @Failure      400  {object}  api.HTTPError
+// @Failure      404  {object}  api.HTTPError
+// @Failure      500  {object}  api.HTTPError
+// @Router       /music/search [get]
+func (a *MusicAPI) Search(c echo.Context) error {
+	q := c.QueryParam("q")
 
-	if !ok || len(queries[0]) < 1 {
-		HandleBadRequest(w, errors.New("missing \"q\" parameter"))
-		return
-	}
-
-	q := queries[0]
-
-	tracks, err := c.manager.Search(q, 0)
+	tracks, err := a.manager.Search(q, 0)
 	if err != nil {
-		HandleInternalServerError(w, err)
-		return
+		return err
 	}
 
-	json.NewEncoder(w).Encode(tracks)
+	return c.JSON(http.StatusOK, tracks)
 }
 
-func (c *MusicAPI) getState(w http.ResponseWriter, r *http.Request) {
-	guildID := chi.URLParam(r, "guildID")
+// GetState godoc
+// @Summary      Get player
+// @Description  Gets the music player state
+// @Tags         music
+// @Produce      json
+// @Param        guildID  path      string                         true  "Guild ID"
+// @Success      200      {object}  api.MusicStateResponse
+// @Failure      400      {object}  api.HTTPError
+// @Failure      404      {object}  api.HTTPError
+// @Failure      500      {object}  api.HTTPError
+// @Router       /guilds/{guildID}/player [get]
+func (a *MusicAPI) GetState(c echo.Context) error {
+	guildID := c.Param("guildID")
 
-	player, err := c.manager.GetPlayer(guildID)
+	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		HandleInternalServerError(w, err)
+		return err
 	}
 
-	response := &MusicStateResponse{
-		Playlist: player.Playlist(),
-		Status:   player.BotAudio().Status().String(),
-	}
-
-	json.NewEncoder(w).Encode(response)
+	return a.returnPlayerState(c, player)
 }
 
-func (c *MusicAPI) addToPlaylist(w http.ResponseWriter, r *http.Request) {
-	guildID := chi.URLParam(r, "guildID")
+// AddToPlaylist godoc
+// @Summary      Add to playlist
+// @Description  Adds the track to the playlist
+// @Tags         music
+// @Accept       json
+// @Produce      json
+// @Param        guildID  path      string                    true  "Guild ID"
+// @Param        body     body      api.AddToPlaylistPayload  true  "Body"
+// @Success      200      {object}  api.MusicStateResponse
+// @Failure      400      {object}  api.HTTPError
+// @Failure      404      {object}  api.HTTPError
+// @Failure      500      {object}  api.HTTPError
+// @Router       /guilds/{guildID}/addToPlaylist [post]
+func (a *MusicAPI) AddToPlaylist(c echo.Context) error {
+	guildID := c.Param("guildID")
 
 	body := &AddToPlaylistPayload{}
-	err := json.NewDecoder(r.Body).Decode(&body)
-	if err != nil {
-		HandleBadRequest(w, err)
-		return
+
+	if err := c.Bind(&body); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	player, err := c.manager.GetPlayer(guildID)
+	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		HandleInternalServerError(w, err)
+		return err
 	}
 
 	player.AddToPlaylist(body.ID)
 
-	response := &MusicStateResponse{
-		Playlist: player.Playlist(),
-		Status:   player.BotAudio().Status().String(),
-	}
-
-	json.NewEncoder(w).Encode(response)
+	return a.returnPlayerState(c, player)
 }
 
-func (c *MusicAPI) moveInPlaylist(w http.ResponseWriter, r *http.Request) {
-	guildID := chi.URLParam(r, "guildID")
+// MoveInPlaylist godoc
+// @Summary      Move in playlist
+// @Description  Moves a track position in playlist
+// @Tags         music
+// @Accept       json
+// @Produce      json
+// @Param        guildID  path      string                     true  "Guild ID"
+// @Param        body     body      api.MoveInPlaylistPayload  true  "Body"
+// @Success      200      {object}  api.MusicStateResponse
+// @Failure      400      {object}  api.HTTPError
+// @Failure      404      {object}  api.HTTPError
+// @Failure      500      {object}  api.HTTPError
+// @Router       /guilds/{guildID}/moveInPlaylist [post]
+func (a *MusicAPI) MoveInPlaylist(c echo.Context) error {
+	guildID := c.Param("guildID")
 
 	body := &MoveInPlaylistPayload{}
-	err := json.NewDecoder(r.Body).Decode(&body)
-	if err != nil {
-		HandleBadRequest(w, err)
-		return
+	if err := c.Bind(&body); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	player, err := c.manager.GetPlayer(guildID)
+	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		HandleInternalServerError(w, err)
+		return err
 	}
 
 	player.MoveInPlaylist(body.From, body.To)
 
-	response := &MusicStateResponse{
-		Playlist: player.Playlist(),
-		Status:   player.BotAudio().Status().String(),
-	}
-
-	json.NewEncoder(w).Encode(response)
+	return a.returnPlayerState(c, player)
 }
 
-func (c *MusicAPI) removeFromPlaylist(w http.ResponseWriter, r *http.Request) {
-	guildID := chi.URLParam(r, "guildID")
+// RemoveFromPlaylist godoc
+// @Summary      Remove from playlist
+// @Description  Removes a track from the playlist
+// @Tags         music
+// @Accept       json
+// @Produce      json
+// @Param        guildID  path      string  true  "Guild ID"
+// @Param        body     body      api.RemoveFromPlaylistPayload  true  "Body"
+// @Success      200      {object}  api.MusicStateResponse
+// @Failure      400      {object}  api.HTTPError
+// @Failure      404      {object}  api.HTTPError
+// @Failure      500      {object}  api.HTTPError
+// @Router       /guilds/{guildID}/removeFromPlaylist [post]
+func (a *MusicAPI) RemoveFromPlaylist(c echo.Context) error {
+	guildID := c.Param("guildID")
 
 	body := &RemoveFromPlaylistPayload{}
-	err := json.NewDecoder(r.Body).Decode(&body)
-	if err != nil {
-		HandleBadRequest(w, err)
-		return
+	if err := c.Bind(&body); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	player, err := c.manager.GetPlayer(guildID)
+	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		HandleInternalServerError(w, err)
+		return err
 	}
 
 	player.RemoveFromPlaylist(body.Index)
 
-	response := &MusicStateResponse{
-		Playlist: player.Playlist(),
-		Status:   player.BotAudio().Status().String(),
-	}
-
-	json.NewEncoder(w).Encode(response)
+	return a.returnPlayerState(c, player)
 }
 
-func (c *MusicAPI) play(w http.ResponseWriter, r *http.Request) {
-	guildID := chi.URLParam(r, "guildID")
+// Play godoc
+// @Summary      Play
+// @Description  Play the current track
+// @Tags         music
+// @Accept       json
+// @Produce      json
+// @Param        guildID  path      string  true  "Guild ID"
+// @Success      200      {object}  api.MusicStateResponse
+// @Failure      400      {object}  api.HTTPError
+// @Failure      404      {object}  api.HTTPError
+// @Failure      500      {object}  api.HTTPError
+// @Router       /guilds/{guildID}/play [post]
+func (a *MusicAPI) Play(c echo.Context) error {
+	guildID := c.Param("guildID")
 
-	player, err := c.manager.GetPlayer(guildID)
+	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		HandleInternalServerError(w, err)
+		return err
 	}
 
 	player.Play()
 
-	response := &MusicStateResponse{
-		Playlist: player.Playlist(),
-		Status:   player.BotAudio().Status().String(),
-	}
-
-	json.NewEncoder(w).Encode(response)
+	return a.returnPlayerState(c, player)
 }
 
-func (c *MusicAPI) pause(w http.ResponseWriter, r *http.Request) {
-	guildID := chi.URLParam(r, "guildID")
+// Pause godoc
+// @Summary      Pause
+// @Description  Pause the current track
+// @Tags         music
+// @Accept       json
+// @Produce      json
+// @Param        guildID  path      string  true  "Guild ID"
+// @Success      200      {object}  api.MusicStateResponse
+// @Failure      400      {object}  api.HTTPError
+// @Failure      404      {object}  api.HTTPError
+// @Failure      500      {object}  api.HTTPError
+// @Router       /guilds/{guildID}/pause [post]
+func (a *MusicAPI) Pause(c echo.Context) error {
+	guildID := c.Param("guildID")
 
-	player, err := c.manager.GetPlayer(guildID)
+	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		HandleInternalServerError(w, err)
+		return err
 	}
 
 	player.Play()
 
+	return a.returnPlayerState(c, player)
+}
+
+func (a *MusicAPI) returnPlayerState(c echo.Context, player *music.MusicPlayer) error {
 	response := &MusicStateResponse{
 		Playlist: player.Playlist(),
 		Status:   player.BotAudio().Status().String(),
 	}
 
-	json.NewEncoder(w).Encode(response)
+	return c.JSON(http.StatusOK, response)
 }
