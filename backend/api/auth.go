@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/config"
+	"github.com/labstack/echo/v4"
 	"github.com/ravener/discord-oauth2"
 	"golang.org/x/oauth2"
 )
@@ -29,29 +30,41 @@ func NewAuthAPI() *AuthAPI {
 	return &AuthAPI{}
 }
 
-func (a *AuthAPI) authLogin(w http.ResponseWriter, r *http.Request) {
-	// Step 1: Redirect to the OAuth 2.0 Authorization page.
-	// This route could be named /login etc
-	http.Redirect(w, r, conf.AuthCodeURL(state), http.StatusTemporaryRedirect)
+// AuthLogin godoc
+// @Summary      Login
+// @Description  Redirects to login page
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Success      200  {string}  string  "ok"
+// @Failure      500  {object}  api.HTTPError
+// @Router       /auth/login [get]
+func (a *AuthAPI) AuthLogin(c echo.Context) error {
+	c.Redirect(http.StatusTemporaryRedirect, conf.AuthCodeURL(state))
+	return nil
 }
 
-func (a *AuthAPI) authCallback(w http.ResponseWriter, r *http.Request) {
-	if r.FormValue("state") != state {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("State does not match."))
-		return
+// AuthCallback godoc
+// @Summary      Callback
+// @Description  Callback that redirects to the frontend once logged in
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Success      200  {string}  string  "ok"
+// @Failure      500  {object}  api.HTTPError
+// @Router       /auth/callback [get]
+func (a *AuthAPI) AuthCallback(c echo.Context) error {
+	if c.FormValue("state") != state {
+		return echo.NewHTTPError(http.StatusBadRequest, "")
 	}
-	// Step 3: We exchange the code we got for an access token
-	// Then we can use the access token to do actions, limited to scopes we requested
-	token, err := conf.Exchange(context.Background(), r.FormValue("code"))
+	token, err := conf.Exchange(context.Background(), c.FormValue("code"))
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	http.Redirect(w, r, fmt.Sprint("http://localhost:3000?accessToken=", token.AccessToken, "&refreshToken=", token.RefreshToken), http.StatusPermanentRedirect)
+	c.Redirect(http.StatusPermanentRedirect, fmt.Sprint("http://localhost:3000?accessToken=", token.AccessToken, "&refreshToken=", token.RefreshToken))
+	return nil
 }
 
 func getToken(r *http.Request) *string {

@@ -14,7 +14,6 @@ import { ProgressBar } from './ProgressBar';
 
 export function Player() {
 
-  const [progress, setProgress] = useState<number>(50);
   const {playerState} = useSelector((state: RootState) => state.musicPlayer);
   const {selectedGuild} = useSelector((state: RootState) => state.guild);
   const [volume, setVolume] = useState<number>(80);
@@ -22,14 +21,18 @@ export function Player() {
   function getButton() {
     switch (playerState?.status) {
     case PlayerStatus.IDLE: 
-      return <img className="play-pause" title='Play' src={playIcon} onClick={() => !selectedGuild  || play(selectedGuild?.id)}></img>;
+      return <button type='button'><img className="play-pause" title='Play' src={playIcon} onClick={() => !selectedGuild  || play(selectedGuild?.id)}></img></button>;
     case PlayerStatus.PAUSED: 
-      return <img className="play-pause" title='Play' src={playIcon} onClick={() => !selectedGuild  || play(selectedGuild?.id)} ></img>;
+      return <button type='button'><img className="play-pause" title='Play' src={playIcon} onClick={() => !selectedGuild  || play(selectedGuild?.id)} ></img></button>;
     case PlayerStatus.PLAYING: 
-      return <img className="play-pause" title='Pause' src={pauseIcon} ></img>;
+      return <button type='button'><img className="play-pause" title='Pause' src={pauseIcon} ></img></button>;
     default:
-      return <div></div>;
+      return <button type='button' disabled><img className="play-pause" title='Play' src={playIcon}></img></button>;
     }
+  }
+
+  function setProgress(progress: number) {
+    console.log(progress);
   }
 
   return (
@@ -48,14 +51,18 @@ export function Player() {
       <div className="controls">
 
         <div className="buttons">
-          <img className="skip-previous" title='Previous' src={previous}></img>
+          <button type='button'>
+            <img className="skip-previous" title='Previous' src={previous}></img>
+          </button>
           {getButton()}
-          <img className="skip-next" title='Next' src={next}></img>
+          <button type='button'>
+            <img className="skip-next" title='Next' src={next}></img>
+          </button>
         </div>
 
         <div className='progress-bar'>
-          <span>1:26</span>
-          <ProgressBar progress={progress} onProgressChange={setProgress} />
+          <span>-:-</span>
+          <ProgressBar progress={playerState?.progress || 0} onProgressChange={setProgress} disabled={!playerState?.progress}/>
           <span>3:01</span>
         </div>
       </div>

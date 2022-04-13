@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Guild } from '../../services/model/guild';
+import { Guild } from '../services/model/guild';
 
 interface GuildState {
   guilds?: Guild[];

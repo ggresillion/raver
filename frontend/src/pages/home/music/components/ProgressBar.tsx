@@ -1,7 +1,7 @@
 import React from 'react';
 import './ProgressBar.scss';
 
-export function ProgressBar(props: { progress: number, onProgressChange?: (progress: number) => void }) {
+export function ProgressBar(props: { disabled?: boolean, progress: number, onProgressChange?: (progress: number) => void }) {
 
   const progressRef = React.createRef<HTMLDivElement>();
 
@@ -17,7 +17,7 @@ export function ProgressBar(props: { progress: number, onProgressChange?: (progr
 
   return (
     <div className='progress-outer' onClick={onProgressChange} ref={progressRef}>
-      <div className="progress-inner" style={{ width: props.progress + '%' }}></div>
+      <div className={`progress-inner ${props.disabled ? 'disabled': ''}`} style={{ width: props.progress + '%' }}></div>
       {!!props.onProgressChange && <div className='progress-button'></div>}
     </div>
   );

@@ -1,10 +1,10 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
+	echo "github.com/labstack/echo/v4"
 )
 
 type DiscordAPI struct {
@@ -14,11 +14,21 @@ func NewDiscordAPI() *DiscordAPI {
 	return &DiscordAPI{}
 }
 
-func (a *DiscordAPI) getGuilds(w http.ResponseWriter, r *http.Request) {
-	token := getToken(r)
+// GetGuilds godoc
+// @Summary      Get guilds
+// @Description  Get the list of all guilds for the connected user
+// @Tags         guilds
+// @Accept       json
+// @Produce      json
+// @Success      200  {array}   discord.Guild
+// @Failure      400  {object}  HTTPError
+// @Failure      404  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
+// @Router       /guilds [get]
+func (a *DiscordAPI) GetGuilds(c echo.Context) error {
+	token := getToken(c.Request())
 	if token == nil {
-		HandleUnauthorizedError(w)
-		return
+		return echo.NewHTTPError(http.StatusUnauthorized)
 	}
 
 	dc := discord.NewDiscordClient(*token)
@@ -26,15 +36,11 @@ func (a *DiscordAPI) getGuilds(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch e := err.(type) {
 		case *discord.DiscordApiError:
-			w.WriteHeader(e.Code)
-			w.Write([]byte(e.Message))
-			return
+			return echo.NewHTTPError(e.Code, e.Message)
 		default:
-			HandleInternalServerError(w, err)
+			return err
 		}
-		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(guilds)
+	return c.JSON(http.StatusOK, guilds)
 }

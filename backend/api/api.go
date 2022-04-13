@@ -4,10 +4,16 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/cors"
+	_ "github.com/ggresillion/discordsoundboard/backend/api/docs"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
+
+type HTTPError struct {
+	Message string `json:"message"`
+}
 
 type API struct {
 	authAPI    *AuthAPI
@@ -27,46 +33,58 @@ func NewAPI(
 	return &API{authAPI, discordAPI, musicAPI, wsAPI, botAPI}
 }
 
+// @title           DiscordSoundBoard API
+// @version         1.0
+// @description     This is the DiscordSoundBoard API.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /api
+
+// @securitydefinitions.apikey  Authentication
+// @in                          header
+// @name                        Authorization
 func (a *API) Listen() {
 	// Create router
-	r := chi.NewRouter()
+	e := echo.New()
 
 	// Middlewares
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(cors.Handler(cors.Options{
-		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-		AllowedOrigins: []string{"https://*", "http://*"},
-		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"https://labstack.com", "https://labstack.net"},
+		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 	}))
 
 	// Register routes
-	r.Get("/api/auth/login", a.authAPI.authLogin)
-	r.Get("/api/auth/callback", a.authAPI.authCallback)
+	e.GET("/api/auth/login", a.authAPI.AuthLogin)
+	e.GET("/api/auth/callback", a.authAPI.AuthCallback)
 
-	r.Get("/api/guilds", a.discordAPI.getGuilds)
-	r.Get("/api/guilds/{guildID}/player", a.musicAPI.getState)
-	r.Post("/api/guilds/{guildID}/addToPlaylist", a.musicAPI.addToPlaylist)
-	r.Post("/api/guilds/{guildID}/moveInPlaylist", a.musicAPI.moveInPlaylist)
-	r.Post("/api/guilds/{guildID}/removeFromPlaylist", a.musicAPI.removeFromPlaylist)
-	r.Post("/api/guilds/{guildID}/play", a.musicAPI.play)
-	r.Post("/api/guilds/{guildID}/pause", a.musicAPI.pause)
-	r.Post("/api/guilds/{guildID}/join", a.botAPI.joinChannel)
+	e.GET("/api/guilds", a.discordAPI.GetGuilds)
+	e.GET("/api/guilds/:guildID/player", a.musicAPI.GetState)
+	e.POST("/api/guilds/:guildID/addToPlaylist", a.musicAPI.AddToPlaylist)
+	e.POST("/api/guilds/:guildID/moveInPlaylist", a.musicAPI.MoveInPlaylist)
+	e.POST("/api/guilds/:guildID/removeFromPlaylist", a.musicAPI.RemoveFromPlaylist)
+	e.POST("/api/guilds/:guildID/play", a.musicAPI.Play)
+	e.POST("/api/guilds/:guildID/pause", a.musicAPI.Pause)
+	e.POST("/api/guilds/:guildID/join", a.botAPI.JoinChannel)
 
-	r.Get("/api/music/search", a.musicAPI.search)
+	e.GET("/api/music/search", a.musicAPI.Search)
 
-	r.Get("/ws", a.wsAPI.handleConnection)
+	// e.GET("/ws", a.wsAPI.handleConnection)
 
-	r.Handle("/*", http.FileServer(http.Dir("./static")))
+	e.Static("/", "./static")
+
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// Start API
 	log.Println("listening on 8080")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Fatal(http.ListenAndServe(":8080", e))
 }

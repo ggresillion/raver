@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { MusicPlayerState } from '../../services/model/playerState';
+import { MusicPlayerState } from '../services/model/playerState';
 
 interface MusicState {
   playerState?: MusicPlayerState;

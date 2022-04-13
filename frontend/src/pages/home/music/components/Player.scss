@@ -50,17 +50,6 @@
             align-items: center;
             gap: 6px;
         }
-
-        img {
-            height: 36px;
-            filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
-            cursor: pointer;
-            user-select: none;
-
-            &:hover {
-                transform: scale(1.05);
-            }
-        }
     }
 
     .volume {
@@ -77,5 +66,25 @@
 
     .progress-bar {
         width: 500px;
+    }
+}
+
+button {
+    cursor: pointer;
+    user-select: none;
+    background-color: transparent;
+    border: none;
+
+    &:disabled {
+        opacity: 0.2;
+    }
+
+    &:hover:not(:disabled) {
+        transform: scale(1.1);
+    }
+
+    img {
+        height: 36px;
+        filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
     }
 }
