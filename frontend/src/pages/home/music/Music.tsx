@@ -89,7 +89,6 @@ export function Music() {
       <div className='side-container'>
         <Playlist />
       </div>
-      <Player />
     </div>
   );
 }

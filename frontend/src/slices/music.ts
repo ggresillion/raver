@@ -1,11 +1,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { MusicPlayerState } from '../services/model/playerState';
+import { PlayerStatus } from '../services/model/playerStatus';
 
 interface MusicState {
-  playerState?: MusicPlayerState;
+  playerState: MusicPlayerState;
 }
 
-const initialState: MusicState = {};
+const initialState: MusicState = {
+  playerState: {
+    playlist: [],
+    status: PlayerStatus.NOT_CONNECTED,
+    progress: 0
+  }
+};
 
 export const musicPlayerSlice = createSlice({
   name: 'musicPlayer',

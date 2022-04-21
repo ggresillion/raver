@@ -2,5 +2,6 @@ export enum PlayerStatus {
   PLAYING = 'PLAYING',
   PAUSED = 'PAUSED',
   BUFFERING = 'BUFFERING',
-  IDLE = 'IDLE'
+  IDLE = 'IDLE',
+  NOT_CONNECTED = 'NOT_CONNECTED'
 }

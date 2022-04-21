@@ -2,6 +2,8 @@ package music
 
 import (
 	"errors"
+	"fmt"
+	"log"
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
 	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
@@ -10,7 +12,7 @@ import (
 type MusicConnector interface {
 	Search(q string, p uint) ([]Track, error)
 	Find(ID string) (*Track, error)
-	Play(guildId, query string) error
+	GetStreamURL(query string) (string, error)
 }
 
 type MusicPlayer struct {
@@ -71,6 +73,7 @@ func (m *MusicPlayerManager) GetPlayer(guildID string) (*MusicPlayer, error) {
 		playlist:  []Track{},
 	}
 	m.players[guildID] = p
+	p.subscribeToAudioStatusChange()
 	return p, nil
 }
 
@@ -104,36 +107,57 @@ func (p *MusicPlayer) RemoveFromPlaylist(ID string) {
 }
 
 func (p *MusicPlayer) Play() error {
-	err := p.connector.Play(p.guildID, p.playlist[0].ID)
+
+	switch p.botAudio.Status() {
+	case bot.Paused:
+		p.botAudio.UnPause()
+		return nil
+	case bot.Playing:
+		return nil
+	}
+
+	// Get the stream url from source
+	url, err := p.connector.GetStreamURL(p.playlist[0].ID)
 	if err != nil {
 		return err
 	}
+
+	// Start the stream
+	end, err := p.botAudio.Play(url)
+	if err != nil {
+		return fmt.Errorf("error starting audio streaming: %v", err)
+	}
+
+	// Listen for stream end, skiping to next song if any
+	go func() {
+		err := <-end
+		if err != nil {
+			log.Printf("error during audio streaming: %v", err)
+		}
+		p.playlist = p.playlist[1:]
+		if len(p.playlist) > 0 {
+			p.Play()
+		}
+	}()
+
 	p.propagateState()
 	return nil
 }
 
 func (p *MusicPlayer) Pause() {
 	p.botAudio.Pause()
-	p.propagateState()
 }
 
 func (p *MusicPlayer) Stop() {
 	p.botAudio.Stop()
-	p.propagateState()
 }
 
 func (p *MusicPlayer) Skip() error {
-	if len(p.playlist) == 0 {
-		p.playlist = []Track{}
-		p.propagateState()
+	if len(p.playlist) < 2 {
 		return nil
 	}
 
-	err := p.connector.Play(p.guildID, p.playlist[0].ID)
-	if err != nil {
-		return err
-	}
-	p.propagateState()
+	p.botAudio.Stop()
 	return nil
 }
 
@@ -162,6 +186,15 @@ func (p *MusicPlayer) propagateState() {
 		RoomID:      p.guildID,
 	}
 	p.hub.Send(m)
+}
+
+func (p *MusicPlayer) subscribeToAudioStatusChange() {
+	go func() {
+		for {
+			<-p.botAudio.StatusChange()
+			p.propagateState()
+		}
+	}()
 }
 
 func insert(array []Track, value Track, index int) []Track {

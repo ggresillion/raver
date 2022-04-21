@@ -23,8 +23,15 @@ clean: ## Remove build related file
 	rm -fr ${OUT_DIR}
 
 ## Doc:
-doc: ## Generates the doc from the open api spec
+doc: ## Generates the doc from the openapi spec
 	swag init -o ./api/docs -g api/api.go
+
+## Format:
+format: format-code format-doc ## Formats the code
+format-code: ## Formats the go code
+	go fmt ./...
+format-doc: ## Formats the openapi docs
+	swag fmt -g api/api.go
 
 ## Help:
 help: ## Show this help.

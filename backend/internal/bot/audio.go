@@ -5,8 +5,31 @@ import (
 	"io"
 	"log"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/jonas747/dca"
 )
+
+type BotAudio struct {
+	guildID           string
+	bot               *Bot
+	voiceStates       []*discordgo.VoiceState
+	voiceConnection   *discordgo.VoiceConnection
+	audioStatus       AudioStatus
+	audioStatusChange chan AudioStatus
+	session           *StreamingSession
+}
+
+type StreamingSession struct {
+	end              chan error
+	stop             chan error
+	pause            chan bool
+	encodingSession  *dca.EncodeSession
+	streamingSession *dca.StreamingSession
+}
+
+func NewBotAudio(guildID string, bot *Bot) *BotAudio {
+	return &BotAudio{guildID: guildID, bot: bot, audioStatus: NotConnected, audioStatusChange: make(chan AudioStatus)}
+}
 
 func (b *BotAudio) LeaveChannel() {
 	vc := b.voiceConnection
@@ -19,110 +42,128 @@ func (b *BotAudio) LeaveChannel() {
 }
 
 func (b *BotAudio) JoinUserChannel(userID string) error {
-	g, err := b.bot.session.State.Guild(b.guildId)
+	g, err := b.bot.session.State.Guild(b.guildID)
 	if err != nil {
 		return err
 	}
 	for _, v := range g.VoiceStates {
 		if v.UserID == userID {
-			defer log.Printf("joinned voice channel for guildID %s and userID %s", b.guildId, userID)
-			vc, err := b.bot.session.ChannelVoiceJoin(b.guildId, v.ChannelID, false, true)
+			defer log.Printf("joinned voice channel for guildID %s and userID %s", b.guildID, userID)
+			vc, err := b.bot.session.ChannelVoiceJoin(b.guildID, v.ChannelID, false, true)
 			if err != nil {
 				return err
 			}
 			b.voiceConnection = vc
-			b.audioStatus = IDLE
+
+			if b.audioStatus == NotConnected {
+				b.setStatus(IDLE)
+			}
+
 			return nil
 		}
 	}
 	return errors.New("user not in a voice channel")
 }
 
-func (b *BotAudio) Play(url string) error {
-
-	v := b.voiceConnection
-	if v == nil {
-		return errors.New("bot is not in voice channel")
+func (b *BotAudio) Play(url string) (chan error, error) {
+	switch b.audioStatus {
+	case NotConnected:
+		return nil, errors.New("bot is not in a voice channel")
+	case Playing:
+		b.Stop()
+	}
+	if b.voiceConnection == nil {
+		return nil, errors.New("no voice connection")
 	}
 
-	err := v.Speaking(true)
+	err := b.voiceConnection.Speaking(true)
 	if err != nil {
-		return errors.New("couldn't set speaking")
+		return nil, errors.New("couldn't set speaking")
 	}
-
-	defer func() {
-		v.Speaking(false)
-	}()
 
 	options := dca.StdEncodeOptions
 	options.RawOutput = true
 	options.Bitrate = 96
 	options.Application = "lowdelay"
 
-	encodingSession, err := dca.EncodeFile(url, options)
+	b.session = &StreamingSession{}
+
+	b.session.encodingSession, err = dca.EncodeFile(url, options)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	done := make(chan error)
-	pause := make(chan bool)
+	b.session.end = make(chan error)
+	b.session.stop = make(chan error)
+	b.session.pause = make(chan bool)
 
-	go func() {
-		defer encodingSession.Cleanup()
-		defer close(pause)
-		defer close(done)
+	b.setStatus(Playing)
 
-		ss := dca.NewStream(encodingSession, v, done)
+	streamEnd := make(chan error)
 
-		go func() {
-			for {
-				select {
-				case p := <-pause:
-					ss.SetPaused(p)
-					if p {
-						b.audioStatus = Paused
-					} else {
-						b.audioStatus = Playing
-					}
-				case <-done:
-					encodingSession.Stop()
-					b.audioStatus = IDLE
-					b.pause = nil
-					b.stop = nil
-					return
+	b.session.streamingSession = dca.NewStream(b.session.encodingSession, b.voiceConnection, streamEnd)
+
+	// Listen for pause or stop messages
+	go func(pause chan bool, stop chan error) {
+		for {
+			select {
+			case p := <-pause:
+				b.session.streamingSession.SetPaused(p)
+				if p {
+					b.setStatus(Paused)
+				} else {
+					b.setStatus(Playing)
 				}
+			case <-stop:
+				b.session.encodingSession.Cleanup()
 			}
-		}()
-
-		err = <-done
-		if err != nil && err != io.EOF {
-			log.Printf("error playing audio stream: %s", err)
 		}
-	}()
+	}(b.session.pause, b.session.stop)
 
-	b.audioStatus = Playing
-	b.pause = pause
-	b.stop = done
+	// Listen for the stream ending
+	go func(end chan error) {
+		err := <-streamEnd
+		b.session.encodingSession.Cleanup()
+		b.voiceConnection.Speaking(false)
+		b.setStatus(IDLE)
+		b.session = nil
+		if err != nil && err != io.EOF {
+			end <- err
+		} else {
+			end <- nil
+		}
+	}(b.session.end)
 
-	return nil
+	return b.session.end, nil
 }
 
 func (b *BotAudio) Pause() {
-	if b.pause == nil {
+	if b.session.pause == nil || b.audioStatus != Playing {
 		return
 	}
+	b.session.pause <- true
+}
 
-	if b.audioStatus == Playing {
-		b.pause <- true
-	} else if b.audioStatus == Paused {
-		b.pause <- false
+func (b *BotAudio) UnPause() {
+	if b.session.pause == nil || b.audioStatus != Paused {
+		return
 	}
+	b.session.pause <- false
 }
 
 func (b *BotAudio) Stop() {
-	b.stop <- nil
+	b.session.stop <- nil
 }
 
 func (b *BotAudio) Status() AudioStatus {
 	return b.audioStatus
+}
+
+func (b *BotAudio) StatusChange() chan AudioStatus {
+	return b.audioStatusChange
+}
+
+func (b *BotAudio) setStatus(s AudioStatus) {
+	b.audioStatus = s
+	b.audioStatusChange <- s
 }

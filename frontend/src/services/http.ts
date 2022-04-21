@@ -23,6 +23,7 @@ export class HttpClient {
       body: JSON.stringify(body),
       headers: {
         Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        'Content-Type': 'application/json'
       },
     });
 

@@ -18,6 +18,7 @@ func NewDiscordAPI() *DiscordAPI {
 // @Summary      Get guilds
 // @Description  Get the list of all guilds for the connected user
 // @Tags         guilds
+// @Security     Authentication
 // @Accept       json
 // @Produce      json
 // @Success      200  {array}   discord.Guild

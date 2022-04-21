@@ -85,6 +85,11 @@ const docTemplate = `{
         },
         "/guilds": {
             "get": {
+                "security": [
+                    {
+                        "Authentication": []
+                    }
+                ],
                 "description": "Get the list of all guilds for the connected user",
                 "consumes": [
                     "application/json"
@@ -129,6 +134,11 @@ const docTemplate = `{
         },
         "/guilds/{guildID}/addToPlaylist": {
             "post": {
+                "security": [
+                    {
+                        "Authentication": []
+                    }
+                ],
                 "description": "Adds the track to the playlist",
                 "consumes": [
                     "application/json"
@@ -217,7 +227,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.MusicStateResponse"
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -243,6 +253,11 @@ const docTemplate = `{
         },
         "/guilds/{guildID}/moveInPlaylist": {
             "post": {
+                "security": [
+                    {
+                        "Authentication": []
+                    }
+                ],
                 "description": "Moves a track position in playlist",
                 "consumes": [
                     "application/json"
@@ -302,6 +317,11 @@ const docTemplate = `{
         },
         "/guilds/{guildID}/pause": {
             "post": {
+                "security": [
+                    {
+                        "Authentication": []
+                    }
+                ],
                 "description": "Pause the current track",
                 "consumes": [
                     "application/json"
@@ -352,6 +372,11 @@ const docTemplate = `{
         },
         "/guilds/{guildID}/play": {
             "post": {
+                "security": [
+                    {
+                        "Authentication": []
+                    }
+                ],
                 "description": "Play the current track",
                 "consumes": [
                     "application/json"
@@ -402,6 +427,11 @@ const docTemplate = `{
         },
         "/guilds/{guildID}/player": {
             "get": {
+                "security": [
+                    {
+                        "Authentication": []
+                    }
+                ],
                 "description": "Gets the music player state",
                 "produces": [
                     "application/json"
@@ -449,6 +479,11 @@ const docTemplate = `{
         },
         "/guilds/{guildID}/removeFromPlaylist": {
             "post": {
+                "security": [
+                    {
+                        "Authentication": []
+                    }
+                ],
                 "description": "Removes a track from the playlist",
                 "consumes": [
                     "application/json"
@@ -506,8 +541,123 @@ const docTemplate = `{
                 }
             }
         },
+        "/guilds/{guildID}/skip": {
+            "post": {
+                "security": [
+                    {
+                        "Authentication": []
+                    }
+                ],
+                "description": "Skip the current track",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "music"
+                ],
+                "summary": "Skip",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Guild ID",
+                        "name": "guildID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.MusicStateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/guilds/{guildID}/stop": {
+            "post": {
+                "security": [
+                    {
+                        "Authentication": []
+                    }
+                ],
+                "description": "Stop the current track",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "music"
+                ],
+                "summary": "Stop",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Guild ID",
+                        "name": "guildID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.MusicStateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/music/search": {
             "get": {
+                "security": [
+                    {
+                        "Authentication": []
+                    }
+                ],
                 "description": "Searches for a song",
                 "consumes": [
                     "application/json"
@@ -519,6 +669,15 @@ const docTemplate = `{
                     "music"
                 ],
                 "summary": "Search",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Query",
+                        "name": "q",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
