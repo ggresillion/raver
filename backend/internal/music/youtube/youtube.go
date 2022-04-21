@@ -1,8 +1,6 @@
 package youtube
 
 import (
-	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
-	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 	"github.com/ggresillion/discordsoundboard/backend/internal/music"
 	ytdl "github.com/kkdai/youtube/v2"
 	"github.com/raitonoberu/ytmusic"
@@ -15,12 +13,6 @@ const (
 )
 
 type YoutubeConnector struct {
-	hub *messaging.Hub
-	bot *bot.Bot
-}
-
-func NewYoutubeConnector(hub *messaging.Hub, bot *bot.Bot) YoutubeConnector {
-	return YoutubeConnector{hub, bot}
 }
 
 func check(err error) {
@@ -78,20 +70,20 @@ func (y YoutubeConnector) Find(ID string) (*music.Track, error) {
 	}, nil
 }
 
-func (y YoutubeConnector) Play(guildId, query string) error {
+func (y YoutubeConnector) GetStreamURL(query string) (string, error) {
 
 	client := ytdl.Client{}
 	video, err := client.GetVideo(query)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	formats := video.Formats.WithAudioChannels()
 
 	url, err := client.GetStreamURL(video, &formats[0])
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return y.bot.GetGuildVoice(guildId).Play(url)
+	return url, nil
 }

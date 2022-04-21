@@ -1,8 +1,6 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
 	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
 	"github.com/labstack/echo/v4"
@@ -24,19 +22,16 @@ func NewBotAPI(bot *bot.Bot) *BotAPI {
 // @Accept       json
 // @Produce      json
 // @Param        guildID  path      string  true  "Guild ID"
-// @Success      200      {object}  api.MusicStateResponse
+// @Success      200      {string}  string
 // @Failure      400      {object}  api.HTTPError
 // @Failure      404      {object}  api.HTTPError
 // @Failure      500      {object}  api.HTTPError
 // @Router       /guilds/{guildID}/join [post]
 func (a *BotAPI) JoinChannel(c echo.Context) error {
 	guildID := c.Param("guildID")
-	token := getToken(c.Request())
-	if token == nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "missing request token")
-	}
+	token := c.Get("token").(string)
 
-	dc := discord.NewDiscordClient(*token)
+	dc := discord.NewDiscordClient(token)
 
 	user, err := dc.GetUser()
 	if err != nil {

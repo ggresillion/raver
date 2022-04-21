@@ -16,16 +16,6 @@ type Bot struct {
 	guildVoices map[string]*BotAudio
 }
 
-type BotAudio struct {
-	guildId         string
-	bot             *Bot
-	voiceStates     []*discordgo.VoiceState
-	voiceConnection *discordgo.VoiceConnection
-	audioStatus     AudioStatus
-	pause           chan bool
-	stop            chan error
-}
-
 func NewBot(hub *messaging.Hub) *Bot {
 	return &Bot{hub: hub, session: nil, guildVoices: make(map[string]*BotAudio), ready: false}
 }
@@ -73,7 +63,7 @@ func (b *Bot) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 func (b *Bot) GetGuildVoice(guildId string) *BotAudio {
 	gv := b.guildVoices[guildId]
 	if gv == nil {
-		gv = &BotAudio{guildId: guildId, bot: b, audioStatus: NotConnected}
+		gv = NewBotAudio(guildId, b)
 		b.guildVoices[guildId] = gv
 	}
 	return gv

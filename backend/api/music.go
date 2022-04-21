@@ -37,8 +37,10 @@ type MusicStateResponse struct {
 // @Summary      Search
 // @Description  Searches for a song
 // @Tags         music
+// @Security     Authentication
 // @Accept       json
 // @Produce      json
+// @Param        q    query     string  true  "Query"
 // @Success      200  {array}   music.Track
 // @Failure      400  {object}  api.HTTPError
 // @Failure      404  {object}  api.HTTPError
@@ -59,6 +61,7 @@ func (a *MusicAPI) Search(c echo.Context) error {
 // @Summary      Get player
 // @Description  Gets the music player state
 // @Tags         music
+// @Security     Authentication
 // @Produce      json
 // @Param        guildID  path      string                         true  "Guild ID"
 // @Success      200      {object}  api.MusicStateResponse
@@ -81,6 +84,7 @@ func (a *MusicAPI) GetState(c echo.Context) error {
 // @Summary      Add to playlist
 // @Description  Adds the track to the playlist
 // @Tags         music
+// @Security     Authentication
 // @Accept       json
 // @Produce      json
 // @Param        guildID  path      string                    true  "Guild ID"
@@ -113,6 +117,7 @@ func (a *MusicAPI) AddToPlaylist(c echo.Context) error {
 // @Summary      Move in playlist
 // @Description  Moves a track position in playlist
 // @Tags         music
+// @Security     Authentication
 // @Accept       json
 // @Produce      json
 // @Param        guildID  path      string                     true  "Guild ID"
@@ -144,6 +149,7 @@ func (a *MusicAPI) MoveInPlaylist(c echo.Context) error {
 // @Summary      Remove from playlist
 // @Description  Removes a track from the playlist
 // @Tags         music
+// @Security     Authentication
 // @Accept       json
 // @Produce      json
 // @Param        guildID  path      string  true  "Guild ID"
@@ -175,6 +181,7 @@ func (a *MusicAPI) RemoveFromPlaylist(c echo.Context) error {
 // @Summary      Play
 // @Description  Play the current track
 // @Tags         music
+// @Security     Authentication
 // @Accept       json
 // @Produce      json
 // @Param        guildID  path      string  true  "Guild ID"
@@ -191,7 +198,10 @@ func (a *MusicAPI) Play(c echo.Context) error {
 		return err
 	}
 
-	player.Play()
+	err = player.Play()
+	if err != nil {
+		return err
+	}
 
 	return a.returnPlayerState(c, player)
 }
@@ -200,6 +210,7 @@ func (a *MusicAPI) Play(c echo.Context) error {
 // @Summary      Pause
 // @Description  Pause the current track
 // @Tags         music
+// @Security     Authentication
 // @Accept       json
 // @Produce      json
 // @Param        guildID  path      string  true  "Guild ID"
@@ -216,7 +227,59 @@ func (a *MusicAPI) Pause(c echo.Context) error {
 		return err
 	}
 
-	player.Play()
+	player.Pause()
+
+	return a.returnPlayerState(c, player)
+}
+
+// Stop godoc
+// @Summary      Stop
+// @Description  Stop the current track
+// @Tags         music
+// @Security     Authentication
+// @Accept       json
+// @Produce      json
+// @Param        guildID  path      string  true  "Guild ID"
+// @Success      200      {object}  api.MusicStateResponse
+// @Failure      400      {object}  api.HTTPError
+// @Failure      404      {object}  api.HTTPError
+// @Failure      500      {object}  api.HTTPError
+// @Router       /guilds/{guildID}/stop [post]
+func (a *MusicAPI) Stop(c echo.Context) error {
+	guildID := c.Param("guildID")
+
+	player, err := a.manager.GetPlayer(guildID)
+	if err != nil {
+		return err
+	}
+
+	player.Stop()
+
+	return a.returnPlayerState(c, player)
+}
+
+// Skip godoc
+// @Summary      Skip
+// @Description  Skip the current track
+// @Tags         music
+// @Security     Authentication
+// @Accept       json
+// @Produce      json
+// @Param        guildID  path      string  true  "Guild ID"
+// @Success      200      {object}  api.MusicStateResponse
+// @Failure      400      {object}  api.HTTPError
+// @Failure      404      {object}  api.HTTPError
+// @Failure      500      {object}  api.HTTPError
+// @Router       /guilds/{guildID}/skip [post]
+func (a *MusicAPI) Skip(c echo.Context) error {
+	guildID := c.Param("guildID")
+
+	player, err := a.manager.GetPlayer(guildID)
+	if err != nil {
+		return err
+	}
+
+	player.Skip()
 
 	return a.returnPlayerState(c, player)
 }

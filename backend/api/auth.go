@@ -30,6 +30,19 @@ func NewAuthAPI() *AuthAPI {
 	return &AuthAPI{}
 }
 
+func Authenticated(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		header := c.Request().Header.Get("Authorization")
+		splitToken := strings.Split(header, "Bearer ")
+		if len(splitToken) < 2 {
+			return echo.NewHTTPError(http.StatusUnauthorized)
+		}
+		token := splitToken[1]
+		c.Set("token", token)
+		return next(c)
+	}
+}
+
 // AuthLogin godoc
 // @Summary      Login
 // @Description  Redirects to login page

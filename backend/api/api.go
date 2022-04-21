@@ -57,32 +57,36 @@ func (a *API) Listen() {
 
 	// Middlewares
 	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"https://labstack.com", "https://labstack.net"},
+		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 	}))
 
 	// Register routes
+	// Public routes
 	e.GET("/api/auth/login", a.authAPI.AuthLogin)
 	e.GET("/api/auth/callback", a.authAPI.AuthCallback)
-
-	e.GET("/api/guilds", a.discordAPI.GetGuilds)
-	e.GET("/api/guilds/:guildID/player", a.musicAPI.GetState)
-	e.POST("/api/guilds/:guildID/addToPlaylist", a.musicAPI.AddToPlaylist)
-	e.POST("/api/guilds/:guildID/moveInPlaylist", a.musicAPI.MoveInPlaylist)
-	e.POST("/api/guilds/:guildID/removeFromPlaylist", a.musicAPI.RemoveFromPlaylist)
-	e.POST("/api/guilds/:guildID/play", a.musicAPI.Play)
-	e.POST("/api/guilds/:guildID/pause", a.musicAPI.Pause)
-	e.POST("/api/guilds/:guildID/join", a.botAPI.JoinChannel)
-
-	e.GET("/api/music/search", a.musicAPI.Search)
-
-	// e.GET("/ws", a.wsAPI.handleConnection)
-
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	e.Static("/", "./static")
 
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	e.GET("/ws", a.wsAPI.HandleConnection)
+
+	// Authenticated routes
+	r := e.Group("/api")
+	r.Use(Authenticated)
+
+	r.GET("/guilds", a.discordAPI.GetGuilds)
+	r.GET("/guilds/:guildID/player", a.musicAPI.GetState)
+	r.POST("/guilds/:guildID/addToPlaylist", a.musicAPI.AddToPlaylist)
+	r.POST("/guilds/:guildID/moveInPlaylist", a.musicAPI.MoveInPlaylist)
+	r.POST("/guilds/:guildID/removeFromPlaylist", a.musicAPI.RemoveFromPlaylist)
+	r.POST("/guilds/:guildID/play", a.musicAPI.Play)
+	r.POST("/guilds/:guildID/pause", a.musicAPI.Pause)
+	r.POST("/guilds/:guildID/stop", a.musicAPI.Stop)
+	r.POST("/guilds/:guildID/skip", a.musicAPI.Skip)
+	r.POST("/guilds/:guildID/join", a.botAPI.JoinChannel)
+
+	r.GET("/music/search", a.musicAPI.Search)
 
 	// Start API
 	log.Println("listening on 8080")

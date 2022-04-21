@@ -6,6 +6,7 @@ import (
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 	"github.com/gorilla/websocket"
+	"github.com/labstack/echo/v4"
 )
 
 type WSAPI struct {
@@ -43,12 +44,11 @@ func (a *WSAPI) readPump(conn *websocket.Conn, client *messaging.Client) {
 	}
 }
 
-func (a *WSAPI) handleConnection(w http.ResponseWriter, r *http.Request) {
+func (a *WSAPI) HandleConnection(c echo.Context) error {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 
 	client := messaging.NewClient(a.hub)
@@ -56,4 +56,5 @@ func (a *WSAPI) handleConnection(w http.ResponseWriter, r *http.Request) {
 
 	go a.readPump(conn, client)
 	go a.writePump(conn, client)
+	return nil
 }
