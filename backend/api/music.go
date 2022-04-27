@@ -2,7 +2,9 @@ package api
 
 import (
 	"net/http"
+	"time"
 
+	"github.com/ggresillion/discordsoundboard/backend/internal/common"
 	"github.com/ggresillion/discordsoundboard/backend/internal/music"
 	"github.com/labstack/echo/v4"
 )
@@ -16,7 +18,8 @@ func NewMusicAPI(manager *music.MusicPlayerManager) *MusicAPI {
 }
 
 type AddToPlaylistPayload struct {
-	ID string `json:"id"`
+	ID   string `json:"id"`
+	Type string `json:"type"`
 }
 
 type MoveInPlaylistPayload struct {
@@ -25,12 +28,16 @@ type MoveInPlaylistPayload struct {
 }
 
 type RemoveFromPlaylistPayload struct {
-	Index string `json:"index"`
+	Index int `json:"index"`
+}
+
+type SetTimePayload struct {
+	Seconds int `json:"seconds"`
 }
 
 type MusicStateResponse struct {
-	Playlist []music.Track `json:"playlist"`
-	Status   string        `json:"status"`
+	Playlist []*music.Track `json:"playlist"`
+	Status   string         `json:"status"`
 }
 
 // Search godoc
@@ -93,7 +100,7 @@ func (a *MusicAPI) GetState(c echo.Context) error {
 // @Failure      400      {object}  api.HTTPError
 // @Failure      404      {object}  api.HTTPError
 // @Failure      500      {object}  api.HTTPError
-// @Router       /guilds/{guildID}/addToPlaylist [post]
+// @Router       /guilds/{guildID}/player/playlist/add [post]
 func (a *MusicAPI) AddToPlaylist(c echo.Context) error {
 	guildID := c.Param("guildID")
 
@@ -108,7 +115,27 @@ func (a *MusicAPI) AddToPlaylist(c echo.Context) error {
 		return err
 	}
 
-	player.AddToPlaylist(body.ID)
+	var elementType music.MusicElementType
+	switch body.Type {
+	case "TRACK":
+		elementType = music.TrackElement
+	case "ARTIST":
+		elementType = music.ArtistElement
+	case "ALBUM":
+		elementType = music.AlbumElement
+	case "PLAYLIST":
+		elementType = music.PlaylistElement
+	}
+
+	err = player.AddToPlaylist(body.ID, elementType)
+	if err != nil {
+		switch err.(type) {
+		case *common.NotFoundError:
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		default:
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+	}
 
 	return a.returnPlayerState(c, player)
 }
@@ -126,7 +153,7 @@ func (a *MusicAPI) AddToPlaylist(c echo.Context) error {
 // @Failure      400      {object}  api.HTTPError
 // @Failure      404      {object}  api.HTTPError
 // @Failure      500      {object}  api.HTTPError
-// @Router       /guilds/{guildID}/moveInPlaylist [post]
+// @Router       /guilds/{guildID}/player/playlist/move [post]
 func (a *MusicAPI) MoveInPlaylist(c echo.Context) error {
 	guildID := c.Param("guildID")
 
@@ -158,7 +185,7 @@ func (a *MusicAPI) MoveInPlaylist(c echo.Context) error {
 // @Failure      400      {object}  api.HTTPError
 // @Failure      404      {object}  api.HTTPError
 // @Failure      500      {object}  api.HTTPError
-// @Router       /guilds/{guildID}/removeFromPlaylist [post]
+// @Router       /guilds/{guildID}/player/playlist/remove [post]
 func (a *MusicAPI) RemoveFromPlaylist(c echo.Context) error {
 	guildID := c.Param("guildID")
 
@@ -189,7 +216,7 @@ func (a *MusicAPI) RemoveFromPlaylist(c echo.Context) error {
 // @Failure      400      {object}  api.HTTPError
 // @Failure      404      {object}  api.HTTPError
 // @Failure      500      {object}  api.HTTPError
-// @Router       /guilds/{guildID}/play [post]
+// @Router       /guilds/{guildID}/player/play [post]
 func (a *MusicAPI) Play(c echo.Context) error {
 	guildID := c.Param("guildID")
 
@@ -218,7 +245,7 @@ func (a *MusicAPI) Play(c echo.Context) error {
 // @Failure      400      {object}  api.HTTPError
 // @Failure      404      {object}  api.HTTPError
 // @Failure      500      {object}  api.HTTPError
-// @Router       /guilds/{guildID}/pause [post]
+// @Router       /guilds/{guildID}/player/pause [post]
 func (a *MusicAPI) Pause(c echo.Context) error {
 	guildID := c.Param("guildID")
 
@@ -244,7 +271,7 @@ func (a *MusicAPI) Pause(c echo.Context) error {
 // @Failure      400      {object}  api.HTTPError
 // @Failure      404      {object}  api.HTTPError
 // @Failure      500      {object}  api.HTTPError
-// @Router       /guilds/{guildID}/stop [post]
+// @Router       /guilds/{guildID}/player/stop [post]
 func (a *MusicAPI) Stop(c echo.Context) error {
 	guildID := c.Param("guildID")
 
@@ -270,7 +297,7 @@ func (a *MusicAPI) Stop(c echo.Context) error {
 // @Failure      400      {object}  api.HTTPError
 // @Failure      404      {object}  api.HTTPError
 // @Failure      500      {object}  api.HTTPError
-// @Router       /guilds/{guildID}/skip [post]
+// @Router       /guilds/{guildID}/player/skip [post]
 func (a *MusicAPI) Skip(c echo.Context) error {
 	guildID := c.Param("guildID")
 
@@ -280,6 +307,37 @@ func (a *MusicAPI) Skip(c echo.Context) error {
 	}
 
 	player.Skip()
+
+	return a.returnPlayerState(c, player)
+}
+
+// Time godoc
+// @Summary      Time
+// @Description  Set the current track time
+// @Tags         music
+// @Security     Authentication
+// @Accept       json
+// @Produce      json
+// @Param        guildID  path      string  true  "Guild ID"
+// @Success      200      {object}  api.MusicStateResponse
+// @Failure      400      {object}  api.HTTPError
+// @Failure      404      {object}  api.HTTPError
+// @Failure      500      {object}  api.HTTPError
+// @Router       /guilds/{guildID}/player/time [post]
+func (a *MusicAPI) Time(c echo.Context) error {
+	guildID := c.Param("guildID")
+
+	body := &SetTimePayload{}
+	if err := c.Bind(&body); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	player, err := a.manager.GetPlayer(guildID)
+	if err != nil {
+		return err
+	}
+
+	player.SetTime(time.Duration(body.Seconds) * time.Second)
 
 	return a.returnPlayerState(c, player)
 }

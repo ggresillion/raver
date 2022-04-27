@@ -5,6 +5,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
+	"github.com/ggresillion/discordsoundboard/backend/internal/music"
 )
 
 // Play a song
@@ -27,7 +28,7 @@ func (c *CommandHandler) play() *bot.CommandAndHandler {
 			if len(data.Options) == 0 {
 				return
 			}
-			ID := data.Options[0].StringValue()
+			q := data.Options[0].StringValue()
 
 			p, err := c.musicManager.GetPlayer(i.GuildID)
 			if err != nil {
@@ -39,7 +40,10 @@ func (c *CommandHandler) play() *bot.CommandAndHandler {
 				p.BotAudio().JoinUserChannel(i.Member.User.ID)
 			}
 
-			t, err := p.AddToPlaylist(ID)
+			res, err := c.musicManager.Search(q, 0)
+			t := res.Tracks[0]
+
+			err = p.AddToPlaylist(t.ID, music.TrackElement)
 			if err != nil {
 				respond(s, i, fmt.Sprintf("error while adding song to playlist %s", err.Error()))
 				return
@@ -55,9 +59,8 @@ func (c *CommandHandler) play() *bot.CommandAndHandler {
 				Data: &discordgo.InteractionResponseData{
 					Embeds: []*discordgo.MessageEmbed{
 						{
-							URL:         t.URL,
 							Title:       t.Title,
-							Description: t.Album,
+							Description: t.Album.Name,
 							Image: &discordgo.MessageEmbedImage{
 								URL: t.Thumbnail,
 							},

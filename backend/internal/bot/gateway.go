@@ -12,7 +12,7 @@ type BotGateway struct {
 	bot *Bot
 }
 
-func NewBotSubscriber(bot *Bot) *BotGateway {
+func NewBotGateway(bot *Bot) *BotGateway {
 	return &BotGateway{bot}
 }
 
