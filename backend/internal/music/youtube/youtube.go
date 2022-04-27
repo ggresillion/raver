@@ -21,7 +21,7 @@ func check(err error) {
 	}
 }
 
-func (y YoutubeConnector) Search(q string, p uint) ([]music.Track, error) {
+func (y YoutubeConnector) Search(q string, p uint) (*music.MusicSearchResult, error) {
 	s := ytmusic.TrackSearch(q)
 	result, err := s.Next()
 	if err != nil {
@@ -30,21 +30,27 @@ func (y YoutubeConnector) Search(q string, p uint) ([]music.Track, error) {
 
 	tracks := make([]music.Track, 0)
 	for _, t := range result.Tracks {
-		var sa string
+
+		artists := make([]music.Artist, 0)
 		for _, a := range t.Artists {
-			sa = sa + a.Name
+			artists = append(artists, music.Artist{
+				ID:   a.ID,
+				Name: a.Name,
+			})
 		}
 		tracks = append(tracks, music.Track{
 			ID:        string(t.VideoID),
 			Title:     t.Title,
-			Artist:    sa,
+			Artists:   artists,
 			Thumbnail: t.Thumbnails[0].URL,
-			Album:     t.Album.Name,
-			Duration:  uint(t.Duration),
-			URL:       "https://www.youtube.com/watch?v=" + string(t.VideoID),
+			Album: music.Album{
+				ID:   t.Album.ID,
+				Name: t.Album.Name,
+			},
+			Duration: uint(t.Duration),
 		})
 	}
-	return tracks, nil
+	return &music.MusicSearchResult{Tracks: tracks}, nil
 }
 
 func (y YoutubeConnector) Find(ID string) (*music.Track, error) {
@@ -56,24 +62,31 @@ func (y YoutubeConnector) Find(ID string) (*music.Track, error) {
 
 	t := result.Tracks[0]
 
-	var sa string
+	artists := make([]music.Artist, 0)
 	for _, a := range t.Artists {
-		sa = sa + a.Name
+		artists = append(artists, music.Artist{
+			ID:   a.ID,
+			Name: a.Name,
+		})
 	}
+
 	return &music.Track{
 		ID:        string(t.VideoID),
 		Title:     t.Title,
-		Artist:    sa,
+		Artists:   artists,
 		Thumbnail: t.Thumbnails[0].URL,
-		Album:     t.Album.Name,
-		Duration:  uint(t.Duration),
+		Album: music.Album{
+			ID:   t.Album.ID,
+			Name: t.Album.Name,
+		},
+		Duration: uint(t.Duration),
 	}, nil
 }
 
-func (y YoutubeConnector) GetStreamURL(query string) (string, error) {
+func (y YoutubeConnector) GetStreamURL(ID string) (string, error) {
 
 	client := ytdl.Client{}
-	video, err := client.GetVideo(query)
+	video, err := client.GetVideo(ID)
 	if err != nil {
 		return "", err
 	}

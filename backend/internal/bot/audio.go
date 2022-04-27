@@ -2,11 +2,13 @@ package bot
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/jonas747/dca"
+	"github.com/fiwippi/dca"
 )
 
 type BotAudio struct {
@@ -20,9 +22,8 @@ type BotAudio struct {
 }
 
 type StreamingSession struct {
+	url              string
 	end              chan error
-	stop             chan error
-	pause            chan bool
 	encodingSession  *dca.EncodeSession
 	streamingSession *dca.StreamingSession
 }
@@ -72,6 +73,7 @@ func (b *BotAudio) Play(url string) (chan error, error) {
 	case Playing:
 		b.Stop()
 	}
+
 	if b.voiceConnection == nil {
 		return nil, errors.New("no voice connection")
 	}
@@ -81,78 +83,44 @@ func (b *BotAudio) Play(url string) (chan error, error) {
 		return nil, errors.New("couldn't set speaking")
 	}
 
-	options := dca.StdEncodeOptions
-	options.RawOutput = true
-	options.Bitrate = 96
-	options.Application = "lowdelay"
-
-	b.session = &StreamingSession{}
-
-	b.session.encodingSession, err = dca.EncodeFile(url, options)
+	b.session, err = b.getStream(url, time.Duration(0))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("couldn't start stream: %w", err)
 	}
-
-	b.session.end = make(chan error)
-	b.session.stop = make(chan error)
-	b.session.pause = make(chan bool)
-
-	b.setStatus(Playing)
-
-	streamEnd := make(chan error)
-
-	b.session.streamingSession = dca.NewStream(b.session.encodingSession, b.voiceConnection, streamEnd)
-
-	// Listen for pause or stop messages
-	go func(pause chan bool, stop chan error) {
-		for {
-			select {
-			case p := <-pause:
-				b.session.streamingSession.SetPaused(p)
-				if p {
-					b.setStatus(Paused)
-				} else {
-					b.setStatus(Playing)
-				}
-			case <-stop:
-				b.session.encodingSession.Cleanup()
-			}
-		}
-	}(b.session.pause, b.session.stop)
-
-	// Listen for the stream ending
-	go func(end chan error) {
-		err := <-streamEnd
-		b.session.encodingSession.Cleanup()
-		b.voiceConnection.Speaking(false)
-		b.setStatus(IDLE)
-		b.session = nil
-		if err != nil && err != io.EOF {
-			end <- err
-		} else {
-			end <- nil
-		}
-	}(b.session.end)
 
 	return b.session.end, nil
 }
 
 func (b *BotAudio) Pause() {
-	if b.session.pause == nil || b.audioStatus != Playing {
+	if b.session == nil || b.audioStatus != Playing {
 		return
 	}
-	b.session.pause <- true
+	b.session.streamingSession.SetPaused(true)
+	b.setStatus(Paused)
 }
 
 func (b *BotAudio) UnPause() {
-	if b.session.pause == nil || b.audioStatus != Paused {
+	if b.session == nil || b.audioStatus != Paused {
 		return
 	}
-	b.session.pause <- false
+	b.session.streamingSession.SetPaused(false)
+	b.setStatus(Playing)
+}
+
+func (b *BotAudio) SetTime(t time.Duration) error {
+	url := b.session.url
+	b.Stop()
+
+	var err error
+	b.session, err = b.getStream(url, t)
+	if err != nil {
+		return fmt.Errorf("couldn't start stream: %w", err)
+	}
+	return nil
 }
 
 func (b *BotAudio) Stop() {
-	b.session.stop <- nil
+	b.session.encodingSession.Cleanup()
 }
 
 func (b *BotAudio) Status() AudioStatus {
@@ -166,4 +134,47 @@ func (b *BotAudio) StatusChange() chan AudioStatus {
 func (b *BotAudio) setStatus(s AudioStatus) {
 	b.audioStatus = s
 	b.audioStatusChange <- s
+}
+
+func (b *BotAudio) getStream(url string, start time.Duration) (*StreamingSession, error) {
+	options := dca.StdEncodeOptions
+	options.RawOutput = true
+	options.Bitrate = 96
+	options.Application = "lowdelay"
+	options.StartTime = int(start.Seconds())
+
+	session := &StreamingSession{
+		url:              url,
+		end:              make(chan error),
+		encodingSession:  nil,
+		streamingSession: nil,
+	}
+
+	var err error
+	session.encodingSession, err = dca.EncodeFile(url, options)
+	if err != nil {
+		return nil, err
+	}
+
+	streamEnd := make(chan error)
+
+	session.streamingSession = dca.NewStream(session.encodingSession, b.voiceConnection, streamEnd)
+
+	// Listen for the stream ending
+	go func(end chan error) {
+		err := <-streamEnd
+		b.setStatus(IDLE)
+		session.encodingSession.Cleanup()
+		b.voiceConnection.Speaking(false)
+		if err != nil && err != io.EOF {
+			end <- err
+		} else {
+			end <- nil
+		}
+		b.session = nil
+	}(session.end)
+
+	b.setStatus(Playing)
+
+	return session, nil
 }

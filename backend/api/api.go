@@ -76,15 +76,18 @@ func (a *API) Listen() {
 	r.Use(Authenticated)
 
 	r.GET("/guilds", a.discordAPI.GetGuilds)
-	r.GET("/guilds/:guildID/player", a.musicAPI.GetState)
-	r.POST("/guilds/:guildID/addToPlaylist", a.musicAPI.AddToPlaylist)
-	r.POST("/guilds/:guildID/moveInPlaylist", a.musicAPI.MoveInPlaylist)
-	r.POST("/guilds/:guildID/removeFromPlaylist", a.musicAPI.RemoveFromPlaylist)
-	r.POST("/guilds/:guildID/play", a.musicAPI.Play)
-	r.POST("/guilds/:guildID/pause", a.musicAPI.Pause)
-	r.POST("/guilds/:guildID/stop", a.musicAPI.Stop)
-	r.POST("/guilds/:guildID/skip", a.musicAPI.Skip)
+
 	r.POST("/guilds/:guildID/join", a.botAPI.JoinChannel)
+
+	r.GET("/guilds/:guildID/player", a.musicAPI.GetState)
+	r.POST("/guilds/:guildID/player/playlist/add", a.musicAPI.AddToPlaylist)
+	r.POST("/guilds/:guildID/player/playlist/move", a.musicAPI.MoveInPlaylist)
+	r.POST("/guilds/:guildID/player/playlist/remove", a.musicAPI.RemoveFromPlaylist)
+	r.POST("/guilds/:guildID/player/play", a.musicAPI.Play)
+	r.POST("/guilds/:guildID/player/pause", a.musicAPI.Pause)
+	r.POST("/guilds/:guildID/player/stop", a.musicAPI.Stop)
+	r.POST("/guilds/:guildID/player/skip", a.musicAPI.Skip)
+	r.POST("/guilds/:guildID/player/time", a.musicAPI.Time)
 
 	r.GET("/music/search", a.musicAPI.Search)
 

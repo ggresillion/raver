@@ -9,7 +9,7 @@ import (
 	"github.com/ggresillion/discordsoundboard/backend/internal/command"
 	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 	"github.com/ggresillion/discordsoundboard/backend/internal/music"
-	"github.com/ggresillion/discordsoundboard/backend/internal/music/youtube"
+	"github.com/ggresillion/discordsoundboard/backend/internal/music/spotify"
 )
 
 func main() {
@@ -27,13 +27,13 @@ func main() {
 	}
 
 	// Deps
-	musicManager := music.NewMusicPlayerManager(&youtube.YoutubeConnector{}, hub, b)
+	musicManager := music.NewMusicPlayerManager(spotify.NewSpotifyConnector(), hub, b)
 
 	// Handle commands
 	command.NewCommandHandler(b, musicManager)
 
 	// Messages
-	botSubscriber := bot.NewBotSubscriber(b)
+	botSubscriber := bot.NewBotGateway(b)
 	botSubscriber.SubscribeToIncomingMessages()
 	musicSubscriber := music.NewMusicSubscriber(musicManager, hub)
 	musicSubscriber.SubscribeToIncomingMessages()
