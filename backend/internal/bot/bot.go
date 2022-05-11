@@ -2,7 +2,8 @@ package bot
 
 import (
 	"fmt"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/ggresillion/discordsoundboard/backend/internal/config"

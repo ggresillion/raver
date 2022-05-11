@@ -1,7 +1,8 @@
 package api
 
 import (
-	"log"
+	log "github.com/sirupsen/logrus"
+
 	"net/http"
 
 	_ "github.com/ggresillion/discordsoundboard/backend/api/docs"

@@ -1,7 +1,7 @@
 package bot
 
 import (
-	"log"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/bwmarrin/discordgo"
 )

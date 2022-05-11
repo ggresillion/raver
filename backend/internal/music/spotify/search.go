@@ -3,8 +3,9 @@ package spotify
 import (
 	"context"
 	"errors"
-	"log"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/raitonoberu/ytmusic"
 	"github.com/samber/lo"
@@ -117,9 +118,9 @@ func (c SpotifyConnector) FindAlbumTracks(ID string) ([]*music.Track, error) {
 			Album: music.Album{
 				ID:        string(album.ID),
 				Name:      album.Name,
-				Thumbnail: album.Images[0].URL,
+				Thumbnail: getThumbnail(album.Images),
 			},
-			Thumbnail: album.Images[0].URL,
+			Thumbnail: getThumbnail(album.Images),
 			Duration:  uint(t.Duration),
 		}
 	}), nil
@@ -184,9 +185,9 @@ func getTracks(res *spotify.SearchResult) []music.Track {
 			Album: music.Album{
 				ID:        string(t.Album.ID),
 				Name:      t.Album.Name,
-				Thumbnail: t.Album.Images[0].URL,
+				Thumbnail: getThumbnail(t.Album.Images),
 			},
-			Thumbnail: t.Album.Images[0].URL,
+			Thumbnail: getThumbnail(t.Album.Images),
 			Duration:  uint(t.Duration),
 		})
 	}
@@ -197,19 +198,32 @@ func getArtist(res *spotify.SearchResult) []music.Artist {
 	artists := make([]music.Artist, 0)
 	for _, a := range res.Artists.Artists {
 		artists = append(artists, music.Artist{
-			ID:   string(a.ID),
-			Name: a.Name,
+			ID:        string(a.ID),
+			Name:      a.Name,
+			Thumbnail: getThumbnail(a.Images),
 		})
 	}
 	return artists
 }
 
 func getAlbums(res *spotify.SearchResult) []music.Album {
+
 	albums := make([]music.Album, 0)
 	for _, a := range res.Albums.Albums {
+
+		artists := make([]music.Artist, 0)
+		for _, a := range a.Artists {
+			artists = append(artists, music.Artist{
+				ID:   string(a.ID),
+				Name: a.Name,
+			})
+		}
+
 		albums = append(albums, music.Album{
-			ID:   string(a.ID),
-			Name: a.Name,
+			ID:        string(a.ID),
+			Name:      a.Name,
+			Thumbnail: getThumbnail(a.Images),
+			Artists:   artists,
 		})
 	}
 	return albums
@@ -221,7 +235,7 @@ func getPlaylists(res *spotify.SearchResult) []music.Playlist {
 		playlists = append(playlists, music.Playlist{
 			ID:        string(p.ID),
 			Name:      p.Name,
-			Thumbnail: p.Images[0].URL,
+			Thumbnail: getThumbnail(p.Images),
 		})
 	}
 	return playlists
@@ -243,9 +257,16 @@ func toTrack(t *spotify.FullTrack) *music.Track {
 		Album: music.Album{
 			ID:        string(t.Album.ID),
 			Name:      t.Album.Name,
-			Thumbnail: t.Album.Images[0].URL,
+			Thumbnail: getThumbnail(t.Album.Images),
 		},
-		Thumbnail: t.Album.Images[0].URL,
+		Thumbnail: getThumbnail(t.Album.Images),
 		Duration:  uint(t.Duration),
 	}
+}
+
+func getThumbnail(images []spotify.Image) string {
+	if len(images) < 1 {
+		return ""
+	}
+	return images[0].URL
 }

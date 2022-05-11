@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/ggresillion/discordsoundboard/backend/api"
 	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
@@ -12,10 +13,15 @@ import (
 	"github.com/ggresillion/discordsoundboard/backend/internal/music/spotify"
 )
 
-func main() {
-
+func init() {
 	// Change log output from stderr to stdout
 	log.SetOutput(os.Stdout)
+
+	// Set the level to debug
+	log.SetLevel(log.DebugLevel)
+}
+
+func main() {
 
 	hub := messaging.NewHub()
 

@@ -56,12 +56,12 @@ type MusicStateResponse struct {
 func (a *MusicAPI) Search(c echo.Context) error {
 	q := c.QueryParam("q")
 
-	tracks, err := a.manager.Search(q, 0)
+	result, err := a.manager.Search(q, 0)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, tracks)
+	return c.JSON(http.StatusOK, result)
 }
 
 // GetState godoc

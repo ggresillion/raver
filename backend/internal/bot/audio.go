@@ -3,29 +3,27 @@ package bot
 import (
 	"errors"
 	"fmt"
-	"io"
-	"log"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/bwmarrin/discordgo"
-	"github.com/fiwippi/dca"
 )
 
 type BotAudio struct {
-	guildID           string
-	bot               *Bot
-	voiceStates       []*discordgo.VoiceState
-	voiceConnection   *discordgo.VoiceConnection
+	// Guild ID
+	guildID string
+	// Bot
+	bot *Bot
+	// Voice states of all the users in the guild (used in voice channel join)
+	voiceStates []*discordgo.VoiceState
+	// Audio status of the bot
 	audioStatus       AudioStatus
 	audioStatusChange chan AudioStatus
-	session           *StreamingSession
-}
-
-type StreamingSession struct {
-	url              string
-	end              chan error
-	encodingSession  *dca.EncodeSession
-	streamingSession *dca.StreamingSession
+	// Voice connection for the bot
+	voiceConnection *discordgo.VoiceConnection
+	// Infos about the current stream playing
+	session *StreamingSession
 }
 
 func NewBotAudio(guildID string, bot *Bot) *BotAudio {
@@ -66,29 +64,36 @@ func (b *BotAudio) JoinUserChannel(userID string) error {
 	return errors.New("user not in a voice channel")
 }
 
-func (b *BotAudio) Play(url string) (chan error, error) {
+func (b *BotAudio) Play(url string) (chan error, chan time.Duration, error) {
+
+	if b.session != nil {
+		return nil, nil, errors.New("bot is already playing something")
+	}
+
 	switch b.audioStatus {
 	case NotConnected:
-		return nil, errors.New("bot is not in a voice channel")
+		return nil, nil, errors.New("bot is not in a voice channel")
+	case IDLE:
+		break
 	case Playing:
-		b.Stop()
+		return nil, nil, errors.New("bot is already playing something")
 	}
 
 	if b.voiceConnection == nil {
-		return nil, errors.New("no voice connection")
+		return nil, nil, errors.New("no voice connection")
 	}
 
 	err := b.voiceConnection.Speaking(true)
 	if err != nil {
-		return nil, errors.New("couldn't set speaking")
+		return nil, nil, errors.New("couldn't set speaking")
 	}
 
-	b.session, err = b.getStream(url, time.Duration(0))
+	b.session, err = b.startStream(url, time.Duration(0))
 	if err != nil {
-		return nil, fmt.Errorf("couldn't start stream: %w", err)
+		return nil, nil, fmt.Errorf("couldn't start stream: %w", err)
 	}
 
-	return b.session.end, nil
+	return b.session.end, b.session.progress, nil
 }
 
 func (b *BotAudio) Pause() {
@@ -109,10 +114,13 @@ func (b *BotAudio) UnPause() {
 
 func (b *BotAudio) SetTime(t time.Duration) error {
 	url := b.session.url
+	end := b.session.end
+	b.session.swappingStream = true
 	b.Stop()
 
 	var err error
-	b.session, err = b.getStream(url, t)
+	b.session, err = b.startStream(url, t)
+	b.session.end = end
 	if err != nil {
 		return fmt.Errorf("couldn't start stream: %w", err)
 	}
@@ -134,47 +142,4 @@ func (b *BotAudio) StatusChange() chan AudioStatus {
 func (b *BotAudio) setStatus(s AudioStatus) {
 	b.audioStatus = s
 	b.audioStatusChange <- s
-}
-
-func (b *BotAudio) getStream(url string, start time.Duration) (*StreamingSession, error) {
-	options := dca.StdEncodeOptions
-	options.RawOutput = true
-	options.Bitrate = 96
-	options.Application = "lowdelay"
-	options.StartTime = int(start.Seconds())
-
-	session := &StreamingSession{
-		url:              url,
-		end:              make(chan error),
-		encodingSession:  nil,
-		streamingSession: nil,
-	}
-
-	var err error
-	session.encodingSession, err = dca.EncodeFile(url, options)
-	if err != nil {
-		return nil, err
-	}
-
-	streamEnd := make(chan error)
-
-	session.streamingSession = dca.NewStream(session.encodingSession, b.voiceConnection, streamEnd)
-
-	// Listen for the stream ending
-	go func(end chan error) {
-		err := <-streamEnd
-		b.setStatus(IDLE)
-		session.encodingSession.Cleanup()
-		b.voiceConnection.Speaking(false)
-		if err != nil && err != io.EOF {
-			end <- err
-		} else {
-			end <- nil
-		}
-		b.session = nil
-	}(session.end)
-
-	b.setStatus(Playing)
-
-	return session, nil
 }

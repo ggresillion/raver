@@ -3,11 +3,12 @@ package discord
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const (
