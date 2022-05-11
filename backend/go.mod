@@ -38,19 +38,17 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	layeh.com/gopus v0.0.0-20210501142526-1ee02d434e32 // indirect
 )
 
 require (
-	github.com/bwmarrin/dgvoice v0.0.0-20210225172318-caaac756e02e
-	github.com/fiwippi/dca v0.0.0-20201113050843-65838623978b
+	github.com/ggresillion/dca v0.0.0-20220511155008-b9c59f016f5c
 	github.com/gorilla/websocket v1.5.0
-	github.com/jonas747/dca v0.0.0-20210930103944-155f5e5f0cc7
 	github.com/kkdai/youtube/v2 v2.7.11
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/raitonoberu/ytmusic v0.0.0-20220205190837-b5a9d8620bf3
 	github.com/ravener/discord-oauth2 v0.0.0-20210928130214-d7697a35c387
 	github.com/samber/lo v1.15.0
+	github.com/sirupsen/logrus v1.8.1
 	github.com/swaggo/echo-swagger v1.3.0
 	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2 // indirect
 	github.com/zmb3/spotify/v2 v2.0.1

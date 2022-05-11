@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import search from '../../../assets/icons/search_white_24dp.svg';
-import { useAppSelector } from '../../../hooks';
+import searchIcon from '../../../assets/icons/search_white_24dp.svg';
+import playIcon from '../../../assets/icons/play_white_24dp.svg';
+import addIcon from '../../../assets/icons/add_white_24dp.svg';
+import { Loader } from '../../../components/Loader';
+import { MusicSearchResult } from '../../../services/model/musicSearchResult';
 import { Track } from '../../../services/model/track';
-import { HttpClient } from '../../../services/http';
-import { addToPlaylist, initPlayerState } from '../../../services/musicPlayer';
+import { addToPlaylist, initPlayerState, search } from '../../../services/musicPlayer';
 import { updatePlayerState } from '../../../slices/music';
 import { RootState } from '../../../store';
-import { Player } from './components/Player';
-import { Playlist } from './components/Playlist';
-import { Thumbnail } from './components/Thumbnail';
 import './Music.scss';
-import { Loader } from '../../../components/Loader';
 
 function secondsToTime(secs: number) {
   const hours = Math.floor(secs / (60 * 60));
@@ -33,7 +31,7 @@ export function Music() {
 
   const dispatch = useDispatch();
 
-  const [results, setResults] = useState<Track[]>();
+  const [results, setResults] = useState<MusicSearchResult>();
 
   const {selectedGuild, ready} = useSelector((state: RootState) => state.guild);
 
@@ -46,21 +44,18 @@ export function Music() {
     dispatch(updatePlayerState(await initPlayerState(guildId)));
   }
 
-  async function onEnter(e: React.KeyboardEvent<HTMLInputElement>) {
+  async function onSearch(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key !== 'Enter') return;
     const target = e.target as HTMLInputElement;
-    searchTracks(target.value);
+    const q = target.value;
+
+    const result = await search(q);
+    setResults(result);
   }
 
-  async function searchTracks(q: string) {
-    if (!q || q === '') return;
-    const http = new HttpClient();
-    const res = await http.get<Track[]>('/music/search?q=' + q);
-    setResults(res);
-  }
-
-  async function addToPlaylistClick(guildId: string, track: Track) {
-    await addToPlaylist(guildId, track.id);
+  async function onAddToPlaylist(id: string, type: string) {
+    if (!selectedGuild) return;
+    await addToPlaylist(selectedGuild.id, id, type);
   }
 
   if (!ready) return (<Loader />);
@@ -68,27 +63,62 @@ export function Music() {
 
   return (
     <div className='music-container'>
-      <div className='side-container'>
-        <h2 className='side-title'>__ Search __</h2>
-        <div className='search-box'>
-          <input className='search-input' placeholder='Search for music' onKeyDown={onEnter} />
-          <img className='search-icon' src={search}></img>
-        </div>
-        <div className='results'>
-          {results?.map((r, i) => <div className='result' key={i} onClick={() => addToPlaylistClick(selectedGuild.id, r)}>
-            <Thumbnail url={`https://img.youtube.com/vi/${r.id}/0.jpg`} />
-            <div className='track-info'>
-              <span className='track-name'>{r.title} - <span className='track-album'>{r.album}</span></span>
-              <span className='track-artist'>{r.artist}</span>
-            </div>
-            <span className='track-duration'>{secondsToTime(r.duration).minutes}:{secondsToTime(r.duration).seconds}</span>
-          </div>,
-          )}
-        </div>
+      <div className='search-box'>
+        <input className='search-input' placeholder='Search for music' onKeyDown={onSearch} />
+        <img className='search-icon' src={searchIcon}></img>
       </div>
-      <div className='side-container'>
-        <Playlist />
-      </div>
+      {results ? <div className='results'>
+        <div className='type'>
+          <h2>Songs</h2>
+          <div className='line'>
+            {results?.tracks.map(t => (
+              <div key={t.id} className="card">
+                <img src={t.thumbnail}></img>
+                <span className='title'>{t.title}</span>
+                <span className='artist'>{t.artists.map(a => a.name).join(', ')}</span>
+                <button type='button'><img title='Add to playlist' src={addIcon} onClick={() => onAddToPlaylist(t.id, 'TRACK')}></img></button>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className='type'>
+          <h2>Artists</h2>
+          <div className='line'>
+            {results?.artists.map(a => (
+              <div key={a.id} className="card">
+                <img src={a.thumbnail}></img>
+                <span className='title'>{a.name}</span>
+                <button type='button'><img title='Play' src={playIcon} onClick={() => onAddToPlaylist(a.id, 'ARTIST')}></img></button>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className='type'>
+          <h2>Albums</h2>
+          <div className='line'>
+            {results?.albums.map(a => (
+              <div key={a.id} className="card">
+                <img src={a.thumbnail}></img>
+                <span className='title'>{a.name}</span>
+                <span className='artist'>{a.artists[0].name}</span>
+                <button type='button'><img title='Play' src={playIcon} onClick={() => onAddToPlaylist(a.id, 'ALBUM')}></img></button>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className='type'>
+          <h2>Playlists</h2>
+          <div className='line'>
+            {results?.playlists.map(p => (
+              <div key={p.id} className="card">
+                <img src={p.thumbnail}></img>
+                <span className='title'>{p.name}</span>
+                <button type='button'><img title='Play' src={playIcon} onClick={() => onAddToPlaylist(p.id, 'PLAYLIST')}></img></button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div> : <div></div>}
     </div>
   );
 }

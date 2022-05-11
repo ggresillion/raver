@@ -51,7 +51,7 @@ export function Playlist() {
                               <Thumbnail url={`https://img.youtube.com/vi/${item.id}/0.jpg`} />
                               <div className="track-info">
                                 <span className="track-name">{item.title}</span>
-                                <span className="track-artist">{item.artist}</span>
+                                <span className="track-artist">{item.artists}</span>
                               </div>
                             </div>
                           </td>

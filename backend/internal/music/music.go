@@ -3,8 +3,9 @@ package music
 import (
 	"errors"
 	"fmt"
-	"log"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
 	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
@@ -25,6 +26,7 @@ type MusicPlayer struct {
 	hub       *messaging.Hub
 	botAudio  *bot.BotAudio
 	playlist  []*Track
+	progress  time.Duration
 	stopped   bool
 }
 
@@ -39,7 +41,7 @@ type Track struct {
 	ID        string   `json:"id"`
 	Title     string   `json:"title"`
 	Thumbnail string   `json:"thumbnail"`
-	Artists   []Artist `json:"artist"`
+	Artists   []Artist `json:"artists"`
 	Album     Album    `json:"album"`
 	Duration  uint     `json:"duration"`
 }
@@ -50,9 +52,10 @@ type Playlist struct {
 	Thumbnail string `json:"thumbnail"`
 }
 type Album struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	Thumbnail string `json:"thumbnail"`
+	ID        string   `json:"id"`
+	Name      string   `json:"name"`
+	Thumbnail string   `json:"thumbnail"`
+	Artists   []Artist `json:"artists"`
 }
 type Artist struct {
 	ID        string `json:"id"`
@@ -70,6 +73,7 @@ type MusicSearchResult struct {
 type MusicPlayerState struct {
 	Status   bot.AudioStatus `json:"status"`
 	Playlist []*Track        `json:"playlist"`
+	Progress int64           `json:"progress"`
 }
 
 type MusicElementType int
@@ -184,10 +188,22 @@ func (p *MusicPlayer) Play() error {
 	}
 
 	// Start the stream
-	end, err := p.botAudio.Play(url)
+	end, progress, err := p.botAudio.Play(url)
 	if err != nil {
 		return fmt.Errorf("error starting audio streaming: %v", err)
 	}
+
+	// Updates the stream progress
+	go func() {
+		for {
+			progress, more := <-progress
+			if !more {
+				return
+			}
+			p.progress = progress
+			p.propagateState()
+		}
+	}()
 
 	// Listen for stream end, skiping to next song if any
 	go func() {
@@ -251,6 +267,7 @@ func (p *MusicPlayer) propagateState() {
 	payload := MusicPlayerState{
 		Status:   p.botAudio.Status(),
 		Playlist: p.playlist,
+		Progress: p.progress.Milliseconds(),
 	}
 
 	m := messaging.Message{

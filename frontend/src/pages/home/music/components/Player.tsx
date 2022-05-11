@@ -6,12 +6,18 @@ import next from '../../../../assets/icons/skip_next_white_24dp.svg';
 import previous from '../../../../assets/icons/skip_previous_white_24dp.svg';
 import volumeDown from '../../../../assets/icons/volume_down_white_24dp.svg';
 import volumeUp from '../../../../assets/icons/volume_up_white_24dp.svg';
+import { ProgressBar } from '../../../../components/ProgressBar';
 import { joinVoiceChannel } from '../../../../services/bot';
 import { PlayerStatus } from '../../../../services/model/playerStatus';
 import { pause, play, skip } from '../../../../services/musicPlayer';
 import { RootState } from '../../../../store';
 import './Player.scss';
-import { ProgressBar } from './ProgressBar';
+
+function millisToMinutesAndSeconds(millis: number) {
+  const minutes = Math.floor(millis / 60000);
+  const seconds = ((millis % 60000) / 1000).toFixed(0);
+  return {minutes, seconds};
+}
 
 export function Player() {
 
@@ -36,6 +42,22 @@ export function Player() {
     console.log(progress);
   }
 
+  function getCurrentTime() {
+    if (!playerState.progress) return '-:-';
+    const time  = millisToMinutesAndSeconds(playerState.progress);
+    return time.minutes + ':' + time.seconds;
+  }
+
+  function getTotalTime() {
+    const time  = millisToMinutesAndSeconds(playerState?.playlist[0].duration);
+    return time.minutes + ':' + time.seconds;
+  }
+
+  function getPercentElapsed() {
+    if (!playerState.progress) return 0;
+    return playerState?.progress / playerState.playlist[0].duration * 100;
+  }
+
   return (
     <div className="player">
       <div className="track">
@@ -44,7 +66,7 @@ export function Player() {
                       <img className='track-thumbnail' src={playerState.playlist[0].thumbnail} />
                       <div className='track-info'>
                         <span className='track-name'>{playerState.playlist[0].title}</span>
-                        <span className='track-artist'>{playerState.playlist[0].artist}</span>
+                        <span className='track-artist'>{playerState.playlist[0].artists.map(a => a.name).join(', ')}</span>
                       </div>
                     </>
         }
@@ -63,9 +85,9 @@ export function Player() {
 
         {playerState?.playlist.length > 0 ? 
           <div className='progress-bar'>
-            <span>-:-</span>
-            <ProgressBar progress={playerState?.progress || 0} onProgressChange={setProgress} disabled={true}/>
-            <span>{playerState?.playlist[0].duration}</span>
+            <span>{getCurrentTime()}</span>
+            <ProgressBar progress={getPercentElapsed()} onProgressChange={setProgress} disabled={true}/>
+            <span>{getTotalTime()}</span>
           </div> :
           <div className='progress-bar'>
             <span>-:-</span>
