@@ -32,7 +32,7 @@ type RemoveFromPlaylistPayload struct {
 }
 
 type SetTimePayload struct {
-	Seconds int `json:"seconds"`
+	Millis int `json:"millis"`
 }
 
 type MusicStateResponse struct {
@@ -337,7 +337,7 @@ func (a *MusicAPI) Time(c echo.Context) error {
 		return err
 	}
 
-	player.SetTime(time.Duration(body.Seconds) * time.Second)
+	player.SetTime(time.Duration(body.Millis) * time.Millisecond)
 
 	return a.returnPlayerState(c, player)
 }
