@@ -73,7 +73,7 @@ export function Player() {
           <button type='button' style={{visibility: 'hidden'}}>
           </button>
           {getButton()}
-          <button type='button' className='skip-next'  onClick={() => !selectedGuild || skip(selectedGuild?.id)}></button>
+          <button type='button' className='skip-next'  onClick={() => !selectedGuild || skip(selectedGuild?.id)} disabled={playerState.playlist.length <= 0}></button>
         </div>
 
         {playerState.status === PlayerStatus.PLAYING ? 

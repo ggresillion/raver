@@ -10,8 +10,27 @@
     color: white;
     background: #03a9f4;
     background: linear-gradient(90deg, rgba(3, 169, 244, 1) 35%, rgba(109, 5, 255, 0.6194852941176471) 100%);
+    box-sizing: border-box;
+    font-family: "Roboto";
 
     .logo {
         height: calc(100% - 12px);
+    }
+
+    .user {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-left: auto;
+
+        img {
+            border-radius: 99px;
+            height: 42px;
+            width: 42px;
+        }
+
+        .thin {
+            font-family: "Roboto-Thin";
+        }
     }
 }

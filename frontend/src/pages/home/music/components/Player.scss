@@ -149,9 +149,12 @@
         &:disabled {
             opacity: 0.2;
             cursor: inherit;
+            &:hover {
+                transform: none;
+            }
         }
 
-        &:hover:not(:disabled) {
+        &:hover {
             transform: scale(1.1);
         }
     }
