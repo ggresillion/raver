@@ -35,3 +35,7 @@ export async function pause(guildId: string): Promise<void> {
 export async function skip(guildId: string): Promise<void> {
   return http.post<void, MusicPlayerState>(`/guilds/${guildId}/player/skip`);
 }
+
+export async function setTime(guildId: string, millis: number): Promise<void> {
+  return http.post<void, {millis: number}>(`/guilds/${guildId}/player/time`, {millis});
+}

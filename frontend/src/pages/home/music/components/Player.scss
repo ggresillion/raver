@@ -7,15 +7,16 @@
     padding: 2px 16px;
     background-color: rgb(53, 53, 53);
     filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-sizing: border-box;
     color: white;
+    box-sizing: border-box;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
 
     .track {
         display: flex;
-        justify-content: space-between;
+        align-items: center;
         gap: 26px;
 
         .track-thumbnail {
@@ -44,6 +45,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        gap: 6px;
 
         .progress-bar {
             display: flex;
@@ -52,15 +54,40 @@
         }
     }
 
-    .volume {
-        width: 300px;
+    .extra {
         display: flex;
+        justify-content: flex-end;
         align-items: center;
-        gap: 6px;
 
-        .progress-inner {
-            background: none;
-            background-color: #03a9f4;
+        .volume {
+            width: 300px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+
+            .progress-inner {
+                background: none;
+                background-color: #03a9f4;
+            }
+        }
+
+        .join-channel {
+            height: 40px;
+            width: 40px;
+            border: none;
+            background: url("../../../../assets/icons/join_channel.svg");
+            background-size: cover;
+            cursor: pointer;
+
+            :disabled {
+                cursor: not-allowed;
+                opacity: 0.8;
+                visibility: hidden;
+            }
+
+            &:hover:not(:disabled) {
+                transform: scale(1.1);
+            }
         }
     }
 
@@ -69,22 +96,82 @@
     }
 }
 
-button {
-    cursor: pointer;
-    user-select: none;
-    background-color: transparent;
-    border: none;
+.buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 
-    &:disabled {
-        opacity: 0.2;
-    }
-
-    &:hover:not(:disabled) {
-        transform: scale(1.1);
-    }
-
-    img {
+    button {
+        cursor: pointer;
+        user-select: none;
+        background-color: white;
         height: 36px;
-        filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
+        width: 36px;
+        border-radius: 99px;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-size: contain;
+        box-shadow: 0px 0px 20px 0px rgb(0 0 0 / 60%);
+        -moz-box-shadow: 0px 0px 20px 0px rgb(0 0 0 / 60%);
+        -webkit-box-shadow: 0px 0px 20px 0px rgb(0 0 0 / 60%);
+        -o-box-shadow: 0px 0px 20px 0px rgb(0 0 0 / 60%);
+
+        &.pause {
+            background: url("../../../../assets/icons/pause.svg");
+        }
+
+        &.play {
+            background: url("../../../../assets/icons/play.svg");
+        }
+
+        &.buffering {
+            background: url("../../../../assets/icons/buffering.svg");
+            animation: rotation 2s infinite linear;
+
+            @keyframes rotation {
+                from {
+                    transform: rotate(0deg);
+                }
+                to {
+                    transform: rotate(359deg);
+                }
+            }
+        }
+
+        &.skip-next {
+            background: url("../../../../assets/icons/skip_next.svg");
+            width: 32px;
+            height: 32px;
+        }
+
+        &:disabled {
+            opacity: 0.2;
+            cursor: inherit;
+        }
+
+        &:hover:not(:disabled) {
+            transform: scale(1.1);
+        }
+    }
+}
+
+.slider {
+    width: 100%;
+    height: 12px;
+    border: 1px rgb(27, 27, 27) solid;
+    box-shadow: 0px 0px 25px black;
+    border-radius: 99px;
+    user-select: none;
+    background: linear-gradient(90deg, #03a9f4 35%, rgba(109, 5, 255, 0.6194852941) 100%);
+
+    .thumb {
+        height: 16px;
+        width: 16px;
+        margin-top: -2px;
+        background-color: white;
+        border-radius: 99px;
+        cursor: pointer;
     }
 }
