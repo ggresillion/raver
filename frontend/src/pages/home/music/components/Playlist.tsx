@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   DragDropContext, Draggable, Droppable, DropResult
 } from 'react-beautiful-dnd';
+import deleteIcon from '../../../../assets/icons/delete_white_24dp.svg';
+import playlistIcon from '../../../../assets/icons/queue_music.svg';
+import arrowIcon from '../../../../assets/icons/double_arrow.svg';
 import { useAppSelector } from '../../../../hooks';
 import { moveInPlaylist, removeFromPlaylist } from '../../../../services/musicPlayer';
 import './Playlist.scss';
-import { Thumbnail } from './Thumbnail';
 
 export function Playlist() {
+  const [isOpen, setOpen] = useState(false);
   const musicPlayer = useAppSelector((state) => state.musicPlayer);
   const selectedGuild = useAppSelector((state) => state.guild.selectedGuild);
 
@@ -15,60 +18,66 @@ export function Playlist() {
     if (!selectedGuild) return;
     // dropped outside the list
     if (!result.destination) {
-      removeFromPlaylist(selectedGuild.id, result.source.index);
       return;
     }
-    moveInPlaylist(selectedGuild.id, result.source.index, result.destination.index);
+    moveInPlaylist(selectedGuild.id, result.source.index+1, result.destination.index+1);
   }
 
+  if(!musicPlayer.playerState.playlist || musicPlayer.playerState.playlist.length <= 0) return <div></div>;
+
+  const currentTrack = musicPlayer.playerState.playlist[0];
+
   return (
-    <div className="playlist-container">
-      <h2 className="side-title">__ Playlist __</h2>
-      <div className="table-container">
+    <>
+      <div className={`playlist ${isOpen ? 'open' : ''}`}>
+        <div className='handle' onClick={() => setOpen(!isOpen)}>
+          <button className='icon open' style={{backgroundImage: `url(${arrowIcon})`}}></button>
+          <button className='icon closed' style={{backgroundImage: `url(${playlistIcon})`}}></button>
+        </div>
+        <h2 className='title'>Queue</h2>
+        <h3 className='subtitle'>Now playing</h3>
+        <div className='track'>
+          <img className='track-thumbnail' src={currentTrack.thumbnail} />
+          <div className='track-info'>
+            <span className='track-name'>{currentTrack.title}</span>
+            <span className='track-artist'>{currentTrack.artists.map(a => a.name).join(', ')}</span>
+          </div>
+        </div>
+        <h3 className='subtitle'>Coming next</h3>
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="droppable">
-            {(provided) => (
-              <table className="playlist-table" ref={provided.innerRef}>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Title</th>
-                    <th>Album</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {musicPlayer.playerState?.playlist.map((item, index) => (
-                    <Draggable key={index} draggableId={String(index)} index={index}>
-                      {(provided) => (
-                        <tr
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        >
-                          <td>{index + 1}</td>
-                          <td>
-                            <div className="track">
-                              <Thumbnail url={`https://img.youtube.com/vi/${item.id}/0.jpg`} />
-                              <div className="track-info">
-                                <span className="track-name">{item.title}</span>
-                                <span className="track-artist">{item.artists}</span>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <span className="track-album">{item.album}</span>
-                          </td>
-                        </tr>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </tbody>
-              </table>
+            {(provided, snapshot) => (
+              <div
+                className='tracks'
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+              >
+                {musicPlayer.playerState.playlist.slice(1, musicPlayer.playerState.playlist.length).map((track, index) => (
+                  <Draggable key={track.id} draggableId={track.id} index={index}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      >
+                        <div className='track'>
+                          <img className='track-thumbnail' src={track.thumbnail} />
+                          <div className='track-info'>
+                            <span className='track-name'>{track.title}</span>
+                            <span className='track-artist'>{track.artists.map(a => a.name).join(', ')}</span>
+                          </div>
+                          <button className='icon' style={{backgroundImage: `url(${deleteIcon})`}} onClick={() => !selectedGuild || removeFromPlaylist(selectedGuild.id, index +1)}></button>
+                        </div>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
             )}
           </Droppable>
         </DragDropContext>
       </div>
-    </div>
+    </>
   );
 }

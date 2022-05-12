@@ -43,3 +43,21 @@ body {
   border-radius: 10px;
   background-color: #03a9f4;
 }
+
+/* BUTTONS */
+
+button {
+  cursor: pointer;
+
+  &.icon {
+    border: none;
+    height: 32px;
+    width: 32px;
+    background-color: transparent;
+    background-size: cover;
+  }
+
+  &:hover {
+    transform: scale(1.2);
+  }
+}
