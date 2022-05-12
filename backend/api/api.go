@@ -76,6 +76,8 @@ func (a *API) Listen() {
 	r := e.Group("/api")
 	r.Use(Authenticated)
 
+	r.GET("/auth/user", a.authAPI.GetMe)
+
 	r.GET("/guilds", a.discordAPI.GetGuilds)
 
 	r.POST("/guilds/:guildID/join", a.botAPI.JoinChannel)

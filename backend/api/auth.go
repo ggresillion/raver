@@ -7,8 +7,9 @@ import (
 	"strings"
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/config"
+	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
 	"github.com/labstack/echo/v4"
-	"github.com/ravener/discord-oauth2"
+	discordAuth "github.com/ravener/discord-oauth2"
 	"golang.org/x/oauth2"
 )
 
@@ -19,8 +20,8 @@ var conf = &oauth2.Config{
 	// This next 2 lines must be edited before running this.
 	ClientID:     config.Get().ClientID,
 	ClientSecret: config.Get().ClientSecret,
-	Scopes:       []string{discord.ScopeIdentify},
-	Endpoint:     discord.Endpoint,
+	Scopes:       []string{discordAuth.ScopeIdentify},
+	Endpoint:     discordAuth.Endpoint,
 }
 
 type AuthAPI struct {
@@ -77,6 +78,29 @@ func (a *AuthAPI) AuthCallback(c echo.Context) error {
 	}
 
 	c.Redirect(http.StatusPermanentRedirect, fmt.Sprint("http://localhost:3000?accessToken=", token.AccessToken, "&refreshToken=", token.RefreshToken))
+	return nil
+}
+
+// GetMe godoc
+// @Summary      Get connected ser
+// @Description  Returns the connected user
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  discord.User
+// @Failure      500  {object}  api.HTTPError
+// @Router       /auth/user [get]
+func (a *AuthAPI) GetMe(c echo.Context) error {
+	token := c.Get("token").(string)
+
+	dc := discord.NewDiscordClient(token)
+
+	user, err := dc.GetUser()
+	if err != nil {
+		return err
+	}
+
+	c.JSON(http.StatusOK, user)
 	return nil
 }
 
