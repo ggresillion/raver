@@ -17,10 +17,11 @@
     }
 
     .guild {
-        width: 52px;
-        min-width: 52px;
-        height: 52px;
-        min-height: 52px;
+        position: relative;
+        width: 42px;
+        min-width: 42px;
+        height: 42px;
+        min-height: 42px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -33,7 +34,16 @@
         box-shadow: 2px 2px 20px #0000002b;
 
         &.selected {
-            border: 2px solid red;
+            &:before {
+                content: "";
+                position: absolute;
+                left: -12px;
+                height: 20px;
+                width: 4px;
+                background-color: white;
+                border-top-right-radius: 5px;
+                border-bottom-right-radius: 5px;
+            }
         }
 
         &:hover {
@@ -41,7 +51,7 @@
         }
 
         .guild-icon {
-            height: 52px;
+            height: 42px;
             border-radius: 99px;
         }
     }
