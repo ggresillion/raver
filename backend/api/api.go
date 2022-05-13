@@ -79,8 +79,9 @@ func (a *API) Listen() {
 	r.GET("/auth/user", a.authAPI.GetMe)
 
 	r.GET("/guilds", a.discordAPI.GetGuilds)
-
 	r.POST("/guilds/:guildID/join", a.botAPI.JoinChannel)
+
+	r.GET("/bot/latency", a.botAPI.GetLatency)
 
 	r.GET("/guilds/:guildID/player", a.musicAPI.GetState)
 	r.POST("/guilds/:guildID/player/playlist/add", a.musicAPI.AddToPlaylist)
