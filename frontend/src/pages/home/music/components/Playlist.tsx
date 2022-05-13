@@ -53,7 +53,7 @@ export function Playlist() {
                 ref={provided.innerRef}
               >
                 {musicPlayer.playerState.playlist.slice(1, musicPlayer.playerState.playlist.length).map((track, index) => (
-                  <Draggable key={track.id} draggableId={track.id} index={index}>
+                  <Draggable key={track.id + index} draggableId={track.id} index={index}>
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
