@@ -8,6 +8,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/ggresillion/discordsoundboard/backend/internal/config"
+	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
 	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 )
 
@@ -73,4 +74,22 @@ func (b *Bot) GetGuildVoice(guildId string) *BotAudio {
 
 func (b *Bot) GetLatency() time.Duration {
 	return b.session.HeartbeatLatency()
+}
+
+func (b *Bot) GetGuilds(token string) ([]discord.Guild, error) {
+	dc := discord.NewDiscordClient(token)
+	userGuilds, err := dc.GetGuilds()
+	if err != nil {
+		return nil, err
+	}
+
+	guilds := make([]discord.Guild, 0)
+	for _, g1 := range b.session.State.Guilds {
+		for _, g2 := range userGuilds {
+			if g1.ID == g2.ID {
+				guilds = append(guilds, g2)
+			}
+		}
+	}
+	return guilds, nil
 }

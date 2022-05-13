@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Loader } from '../../../components/Loader';
-import { joinGuild } from '../../../services/guilds';
-import { HttpClient } from '../../../services/http';
+import { addGuild, getGuilds, joinGuild } from '../../../services/guilds';
 import { Guild } from '../../../services/model/guild';
 import { setGuild, setGuilds } from '../../../slices/guild';
+import addIcon from '../../../assets/icons/add_white_24dp.svg';
 import { RootState } from '../../../store';
 import './Guilds.scss';
 
@@ -14,14 +14,13 @@ export function Guilds() {
   const { selectedGuild, guilds } = useSelector((state: RootState) => state.guild);
 
   useEffect(() => {
-    const getGuilds = async () => {
-      const http = new HttpClient();
-      const res = await http.get<Guild[]>('/guilds');
-      dispatch(setGuilds({ guilds: res }));
+    const fetchGuilds = async () => {
+      const guilds = await getGuilds(); 
+      dispatch(setGuilds({ guilds }));
 
       const guildId = localStorage.getItem('selectedGuildId');
       if (guildId) {
-        const guild = res?.find(g => g.id === guildId);
+        const guild = guilds?.find(g => g.id === guildId);
         if (guild) {
           selectGuild(guild);
           return;
@@ -29,7 +28,7 @@ export function Guilds() {
       }
       dispatch(setGuild({ selectedGuild: undefined }));
     };
-    getGuilds();
+    fetchGuilds();
   }, []);
 
   async function selectGuild(guild: Guild) {
@@ -67,6 +66,9 @@ export function Guilds() {
           </div>
         );
       })}
+      <div className="guild" key="add" title="Add to guild" onClick={() => addGuild()}>
+        <img className="guild-icon" src={addIcon} />
+      </div>
     </div>
   );
 }

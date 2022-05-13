@@ -68,6 +68,7 @@ func (a *API) Listen() {
 	e.GET("/api/auth/login", a.authAPI.AuthLogin)
 	e.GET("/api/auth/callback", a.authAPI.AuthCallback)
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	e.GET("/api/bot/guilds/add", a.botAPI.AddBotToGuild)
 	e.Static("/", "./static")
 
 	e.GET("/ws", a.wsAPI.HandleConnection)
@@ -82,6 +83,7 @@ func (a *API) Listen() {
 	r.POST("/guilds/:guildID/join", a.botAPI.JoinChannel)
 
 	r.GET("/bot/latency", a.botAPI.GetLatency)
+	r.GET("/bot/guilds", a.botAPI.GetGuilds)
 
 	r.GET("/guilds/:guildID/player", a.musicAPI.GetState)
 	r.POST("/guilds/:guildID/player/playlist/add", a.musicAPI.AddToPlaylist)

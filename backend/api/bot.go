@@ -4,13 +4,20 @@ import (
 	"net/http"
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
+	"github.com/ggresillion/discordsoundboard/backend/internal/config"
 	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
 	"github.com/labstack/echo/v4"
 )
 
+const permissions = "2184186880"
+
 type LatencyResponse struct {
 	// Bot latency in ms
 	Latency int `json:"latency"`
+}
+
+type GuildsResponse struct {
+	Guilds []discord.Guild `json:"guilds"`
 }
 
 type BotAPI struct {
@@ -19,6 +26,30 @@ type BotAPI struct {
 
 func NewBotAPI(bot *bot.Bot) *BotAPI {
 	return &BotAPI{bot}
+}
+
+// GetGuilds godoc
+// @Summary      Get guilds
+// @Description  Get the guilds the bot and yourself are into
+// @Tags         bot
+// @Security     Authentication
+// @Accept       json
+// @Produce      json
+// @Success      200      {string}  string
+// @Failure      400      {object}  api.HTTPError
+// @Failure      404      {object}  api.HTTPError
+// @Failure      500      {object}  api.HTTPError
+// @Router       /bot/guilds [post]
+func (a *BotAPI) GetGuilds(c echo.Context) error {
+	token := c.Get("token").(string)
+
+	guilds, err := a.bot.GetGuilds(token)
+	if err != nil {
+		return err
+	}
+
+	c.JSON(http.StatusOK, &GuildsResponse{Guilds: guilds})
+	return nil
 }
 
 // JoinChannel godoc
@@ -46,6 +77,22 @@ func (a *BotAPI) JoinChannel(c echo.Context) error {
 	}
 
 	a.bot.GetGuildVoice(guildID).JoinUserChannel(user.ID)
+	return nil
+}
+
+// AddBotToGuild godoc
+// @Summary      Add bot to guild
+// @Description  Add the bot to a guild
+// @Tags         bot
+// @Security     Authentication
+// @Accept       json
+// @Produce      json
+// @Success      200      {string}  string
+// @Failure      500      {object}  api.HTTPError
+// @Router       /bot/guilds/add [post]
+func (a *BotAPI) AddBotToGuild(c echo.Context) error {
+	clientID := config.Get().ClientID
+	c.Redirect(http.StatusPermanentRedirect, "https://discord.com/oauth2/authorize?client_id="+clientID+"&permissions="+permissions+"&scope=bot%20applications.commands")
 	return nil
 }
 
