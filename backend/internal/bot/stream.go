@@ -80,7 +80,7 @@ func (s *StreamingSession) updateStreamProgress(stop chan bool) {
 			return
 		default:
 			s.progress <- s.streamingSession.PlaybackPosition()
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(time.Second)
 		}
 	}
 }
