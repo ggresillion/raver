@@ -82,7 +82,7 @@ func (a *AuthAPI) AuthCallback(c echo.Context) error {
 }
 
 // GetMe godoc
-// @Summary      Get connected ser
+// @Summary      Get connected user
 // @Description  Returns the connected user
 // @Tags         auth
 // @Accept       json
