@@ -19,7 +19,6 @@ export function Header() {
 
     const fetchLatency = async () => {
       const latency = await getLatencyInMillis();
-      console.log(latency);
       setLatency(latency);
     };
 
