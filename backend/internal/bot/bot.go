@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -68,4 +69,8 @@ func (b *Bot) GetGuildVoice(guildId string) *BotAudio {
 		b.guildVoices[guildId] = gv
 	}
 	return gv
+}
+
+func (b *Bot) GetLatency() time.Duration {
+	return b.session.HeartbeatLatency()
 }

@@ -17,6 +17,25 @@
         height: calc(100% - 12px);
     }
 
+    .latency {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+
+        .icon {
+            width: 8px;
+            height: 8px;
+            background-color: rgb(0, 199, 0);
+            border-radius: 99px;
+        }
+
+        .value {
+            font-family: "Roboto-Thin";
+            font-size: 11px;
+        }
+    }
+
     .user {
         display: flex;
         align-items: center;

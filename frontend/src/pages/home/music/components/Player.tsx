@@ -8,6 +8,7 @@ import { PlayerStatus } from '../../../../services/model/playerStatus';
 import { pause, play, setTime, skip } from '../../../../services/musicPlayer';
 import { RootState } from '../../../../store';
 import './Player.scss';
+import { Soundwave } from './Soundwave';
 
 function millisToMinutesAndSeconds(millis: number) {
   const minutes = Math.floor(millis / 60000);
@@ -64,6 +65,7 @@ export function Player() {
                         <span className='track-name'>{playerState.playlist[0].title}</span>
                         <span className='track-artist'>{playerState.playlist[0].artists.map(a => a.name).join(', ')}</span>
                       </div>
+                      <Soundwave play={playerState.status === PlayerStatus.PLAYING}></Soundwave>
                     </>
         }
       </div>
