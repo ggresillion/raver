@@ -48,8 +48,7 @@ func (a *BotAPI) GetGuilds(c echo.Context) error {
 		return err
 	}
 
-	c.JSON(http.StatusOK, &GuildsResponse{Guilds: guilds})
-	return nil
+	return c.JSON(http.StatusOK, &GuildsResponse{Guilds: guilds})
 }
 
 // JoinChannel godoc
@@ -76,8 +75,7 @@ func (a *BotAPI) JoinChannel(c echo.Context) error {
 		return err
 	}
 
-	a.bot.GetGuildVoice(guildID).JoinUserChannel(user.ID)
-	return nil
+	return a.bot.GetGuildVoice(guildID).JoinUserChannel(user.ID)
 }
 
 // AddBotToGuild godoc
@@ -92,8 +90,7 @@ func (a *BotAPI) JoinChannel(c echo.Context) error {
 // @Router       /bot/guilds/add [post]
 func (a *BotAPI) AddBotToGuild(c echo.Context) error {
 	clientID := config.Get().ClientID
-	c.Redirect(http.StatusPermanentRedirect, "https://discord.com/oauth2/authorize?client_id="+clientID+"&permissions="+permissions+"&scope=bot%20applications.commands")
-	return nil
+	return c.Redirect(http.StatusPermanentRedirect, "https://discord.com/oauth2/authorize?client_id="+clientID+"&permissions="+permissions+"&scope=bot%20applications.commands")
 }
 
 // GetLatency godoc
@@ -108,6 +105,5 @@ func (a *BotAPI) AddBotToGuild(c echo.Context) error {
 // @Router       /bot/latency [post]
 func (a *BotAPI) GetLatency(c echo.Context) error {
 	latency := a.bot.GetLatency()
-	c.JSON(http.StatusOK, &LatencyResponse{int(latency.Milliseconds())})
-	return nil
+	return c.JSON(http.StatusOK, &LatencyResponse{int(latency.Milliseconds())})
 }

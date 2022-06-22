@@ -1,6 +1,10 @@
 package api
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
 
@@ -87,6 +91,52 @@ func (a *MusicAPI) GetState(c echo.Context) error {
 	return a.returnPlayerState(c, player)
 }
 
+// SubscribeToState godoc
+// @Summary      Subscribe to player
+// @Description  Subscribe to player events
+// @Tags         music
+// @Security     Authentication
+// @Produce      json
+// @Param        guildID  path      string                         true  "Guild ID"
+// @Success      200      {object}  api.MusicStateResponse
+// @Failure      400      {object}  api.HTTPError
+// @Failure      404      {object}  api.HTTPError
+// @Failure      500      {object}  api.HTTPError
+// @Router       /guilds/{guildID}/player/subscribe [get]
+func (a *MusicAPI) SubscribeToState(c echo.Context) error {
+	guildID := c.Param("guildID")
+
+	player, err := a.manager.GetPlayer(guildID)
+	if err != nil {
+		return err
+	}
+
+	c.Response().Header().Set(echo.HeaderContentType, "text/event-stream")
+	c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
+	c.Response().Header().Set(echo.HeaderConnection, "keep-alive")
+
+	select {
+	case ev := <-player.SubscribeToPlayerState():
+		var buf bytes.Buffer
+		enc := json.NewEncoder(&buf)
+		err := enc.Encode(ev)
+		if err != nil {
+			log.Error(err)
+		}
+		_, err = fmt.Fprintf(c.Response().Writer, "data: %v\n\n", buf.String())
+		if err != nil {
+			log.Error(err)
+		}
+		fmt.Printf("data: %v\n", buf.String())
+	}
+
+	if f, ok := c.Response().Writer.(http.Flusher); ok {
+		f.Flush()
+	}
+	return nil
+
+}
+
 // AddToPlaylist godoc
 // @Summary      Add to playlist
 // @Description  Adds the track to the playlist
@@ -106,7 +156,7 @@ func (a *MusicAPI) AddToPlaylist(c echo.Context) error {
 
 	body := &AddToPlaylistPayload{}
 
-	if err := c.Bind(&body); err != nil {
+	if err := c.Bind(&body); err != nil || body.ID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
@@ -337,7 +387,10 @@ func (a *MusicAPI) Time(c echo.Context) error {
 		return err
 	}
 
-	player.SetTime(time.Duration(body.Millis) * time.Millisecond)
+	err = player.SetTime(time.Duration(body.Millis) * time.Millisecond)
+	if err != nil {
+		return err
+	}
 
 	return a.returnPlayerState(c, player)
 }

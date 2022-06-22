@@ -11,13 +11,16 @@ type User struct {
 	Avatar   string `json:"avatar"`
 }
 
-func (dc *DiscordClient) GetUser() (*User, error) {
+func (c *Client) GetUser() (*User, error) {
 
-	res, err := dc.request("GET", "/users/@me")
+	res, err := c.request("GET", "/users/@me")
 	if err != nil {
 		return nil, err
 	}
 	u := &User{}
-	json.NewDecoder(res).Decode(u)
+	err = json.NewDecoder(res).Decode(u)
+	if err != nil {
+		return nil, err
+	}
 	return u, nil
 }

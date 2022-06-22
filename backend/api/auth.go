@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -16,7 +17,7 @@ import (
 var state = "random"
 
 var conf = &oauth2.Config{
-	RedirectURL: "http://localhost:8080/api/auth/callback",
+	RedirectURL: config.Get().Host + "/api/auth/callback",
 	// This next 2 lines must be edited before running this.
 	ClientID:     config.Get().ClientID,
 	ClientSecret: config.Get().ClientSecret,
@@ -34,11 +35,20 @@ func NewAuthAPI() *AuthAPI {
 func Authenticated(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		header := c.Request().Header.Get("Authorization")
-		splitToken := strings.Split(header, "Bearer ")
-		if len(splitToken) < 2 {
+		if header != "" {
+			splitToken := strings.Split(header, "Bearer ")
+			if len(splitToken) < 2 {
+				return echo.NewHTTPError(http.StatusUnauthorized)
+			}
+			token := splitToken[1]
+			c.Set("token", token)
+			return next(c)
+		}
+		token := c.QueryParam("access_token")
+		if token == "" {
 			return echo.NewHTTPError(http.StatusUnauthorized)
 		}
-		token := splitToken[1]
+
 		c.Set("token", token)
 		return next(c)
 	}
@@ -54,8 +64,7 @@ func Authenticated(next echo.HandlerFunc) echo.HandlerFunc {
 // @Failure      500  {object}  api.HTTPError
 // @Router       /auth/login [get]
 func (a *AuthAPI) AuthLogin(c echo.Context) error {
-	c.Redirect(http.StatusTemporaryRedirect, conf.AuthCodeURL(state))
-	return nil
+	return c.Redirect(http.StatusTemporaryRedirect, conf.AuthCodeURL(state))
 }
 
 // AuthCallback godoc
@@ -77,8 +86,7 @@ func (a *AuthAPI) AuthCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	c.Redirect(http.StatusPermanentRedirect, fmt.Sprint("http://localhost:3000?accessToken=", token.AccessToken, "&refreshToken=", token.RefreshToken))
-	return nil
+	return c.Redirect(http.StatusPermanentRedirect, fmt.Sprint("http://localhost:3000?accessToken=", token.AccessToken, "&refreshToken=", token.RefreshToken))
 }
 
 // GetMe godoc
@@ -97,11 +105,16 @@ func (a *AuthAPI) GetMe(c echo.Context) error {
 
 	user, err := dc.GetUser()
 	if err != nil {
+		var discordError *discord.ApiError
+		if errors.As(err, &discordError) {
+			if discordError.Code == http.StatusUnauthorized {
+				return echo.NewHTTPError(http.StatusUnauthorized, discordError.Message)
+			}
+		}
 		return err
 	}
 
-	c.JSON(http.StatusOK, user)
-	return nil
+	return c.JSON(http.StatusOK, user)
 }
 
 func getToken(r *http.Request) *string {

@@ -10,8 +10,8 @@ type Guild struct {
 	Icon string `json:"icon"`
 }
 
-func (dc *DiscordClient) GetGuilds() ([]Guild, error) {
-	res, err := dc.request("GET", "/users/@me/guilds")
+func (c *Client) GetGuilds() ([]Guild, error) {
+	res, err := c.request("GET", "/users/@me/guilds")
 	if err != nil {
 		return nil, err
 	}

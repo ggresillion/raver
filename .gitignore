@@ -24,6 +24,6 @@ dist-ssr
 *.sw?
 
 # Go
-.env
+backend/.env
 **/__debug_bin
 out/

@@ -15,38 +15,38 @@ const (
 	api = "https://discordapp.com/api"
 )
 
-type DiscordApiError struct {
+type ApiError struct {
 	Code    int
 	Message string
 }
 
-func newDiscordApiError(code int, message string) *DiscordApiError {
-	return &DiscordApiError{code, message}
+func newDiscordApiError(code int, message string) *ApiError {
+	return &ApiError{code, message}
 }
 
-func (e *DiscordApiError) Error() string {
+func (e *ApiError) Error() string {
 	return fmt.Sprint("received error from discord api: ", e.Message)
 }
 
-type DiscordClient struct {
+type Client struct {
 	token string
 	mutex *sync.Mutex
 }
 
-var clients = map[string]*DiscordClient{}
+var clients = map[string]*Client{}
 
-func NewDiscordClient(token string) *DiscordClient {
+func NewDiscordClient(token string) *Client {
 	client := clients[token]
 	if client != nil {
 		return client
 	}
-	client = &DiscordClient{token, &sync.Mutex{}}
+	client = &Client{token, &sync.Mutex{}}
 	clients[token] = client
 	return client
 }
 
 // Make a request to the discord API
-func (c *DiscordClient) request(verb string, path string) (io.Reader, error) {
+func (c *Client) request(verb string, path string) (io.Reader, error) {
 
 	c.mutex.Lock()
 
@@ -61,13 +61,16 @@ func (c *DiscordClient) request(verb string, path string) (io.Reader, error) {
 		return nil, newDiscordApiError(res.StatusCode, string(b))
 	}
 
-	c.handleRateLimit(res)
+	err = c.handleRateLimit(res)
+	if err != nil {
+		return nil, err
+	}
 
 	return res.Body, nil
 }
 
 // Do the actual request
-func (c *DiscordClient) make(verb string, path string) (*http.Response, error) {
+func (c *Client) make(verb string, path string) (*http.Response, error) {
 	req, err := http.NewRequest(verb, fmt.Sprint(api, path), nil)
 	if err != nil {
 		return nil, err
@@ -82,8 +85,8 @@ func (c *DiscordClient) make(verb string, path string) (*http.Response, error) {
 	return res, nil
 }
 
-// Handle rate limit from discord by waiting for X-RateLimit-Reset-After seconds if the bucket if empty
-func (c *DiscordClient) handleRateLimit(res *http.Response) error {
+// Handle rate limit from discord by waiting for X-RateLimit-Reset-After seconds if the bucket is empty
+func (c *Client) handleRateLimit(res *http.Response) error {
 	if res.Header.Get("X-RateLimit-Remaining") == "0" {
 		secondsToWait, err := strconv.Atoi(res.Header.Get("X-RateLimit-Reset-After"))
 		if err != nil {

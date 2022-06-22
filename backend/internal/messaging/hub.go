@@ -5,9 +5,8 @@ import "encoding/json"
 type MessageType int
 
 type Client struct {
-	send     chan Message
-	received chan Message
-	hub      *Hub
+	send chan Message
+	hub  *Hub
 }
 
 type Room struct {
@@ -45,9 +44,8 @@ func NewHub() *Hub {
 
 func NewClient(hub *Hub) *Client {
 	return &Client{
-		send:     make(chan Message),
-		received: make(chan Message),
-		hub:      hub,
+		send: make(chan Message),
+		hub:  hub,
 	}
 }
 
@@ -101,24 +99,6 @@ func (c *Client) Send(m Message) {
 	c.send <- m
 }
 
-func (c *Client) Receive(m Message) {
-	m.Client = c
-
-	if m.RoomID != "" {
-		for _, r := range c.hub.rooms {
-			if r.id == m.RoomID {
-				for _, c := range r.subscribers {
-					c <- m
-				}
-			}
-		}
-		return
-	}
-	for _, c := range c.hub.subscribers {
-		c <- m
-	}
-}
-
 func (c *Client) ToSend() chan Message {
 	return c.send
 }
@@ -145,25 +125,4 @@ func (m *Message) CastPayload(t interface{}) error {
 	}
 	json.Unmarshal(p, t)
 	return nil
-}
-
-func (m *Message) Reply(r Message) {
-	m.Client.Send(r)
-}
-
-func (m *Message) Ok() {
-	m.Client.Send(Message{
-		ID:          m.ID,
-		MessageType: "websocket/ok",
-	})
-}
-
-func (m *Message) Error(err error) {
-	m.Client.Send(Message{
-		ID:          m.ID,
-		MessageType: "websocket/error",
-		Payload: &ErrorPayload{
-			Message: err.Error(),
-		},
-	})
 }

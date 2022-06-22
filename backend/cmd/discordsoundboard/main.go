@@ -39,18 +39,17 @@ func main() {
 	command.NewCommandHandler(b, musicManager)
 
 	// Messages
-	botSubscriber := bot.NewBotGateway(b)
-	botSubscriber.SubscribeToIncomingMessages()
-	musicSubscriber := music.NewMusicSubscriber(musicManager, hub)
-	musicSubscriber.SubscribeToIncomingMessages()
+	//botSubscriber := bot.NewBotGateway(b)
+	//botSubscriber.SubscribeToIncomingMessages()
+	//musicSubscriber := music.NewMusicSubscriber(musicManager, hub)
+	//musicSubscriber.SubscribeToIncomingMessages()
 
 	// Start API
 	authAPI := api.NewAuthAPI()
 	discordAPI := api.NewDiscordAPI()
 	musicAPI := api.NewMusicAPI(musicManager)
-	wsAPI := api.NewWSAPI(hub)
 	botAPI := api.NewBotAPI(b)
-	api := api.NewAPI(authAPI, discordAPI, musicAPI, wsAPI, botAPI)
+	a := api.NewAPI(authAPI, discordAPI, musicAPI, botAPI)
 
-	api.Listen()
+	a.Listen()
 }
