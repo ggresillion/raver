@@ -21,13 +21,16 @@ type MusicConnector interface {
 }
 
 type MusicPlayer struct {
-	guildID   string
-	connector MusicConnector
-	hub       *messaging.Hub
-	botAudio  *bot.BotAudio
-	playlist  []*Track
-	progress  time.Duration
-	stopped   bool
+	guildID     string
+	connector   MusicConnector
+	hub         *messaging.Hub
+	botAudio    *bot.BotAudio
+	playlist    []*Track
+	progress    time.Duration
+	stateChange chan MusicPlayerState
+	currentUrl  string
+	stopped     bool
+	preventSkip bool
 }
 
 type MusicPlayerManager struct {
@@ -106,12 +109,14 @@ func (m *MusicPlayerManager) GetPlayer(guildID string) (*MusicPlayer, error) {
 	}
 
 	p := &MusicPlayer{
-		guildID:   guildID,
-		connector: m.connector,
-		hub:       m.hub,
-		botAudio:  m.bot.GetGuildVoice(guildID),
-		playlist:  []*Track{},
-		stopped:   false,
+		guildID:     guildID,
+		connector:   m.connector,
+		hub:         m.hub,
+		botAudio:    m.bot.GetGuildVoice(guildID),
+		stateChange: make(chan MusicPlayerState),
+		playlist:    []*Track{},
+		stopped:     false,
+		preventSkip: false,
 	}
 	m.players[guildID] = p
 	p.subscribeToAudioStatusChange()
@@ -182,13 +187,14 @@ func (p *MusicPlayer) Play() error {
 	p.stopped = false
 
 	// Get the stream url from source
-	url, err := p.connector.GetStreamURL(p.playlist[0].ID)
+	var err error
+	p.currentUrl, err = p.connector.GetStreamURL(p.playlist[0].ID)
 	if err != nil {
 		return err
 	}
 
 	// Start the stream
-	end, progress, err := p.botAudio.Play(url)
+	end, progress, err := p.botAudio.Play(p.currentUrl, 0)
 	if err != nil {
 		return fmt.Errorf("error starting audio streaming: %v", err)
 	}
@@ -213,7 +219,8 @@ func (p *MusicPlayer) Play() error {
 		}
 
 		// Do nothing if the player is stopped
-		if p.stopped {
+		if p.stopped || p.preventSkip {
+			p.preventSkip = false
 			return
 		}
 		p.playlist = p.playlist[1:]
@@ -230,9 +237,44 @@ func (p *MusicPlayer) Pause() {
 	p.botAudio.Pause()
 }
 
-func (p *MusicPlayer) SetTime(t time.Duration) {
-	p.stopped = true
-	p.botAudio.SetTime(t)
+func (p *MusicPlayer) SetTime(t time.Duration) error {
+	p.preventSkip = true
+	// Start the stream
+	end, progress, err := p.botAudio.Play(p.currentUrl, t)
+	if err != nil {
+		return fmt.Errorf("error starting audio streaming: %v", err)
+	}
+
+	// Updates the stream progress
+	go func() {
+		for {
+			progress, more := <-progress
+			if !more {
+				return
+			}
+			p.progress = progress
+			p.propagateState()
+		}
+	}()
+
+	// Listen for stream end, skiping to next song if any
+	go func() {
+		err := <-end
+		if err != nil {
+			log.Printf("error during audio streaming: %v", err)
+		}
+
+		// Do nothing if the player is stopped
+		if p.stopped || p.preventSkip {
+			p.preventSkip = false
+			return
+		}
+		p.playlist = p.playlist[1:]
+		if len(p.playlist) > 0 {
+			p.Play()
+		}
+	}()
+	return nil
 }
 
 func (p *MusicPlayer) Stop() {
@@ -263,6 +305,10 @@ func (p *MusicPlayer) BotAudio() *bot.BotAudio {
 	return p.botAudio
 }
 
+func (p *MusicPlayer) SubscribeToPlayerState() chan MusicPlayerState {
+	return p.stateChange
+}
+
 func (p *MusicPlayer) propagateState() {
 	payload := MusicPlayerState{
 		Status:   p.botAudio.Status(),
@@ -270,12 +316,18 @@ func (p *MusicPlayer) propagateState() {
 		Progress: p.progress.Milliseconds(),
 	}
 
+	go p.updatePlayerState(payload)
+
 	m := messaging.Message{
 		MessageType: "musicPlayer/updatePlayerState",
 		Payload:     payload,
 		RoomID:      p.guildID,
 	}
 	p.hub.Send(m)
+}
+
+func (p *MusicPlayer) updatePlayerState(state MusicPlayerState) {
+	p.stateChange <- state
 }
 
 func (p *MusicPlayer) subscribeToAudioStatusChange() {

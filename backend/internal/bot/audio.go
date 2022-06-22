@@ -64,19 +64,13 @@ func (b *BotAudio) JoinUserChannel(userID string) error {
 	return errors.New("user not in a voice channel")
 }
 
-func (b *BotAudio) Play(url string) (chan error, chan time.Duration, error) {
-
-	if b.session != nil {
-		return nil, nil, errors.New("bot is already playing something")
-	}
+func (b *BotAudio) Play(url string, start time.Duration) (chan error, chan time.Duration, error) {
 
 	switch b.audioStatus {
 	case NotConnected:
 		return nil, nil, errors.New("bot is not in a voice channel")
 	case IDLE:
 		break
-	case Playing:
-		return nil, nil, errors.New("bot is already playing something")
 	}
 
 	if b.voiceConnection == nil {
@@ -88,47 +82,12 @@ func (b *BotAudio) Play(url string) (chan error, chan time.Duration, error) {
 		return nil, nil, errors.New("couldn't set speaking")
 	}
 
-	b.session, err = b.startStream(url, time.Duration(0))
+	b.session, err = b.startStream(url, start)
 	if err != nil {
 		return nil, nil, fmt.Errorf("couldn't start stream: %w", err)
 	}
 
 	return b.session.end, b.session.progress, nil
-}
-
-func (b *BotAudio) Pause() {
-	if b.session == nil || b.audioStatus != Playing {
-		return
-	}
-	b.session.streamingSession.SetPaused(true)
-	b.setStatus(Paused)
-}
-
-func (b *BotAudio) UnPause() {
-	if b.session == nil || b.audioStatus != Paused {
-		return
-	}
-	b.session.streamingSession.SetPaused(false)
-	b.setStatus(Playing)
-}
-
-func (b *BotAudio) SetTime(t time.Duration) error {
-	url := b.session.url
-	end := b.session.end
-	b.session.swappingStream = true
-	b.Stop()
-
-	var err error
-	b.session, err = b.startStream(url, t)
-	b.session.end = end
-	if err != nil {
-		return fmt.Errorf("couldn't start stream: %w", err)
-	}
-	return nil
-}
-
-func (b *BotAudio) Stop() {
-	b.session.encodingSession.Cleanup()
 }
 
 func (b *BotAudio) Status() AudioStatus {

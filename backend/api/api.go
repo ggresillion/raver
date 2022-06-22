@@ -20,7 +20,6 @@ type API struct {
 	authAPI    *AuthAPI
 	discordAPI *DiscordAPI
 	musicAPI   *MusicAPI
-	wsAPI      *WSAPI
 	botAPI     *BotAPI
 }
 
@@ -28,10 +27,9 @@ func NewAPI(
 	authAPI *AuthAPI,
 	discordAPI *DiscordAPI,
 	musicAPI *MusicAPI,
-	wsAPI *WSAPI,
 	botAPI *BotAPI,
 ) *API {
-	return &API{authAPI, discordAPI, musicAPI, wsAPI, botAPI}
+	return &API{authAPI, discordAPI, musicAPI, botAPI}
 }
 
 // @title           DiscordSoundBoard API
@@ -60,7 +58,7 @@ func (a *API) Listen() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
-		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
+		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions},
 	}))
 
 	// Register routes
@@ -70,8 +68,6 @@ func (a *API) Listen() {
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	e.GET("/api/bot/guilds/add", a.botAPI.AddBotToGuild)
 	e.Static("/", "./static")
-
-	e.GET("/ws", a.wsAPI.HandleConnection)
 
 	// Authenticated routes
 	r := e.Group("/api")
@@ -85,6 +81,7 @@ func (a *API) Listen() {
 	r.GET("/bot/latency", a.botAPI.GetLatency)
 	r.GET("/bot/guilds", a.botAPI.GetGuilds)
 
+	r.GET("/guilds/:guildID/player/subscribe", a.musicAPI.SubscribeToState)
 	r.GET("/guilds/:guildID/player", a.musicAPI.GetState)
 	r.POST("/guilds/:guildID/player/playlist/add", a.musicAPI.AddToPlaylist)
 	r.POST("/guilds/:guildID/player/playlist/move", a.musicAPI.MoveInPlaylist)

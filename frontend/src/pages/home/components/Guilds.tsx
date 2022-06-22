@@ -1,41 +1,26 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { useDispatch } from 'react-redux';
 import { Loader } from '../../../components/Loader';
-import { addGuild, getGuilds, joinGuild } from '../../../services/guilds';
-import { Guild } from '../../../services/model/guild';
-import { setGuild, setGuilds } from '../../../slices/guild';
+import { Guild } from '../../../api/model/guild';
 import addIcon from '../../../assets/icons/add_white_24dp.svg';
-import { RootState } from '../../../store';
 import './Guilds.scss';
+import { useGetGuildsQuery } from '../../../api/guildAPI';
+import { useAppSelector } from '../../../hooks';
+import { setSelectedGuild } from '../../../slices/selectedGuildSlice';
+
+export function addGuild(): void {
+  window.open('http://localhost:8080/api/bot/guilds/add');
+}
 
 export function Guilds() {
 
+  const { selectedGuild } = useAppSelector(state => state);
   const dispatch = useDispatch();
-  const { selectedGuild, guilds } = useSelector((state: RootState) => state.guild);
-
-  useEffect(() => {
-    const fetchGuilds = async () => {
-      const guilds = await getGuilds(); 
-      dispatch(setGuilds({ guilds }));
-
-      const guildId = localStorage.getItem('selectedGuildId');
-      if (guildId) {
-        const guild = guilds?.find(g => g.id === guildId);
-        if (guild) {
-          selectGuild(guild);
-          return;
-        }
-      }
-      dispatch(setGuild({ selectedGuild: undefined }));
-    };
-    fetchGuilds();
-  }, []);
+  const { data: guilds } = useGetGuildsQuery();
 
   async function selectGuild(guild: Guild) {
     try {
-      await joinGuild(guild);
-      dispatch(setGuild({ selectedGuild: guild }));
-      localStorage.setItem('selectedGuildId', guild.id);
+      dispatch(setSelectedGuild(guild.id));
 
     } catch (e) {
       console.log(e);
@@ -45,7 +30,7 @@ export function Guilds() {
   if (!guilds) {
     return (
       <div className="guilds">
-        <Loader />
+        <Loader/>
       </div>
     );
   }
@@ -57,17 +42,21 @@ export function Guilds() {
           backgroundColor: stringToRGB(g.name),
         };
         return (
-          <div className={g.id === selectedGuild?.id ? 'guild selected' : 'guild'} key={g.id} style={style} title={g.name} onClick={() => selectGuild(g)}>
+          <div className={g.id === selectedGuild ? 'guild selected' : 'guild'}
+            key={g.id}
+            style={style}
+            title={g.name}
+            onClick={() => selectGuild(g)}>
             {
               !g.icon ?
                 <span>{g.name.charAt(0).toUpperCase()}</span> :
-                <img className="guild-icon" src={`https://cdn.discordapp.com/icons/${g.id}/${g.icon}`} />
+                <img className="guild-icon" src={`https://cdn.discordapp.com/icons/${g.id}/${g.icon}`}/>
             }
           </div>
         );
       })}
       <div className="guild" key="add" title="Add to guild" onClick={() => addGuild()}>
-        <img className="guild-icon" src={addIcon} />
+        <img className="guild-icon" src={addIcon}/>
       </div>
     </div>
   );

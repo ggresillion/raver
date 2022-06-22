@@ -36,7 +36,7 @@ func (a *DiscordAPI) GetGuilds(c echo.Context) error {
 	guilds, err := dc.GetGuilds()
 	if err != nil {
 		switch e := err.(type) {
-		case *discord.DiscordApiError:
+		case *discord.ApiError:
 			return echo.NewHTTPError(e.Code, e.Message)
 		default:
 			return err
