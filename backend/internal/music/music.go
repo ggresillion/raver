@@ -20,7 +20,7 @@ type MusicConnector interface {
 	GetStreamURL(ID string) (string, error)
 }
 
-type MusicPlayer struct {
+type Player struct {
 	guildID     string
 	connector   MusicConnector
 	hub         *messaging.Hub
@@ -31,10 +31,11 @@ type MusicPlayer struct {
 	currentUrl  string
 	stopped     bool
 	preventSkip bool
+	logger log.Logger
 }
 
-type MusicPlayerManager struct {
-	players   map[string]*MusicPlayer
+type PlayerManager struct {
+	players   map[string]*Player
 	connector MusicConnector
 	hub       *messaging.Hub
 	bot       *bot.Bot
@@ -88,16 +89,18 @@ const (
 	PlaylistElement
 )
 
-func NewMusicPlayerManager(connector MusicConnector, hub *messaging.Hub, bot *bot.Bot) *MusicPlayerManager {
-	return &MusicPlayerManager{
-		players:   make(map[string]*MusicPlayer),
+var ErrEmptyPlaylist = errors.New("empty playlist")
+
+func NewMusicPlayerManager(connector MusicConnector, hub *messaging.Hub, bot *bot.Bot) *PlayerManager {
+	return &PlayerManager{
+		players:   make(map[string]*Player),
 		connector: connector,
 		hub:       hub,
 		bot:       bot,
 	}
 }
 
-func (m *MusicPlayerManager) GetPlayer(guildID string) (*MusicPlayer, error) {
+func (m *PlayerManager) GetPlayer(guildID string) (*Player, error) {
 	if guildID == "" {
 		return nil, errors.New("guild id cannot be empty")
 	}
@@ -108,7 +111,7 @@ func (m *MusicPlayerManager) GetPlayer(guildID string) (*MusicPlayer, error) {
 		}
 	}
 
-	p := &MusicPlayer{
+	p := &Player{
 		guildID:     guildID,
 		connector:   m.connector,
 		hub:         m.hub,
@@ -123,11 +126,11 @@ func (m *MusicPlayerManager) GetPlayer(guildID string) (*MusicPlayer, error) {
 	return p, nil
 }
 
-func (m *MusicPlayerManager) Search(query string, page uint) (*MusicSearchResult, error) {
+func (m *PlayerManager) Search(query string, page uint) (*MusicSearchResult, error) {
 	return m.connector.Search(query, page)
 }
 
-func (p *MusicPlayer) AddToPlaylist(ID string, elemType MusicElementType) error {
+func (p *Player) AddToPlaylist(ID string, elemType MusicElementType) error {
 	switch elemType {
 	case TrackElement:
 		track, err := p.connector.FindTrack(ID)
@@ -159,7 +162,7 @@ func (p *MusicPlayer) AddToPlaylist(ID string, elemType MusicElementType) error 
 	return nil
 }
 
-func (p *MusicPlayer) MoveInPlaylist(from, to int) {
+func (p *Player) MoveInPlaylist(from, to int) {
 	el := p.playlist[from]
 	arr := append(p.playlist[:from], p.playlist[from+1:]...)
 	arr = append(arr[:to+1], arr[to:]...)
@@ -168,12 +171,17 @@ func (p *MusicPlayer) MoveInPlaylist(from, to int) {
 	p.propagateState()
 }
 
-func (p *MusicPlayer) RemoveFromPlaylist(i int) {
+func (p *Player) RemoveFromPlaylist(i int) {
 	p.playlist = append(p.playlist[:i], p.playlist[i+1:]...)
 	p.propagateState()
 }
 
-func (p *MusicPlayer) Play() error {
+func (p *Player) Play() error {
+
+	if len(p.playlist) <= 0 {
+		p.logger.Debug()
+		return ErrEmptyPlaylist
+	}
 
 	switch p.botAudio.Status() {
 	case bot.Paused:
@@ -233,11 +241,11 @@ func (p *MusicPlayer) Play() error {
 	return nil
 }
 
-func (p *MusicPlayer) Pause() {
+func (p *Player) Pause() {
 	p.botAudio.Pause()
 }
 
-func (p *MusicPlayer) SetTime(t time.Duration) error {
+func (p *Player) SetTime(t time.Duration) error {
 	p.preventSkip = true
 	// Start the stream
 	end, progress, err := p.botAudio.Play(p.currentUrl, t)
@@ -277,12 +285,12 @@ func (p *MusicPlayer) SetTime(t time.Duration) error {
 	return nil
 }
 
-func (p *MusicPlayer) Stop() {
+func (p *Player) Stop() {
 	p.stopped = true
 	p.botAudio.Stop()
 }
 
-func (p *MusicPlayer) Skip() error {
+func (p *Player) Skip() error {
 	if len(p.playlist) < 2 {
 		return nil
 	}
@@ -292,24 +300,24 @@ func (p *MusicPlayer) Skip() error {
 	return nil
 }
 
-func (p *MusicPlayer) ClearPlaylist() {
+func (p *Player) ClearPlaylist() {
 	p.playlist = []*Track{}
 	p.propagateState()
 }
 
-func (p *MusicPlayer) Playlist() []*Track {
+func (p *Player) Playlist() []*Track {
 	return p.playlist
 }
 
-func (p *MusicPlayer) BotAudio() *bot.BotAudio {
+func (p *Player) BotAudio() *bot.BotAudio {
 	return p.botAudio
 }
 
-func (p *MusicPlayer) SubscribeToPlayerState() chan MusicPlayerState {
+func (p *Player) SubscribeToPlayerState() chan MusicPlayerState {
 	return p.stateChange
 }
 
-func (p *MusicPlayer) propagateState() {
+func (p *Player) propagateState() {
 	payload := MusicPlayerState{
 		Status:   p.botAudio.Status(),
 		Playlist: p.playlist,
@@ -326,11 +334,11 @@ func (p *MusicPlayer) propagateState() {
 	p.hub.Send(m)
 }
 
-func (p *MusicPlayer) updatePlayerState(state MusicPlayerState) {
+func (p *Player) updatePlayerState(state MusicPlayerState) {
 	p.stateChange <- state
 }
 
-func (p *MusicPlayer) subscribeToAudioStatusChange() {
+func (p *Player) subscribeToAudioStatusChange() {
 	go func() {
 		for {
 			<-p.botAudio.StatusChange()

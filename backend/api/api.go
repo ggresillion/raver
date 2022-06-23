@@ -55,7 +55,10 @@ func (a *API) Listen() {
 	e := echo.New()
 
 	// Middlewares
-	e.Use(middleware.Logger())
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "${method} ${uri} ${status}\n",
+		Output: log.StandardLogger().Writer(),
+	}))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions},

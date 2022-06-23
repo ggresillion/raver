@@ -8,11 +8,11 @@ import (
 
 type CommandHandler struct {
 	bot          *bot.Bot
-	musicManager *music.MusicPlayerManager
+	musicManager *music.PlayerManager
 }
 
 // Command handler is responsible for handling bot slash commands
-func NewCommandHandler(b *bot.Bot, musicManager *music.MusicPlayerManager) *CommandHandler {
+func NewCommandHandler(b *bot.Bot, musicManager *music.PlayerManager) *CommandHandler {
 	h := &CommandHandler{b, musicManager}
 	h.bot.RegisterCommands([]*bot.CommandAndHandler{
 		h.join(),
