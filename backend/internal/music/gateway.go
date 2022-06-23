@@ -3,11 +3,11 @@ package music
 //import "github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 //
 //type MusicGateway struct {
-//	manager *MusicPlayerManager
+//	manager *PlayerManager
 //	hub     *messaging.Hub
 //}
 //
-//func NewMusicSubscriber(manager *MusicPlayerManager, hub *messaging.Hub) *MusicGateway {
+//func NewMusicSubscriber(manager *PlayerManager, hub *messaging.Hub) *MusicGateway {
 //	return &MusicGateway{manager, hub}
 //}
 //

@@ -14,10 +14,10 @@ import (
 )
 
 type MusicAPI struct {
-	manager *music.MusicPlayerManager
+	manager *music.PlayerManager
 }
 
-func NewMusicAPI(manager *music.MusicPlayerManager) *MusicAPI {
+func NewMusicAPI(manager *music.PlayerManager) *MusicAPI {
 	return &MusicAPI{manager}
 }
 
@@ -127,7 +127,7 @@ func (a *MusicAPI) SubscribeToState(c echo.Context) error {
 		if err != nil {
 			log.Error(err)
 		}
-		fmt.Printf("data: %v\n", buf.String())
+		log.Debugf("data: %v\n", buf.String())
 	}
 
 	if f, ok := c.Response().Writer.(http.Flusher); ok {
@@ -395,7 +395,7 @@ func (a *MusicAPI) Time(c echo.Context) error {
 	return a.returnPlayerState(c, player)
 }
 
-func (a *MusicAPI) returnPlayerState(c echo.Context, player *music.MusicPlayer) error {
+func (a *MusicAPI) returnPlayerState(c echo.Context, player *music.Player) error {
 	response := &MusicStateResponse{
 		Playlist: player.Playlist(),
 		Status:   player.BotAudio().Status().String(),
