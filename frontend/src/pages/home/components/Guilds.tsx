@@ -7,9 +7,10 @@ import './Guilds.scss';
 import { useGetGuildsQuery } from '../../../api/guildAPI';
 import { useAppSelector } from '../../../hooks';
 import { setSelectedGuild } from '../../../slices/selectedGuildSlice';
+import { config } from '../../../config';
 
 export function addGuild(): void {
-  window.open('http://localhost:8080/api/bot/guilds/add');
+  window.open(`${config.apiUrl}guilds/add`);
 }
 
 export function Guilds() {

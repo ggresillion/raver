@@ -25,7 +25,7 @@ package music
 //}
 //
 //func (g *MusicGateway) HandleStateUpdate(m messaging.Message) {
-//	state := &MusicPlayerState{}
+//	state := &PlayerState{}
 //	m.CastPayload(state)
 //
 //	player, err := g.manager.GetPlayer(m.RoomID)

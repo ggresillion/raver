@@ -18,7 +18,7 @@ type StreamingSession struct {
 	swappingStream   bool
 }
 
-func (b *BotAudio) startStream(url string, start time.Duration) (*StreamingSession, error) {
+func (b *Audio) startStream(url string, start time.Duration) (*StreamingSession, error) {
 	options := dca.StdEncodeOptions
 	options.RawOutput = true
 	options.Bitrate = 96
@@ -86,7 +86,7 @@ func (s *StreamingSession) updateStreamProgress(stop chan bool) {
 	}
 }
 
-func (b *BotAudio) Pause() {
+func (b *Audio) Pause() {
 	if b.session == nil || b.audioStatus != Playing {
 		return
 	}
@@ -94,7 +94,7 @@ func (b *BotAudio) Pause() {
 	b.setStatus(Paused)
 }
 
-func (b *BotAudio) UnPause() {
+func (b *Audio) UnPause() {
 	if b.session == nil || b.audioStatus != Paused {
 		return
 	}
@@ -102,7 +102,7 @@ func (b *BotAudio) UnPause() {
 	b.setStatus(Playing)
 }
 
-func (b *BotAudio) Stop() {
+func (b *Audio) Stop() {
 	if b.session == nil {
 		return
 	}
