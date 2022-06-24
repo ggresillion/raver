@@ -16,11 +16,11 @@ type Bot struct {
 	hub         *messaging.Hub
 	session     *discordgo.Session
 	ready       bool
-	guildVoices map[string]*BotAudio
+	guildVoices map[string]*Audio
 }
 
 func NewBot(hub *messaging.Hub) *Bot {
-	return &Bot{hub: hub, session: nil, guildVoices: make(map[string]*BotAudio), ready: false}
+	return &Bot{hub: hub, session: nil, guildVoices: make(map[string]*Audio), ready: false}
 }
 
 func (b *Bot) StartBot() error {
@@ -63,10 +63,10 @@ func (b *Bot) guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 	b.GetGuildVoice(event.Guild.ID).voiceStates = event.VoiceStates
 }
 
-func (b *Bot) GetGuildVoice(guildId string) *BotAudio {
+func (b *Bot) GetGuildVoice(guildId string) *Audio {
 	gv := b.guildVoices[guildId]
 	if gv == nil {
-		gv = NewBotAudio(guildId, b)
+		gv = NewAudio(guildId, b)
 		b.guildVoices[guildId] = gv
 	}
 	return gv

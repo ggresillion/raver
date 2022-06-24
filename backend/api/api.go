@@ -69,23 +69,29 @@ func (a *API) Listen() {
 	e.GET("/api/auth/login", a.authAPI.AuthLogin)
 	e.GET("/api/auth/callback", a.authAPI.AuthCallback)
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
-	e.GET("/api/bot/guilds/add", a.botAPI.AddBotToGuild)
 	e.Static("/", "./static")
 
 	// Authenticated routes
 	r := e.Group("/api")
 	r.Use(Authenticated)
 
+	// User
 	r.GET("/auth/user", a.authAPI.GetMe)
 
+	// Guilds
 	r.GET("/guilds", a.discordAPI.GetGuilds)
 	r.POST("/guilds/:guildID/join", a.botAPI.JoinChannel)
+	r.GET("/guilds/add", a.botAPI.AddBotToGuild)
 
+	// Bot
 	r.GET("/bot/latency", a.botAPI.GetLatency)
 	r.GET("/bot/guilds", a.botAPI.GetGuilds)
 
+	// Player
 	r.GET("/guilds/:guildID/player/subscribe", a.musicAPI.SubscribeToState)
 	r.GET("/guilds/:guildID/player", a.musicAPI.GetState)
+	r.GET("/guilds/:guildID/player/progress", a.musicAPI.GetProgress)
+	r.GET("/guilds/:guildID/player/progress/subscribe", a.musicAPI.SubscribeToProgress)
 	r.POST("/guilds/:guildID/player/playlist/add", a.musicAPI.AddToPlaylist)
 	r.POST("/guilds/:guildID/player/playlist/move", a.musicAPI.MoveInPlaylist)
 	r.POST("/guilds/:guildID/player/playlist/remove", a.musicAPI.RemoveFromPlaylist)

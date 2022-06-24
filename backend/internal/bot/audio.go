@@ -3,14 +3,23 @@ package bot
 import (
 	"errors"
 	"fmt"
-	"time"
-
 	log "github.com/sirupsen/logrus"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-type BotAudio struct {
+var ErrNotNotInVoiceChannel = errors.New("bot is not in a voice channel")
+var ErrNoVoiceConnection = errors.New("no voice connection")
+var ErrCouldNotSetSpeaking = errors.New("couldn't set speaking")
+var ErrCouldNotStartStream = fmt.Errorf("couldn't start stream")
+
+type Stream struct {
+	Progress chan time.Duration
+	End      chan error
+}
+
+type Audio struct {
 	// Guild ID
 	guildID string
 	// Bot
@@ -26,11 +35,11 @@ type BotAudio struct {
 	session *StreamingSession
 }
 
-func NewBotAudio(guildID string, bot *Bot) *BotAudio {
-	return &BotAudio{guildID: guildID, bot: bot, audioStatus: NotConnected, audioStatusChange: make(chan AudioStatus)}
+func NewAudio(guildID string, bot *Bot) *Audio {
+	return &Audio{guildID: guildID, bot: bot, audioStatus: NotConnected, audioStatusChange: make(chan AudioStatus)}
 }
 
-func (b *BotAudio) LeaveChannel() {
+func (b *Audio) LeaveChannel() {
 	vc := b.voiceConnection
 	if vc == nil {
 		return
@@ -40,14 +49,14 @@ func (b *BotAudio) LeaveChannel() {
 	b.voiceConnection = nil
 }
 
-func (b *BotAudio) JoinUserChannel(userID string) error {
+func (b *Audio) JoinUserChannel(userID string) error {
 	g, err := b.bot.session.State.Guild(b.guildID)
 	if err != nil {
 		return err
 	}
+	defer log.Printf("[%s] joinned voice channel", b.guildID)
 	for _, v := range g.VoiceStates {
 		if v.UserID == userID {
-			defer log.Printf("joinned voice channel for guildID %s and userID %s", b.guildID, userID)
 			vc, err := b.bot.session.ChannelVoiceJoin(b.guildID, v.ChannelID, false, true)
 			if err != nil {
 				return err
@@ -64,41 +73,44 @@ func (b *BotAudio) JoinUserChannel(userID string) error {
 	return errors.New("user not in a voice channel")
 }
 
-func (b *BotAudio) Play(url string, start time.Duration) (chan error, chan time.Duration, error) {
+func (b *Audio) Play(url string, start time.Duration) (*Stream, error) {
 
 	switch b.audioStatus {
 	case NotConnected:
-		return nil, nil, errors.New("bot is not in a voice channel")
+		return nil, ErrNotNotInVoiceChannel
 	case IDLE:
 		break
 	}
 
 	if b.voiceConnection == nil {
-		return nil, nil, errors.New("no voice connection")
+		return nil, ErrNoVoiceConnection
 	}
 
 	err := b.voiceConnection.Speaking(true)
 	if err != nil {
-		return nil, nil, errors.New("couldn't set speaking")
+		return nil, ErrCouldNotSetSpeaking
 	}
 
 	b.session, err = b.startStream(url, start)
 	if err != nil {
-		return nil, nil, fmt.Errorf("couldn't start stream: %w", err)
+		return nil, ErrCouldNotStartStream
 	}
 
-	return b.session.end, b.session.progress, nil
+	return &Stream{
+		Progress: b.session.progress,
+		End:      b.session.end,
+	}, nil
 }
 
-func (b *BotAudio) Status() AudioStatus {
+func (b *Audio) Status() AudioStatus {
 	return b.audioStatus
 }
 
-func (b *BotAudio) StatusChange() chan AudioStatus {
+func (b *Audio) StatusChange() chan AudioStatus {
 	return b.audioStatusChange
 }
 
-func (b *BotAudio) setStatus(s AudioStatus) {
+func (b *Audio) setStatus(s AudioStatus) {
 	b.audioStatus = s
 	b.audioStatusChange <- s
 }

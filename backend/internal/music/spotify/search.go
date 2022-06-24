@@ -45,13 +45,13 @@ func NewSpotifyConnector() *SpotifyConnector {
 }
 
 // Search on spotify
-func (c SpotifyConnector) Search(q string, p uint) (*music.MusicSearchResult, error) {
+func (c SpotifyConnector) Search(q string, p uint) (*music.SearchResult, error) {
 	results, err := c.client.Search(c.ctx, q, spotify.SearchTypePlaylist|spotify.SearchTypeAlbum|spotify.SearchTypeArtist|spotify.SearchTypeTrack)
 	if err != nil {
 		return nil, err
 	}
 
-	return &music.MusicSearchResult{
+	return &music.SearchResult{
 		Tracks:    getTracks(results),
 		Artists:   getArtist(results),
 		Albums:    getAlbums(results),

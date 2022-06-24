@@ -21,7 +21,7 @@ func check(err error) {
 	}
 }
 
-func (y YoutubeConnector) Search(q string, p uint) (*music.MusicSearchResult, error) {
+func (y YoutubeConnector) Search(q string, p uint) (*music.SearchResult, error) {
 	s := ytmusic.TrackSearch(q)
 	result, err := s.Next()
 	if err != nil {
@@ -50,7 +50,7 @@ func (y YoutubeConnector) Search(q string, p uint) (*music.MusicSearchResult, er
 			Duration: uint(t.Duration),
 		})
 	}
-	return &music.MusicSearchResult{Tracks: tracks}, nil
+	return &music.SearchResult{Tracks: tracks}, nil
 }
 
 func (y YoutubeConnector) Find(ID string) (*music.Track, error) {

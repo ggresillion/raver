@@ -35,10 +35,10 @@ func NewBotAPI(bot *bot.Bot) *BotAPI {
 // @Security     Authentication
 // @Accept       json
 // @Produce      json
-// @Success      200      {string}  string
-// @Failure      400      {object}  api.HTTPError
-// @Failure      404      {object}  api.HTTPError
-// @Failure      500      {object}  api.HTTPError
+// @Success      200  {string}  string
+// @Failure      400  {object}  api.HTTPError
+// @Failure      404  {object}  api.HTTPError
+// @Failure      500  {object}  api.HTTPError
 // @Router       /bot/guilds [post]
 func (a *BotAPI) GetGuilds(c echo.Context) error {
 	token := c.Get("token").(string)
@@ -59,10 +59,10 @@ func (a *BotAPI) GetGuilds(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Param        guildID  path      string  true  "Guild ID"
-// @Success      200      {string}  string
+// @Success      200  {string}  string
 // @Failure      400      {object}  api.HTTPError
 // @Failure      404      {object}  api.HTTPError
-// @Failure      500      {object}  api.HTTPError
+// @Failure      500  {object}  api.HTTPError
 // @Router       /guilds/{guildID}/join [post]
 func (a *BotAPI) JoinChannel(c echo.Context) error {
 	guildID := c.Param("guildID")
@@ -85,8 +85,8 @@ func (a *BotAPI) JoinChannel(c echo.Context) error {
 // @Security     Authentication
 // @Accept       json
 // @Produce      json
-// @Success      200      {string}  string
-// @Failure      500      {object}  api.HTTPError
+// @Success      200  {string}  string
+// @Failure      500  {object}  api.HTTPError
 // @Router       /bot/guilds/add [post]
 func (a *BotAPI) AddBotToGuild(c echo.Context) error {
 	clientID := config.Get().ClientID

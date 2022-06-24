@@ -42,8 +42,23 @@ definitions:
       name:
         type: string
     type: object
+  discord.User:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      username:
+        type: string
+    type: object
   music.Album:
     properties:
+      artists:
+        items:
+          $ref: '#/definitions/music.Artist'
+        type: array
       id:
         type: string
       name:
@@ -64,7 +79,7 @@ definitions:
     properties:
       album:
         $ref: '#/definitions/music.Album'
-      artist:
+      artists:
         items:
           $ref: '#/definitions/music.Artist'
         type: array
@@ -129,6 +144,96 @@ paths:
       summary: Login
       tags:
       - auth
+  /auth/user:
+    get:
+      consumes:
+      - application/json
+      description: Returns the connected user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/discord.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      summary: Get connected user
+      tags:
+      - auth
+  /bot/guilds:
+    post:
+      consumes:
+      - application/json
+      description: Get the guilds the bot and yourself are into
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      security:
+      - Authentication: []
+      summary: Get guilds
+      tags:
+      - bot
+  /bot/guilds/add:
+    post:
+      consumes:
+      - application/json
+      description: Add the bot to a guild
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      security:
+      - Authentication: []
+      summary: Add bot to guild
+      tags:
+      - bot
+  /bot/latency:
+    post:
+      consumes:
+      - application/json
+      description: Get the server latency of the bot
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      security:
+      - Authentication: []
+      summary: Get latency
+      tags:
+      - bot
   /guilds:
     get:
       consumes:
@@ -421,6 +526,72 @@ paths:
       summary: Remove from playlist
       tags:
       - music
+  /guilds/{guildID}/player/progress:
+    get:
+      description: Gets the music player progress
+      parameters:
+      - description: Guild ID
+        in: path
+        name: guildID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.MusicStateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      security:
+      - Authentication: []
+      summary: Get progress
+      tags:
+      - music
+  /guilds/{guildID}/player/progress/subscribe:
+    get:
+      description: Subscribe to the music player progress
+      parameters:
+      - description: Guild ID
+        in: path
+        name: guildID
+        required: true
+        type: string
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.MusicStateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      security:
+      - Authentication: []
+      summary: Subscribe to progress
+      tags:
+      - music
   /guilds/{guildID}/player/skip:
     post:
       consumes:
@@ -489,6 +660,39 @@ paths:
       security:
       - Authentication: []
       summary: Stop
+      tags:
+      - music
+  /guilds/{guildID}/player/subscribe:
+    get:
+      description: Subscribe to player events
+      parameters:
+      - description: Guild ID
+        in: path
+        name: guildID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.MusicStateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.HTTPError'
+      security:
+      - Authentication: []
+      summary: Subscribe to player
       tags:
       - music
   /guilds/{guildID}/player/time:

@@ -33,7 +33,7 @@ func main() {
 	}
 
 	// Deps
-	musicManager := music.NewMusicPlayerManager(spotify.NewSpotifyConnector(), hub, b)
+	musicManager := music.NewPlayerManager(spotify.NewSpotifyConnector(), hub, b)
 
 	// Handle commands
 	command.NewCommandHandler(b, musicManager)

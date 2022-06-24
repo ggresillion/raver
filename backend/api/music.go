@@ -44,6 +44,10 @@ type MusicStateResponse struct {
 	Status   string         `json:"status"`
 }
 
+type ProgressResponse struct {
+	Progress int64 `json:"progress"`
+}
+
 // Search godoc
 // @Summary      Search
 // @Description  Searches for a song
@@ -74,7 +78,7 @@ func (a *MusicAPI) Search(c echo.Context) error {
 // @Tags         music
 // @Security     Authentication
 // @Produce      json
-// @Param        guildID  path      string                         true  "Guild ID"
+// @Param        guildID  path      string  true  "Guild ID"
 // @Success      200      {object}  api.MusicStateResponse
 // @Failure      400      {object}  api.HTTPError
 // @Failure      404      {object}  api.HTTPError
@@ -97,7 +101,7 @@ func (a *MusicAPI) GetState(c echo.Context) error {
 // @Tags         music
 // @Security     Authentication
 // @Produce      json
-// @Param        guildID  path      string                         true  "Guild ID"
+// @Param        guildID  path      string  true  "Guild ID"
 // @Success      200      {object}  api.MusicStateResponse
 // @Failure      400      {object}  api.HTTPError
 // @Failure      404      {object}  api.HTTPError
@@ -127,7 +131,6 @@ func (a *MusicAPI) SubscribeToState(c echo.Context) error {
 		if err != nil {
 			log.Error(err)
 		}
-		log.Debugf("data: %v\n", buf.String())
 	}
 
 	if f, ok := c.Response().Writer.(http.Flusher); ok {
@@ -165,7 +168,7 @@ func (a *MusicAPI) AddToPlaylist(c echo.Context) error {
 		return err
 	}
 
-	var elementType music.MusicElementType
+	var elementType music.ElementType
 	switch body.Type {
 	case "TRACK":
 		elementType = music.TrackElement
@@ -402,4 +405,76 @@ func (a *MusicAPI) returnPlayerState(c echo.Context, player *music.Player) error
 	}
 
 	return c.JSON(http.StatusOK, response)
+}
+
+// GetProgress
+// GetState godoc
+// @Summary      Get progress
+// @Description  Gets the music player progress
+// @Tags         music
+// @Security     Authentication
+// @Produce      json
+// @Param        guildID  path      string  true  "Guild ID"
+// @Success      200      {object}  api.MusicStateResponse
+// @Failure      400      {object}  api.HTTPError
+// @Failure      404      {object}  api.HTTPError
+// @Failure      500      {object}  api.HTTPError
+// @Router       /guilds/{guildID}/player/progress [get]
+func (a *MusicAPI) GetProgress(c echo.Context) error {
+	guildID := c.Param("guildID")
+
+	player, err := a.manager.GetPlayer(guildID)
+	if err != nil {
+		return err
+	}
+
+	progress := player.Progress()
+
+	return c.JSON(http.StatusOK, ProgressResponse{progress.Milliseconds()})
+}
+
+// SubscribeToProgress
+// GetState godoc
+// @Summary      Subscribe to progress
+// @Description  Subscribe to the music player progress
+// @Tags         music
+// @Security     Authentication
+// @Produce      text/event-stream
+// @Param        guildID  path      string                         true  "Guild ID"
+// @Success      200      {object}  api.MusicStateResponse
+// @Failure      400      {object}  api.HTTPError
+// @Failure      404      {object}  api.HTTPError
+// @Failure      500      {object}  api.HTTPError
+// @Router       /guilds/{guildID}/player/progress/subscribe [get]
+func (a *MusicAPI) SubscribeToProgress(c echo.Context) error {
+	guildID := c.Param("guildID")
+
+	player, err := a.manager.GetPlayer(guildID)
+	if err != nil {
+		return err
+	}
+
+	c.Response().Header().Set(echo.HeaderContentType, "text/event-stream")
+	c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
+	c.Response().Header().Set(echo.HeaderConnection, "keep-alive")
+
+	select {
+	case ev := <-player.SubscribeToProgress():
+		var buf bytes.Buffer
+		enc := json.NewEncoder(&buf)
+		err := enc.Encode(ev)
+		if err != nil {
+			log.Error(err)
+		}
+		_, err = fmt.Fprintf(c.Response().Writer, "data: %v\n\n", buf.String())
+		if err != nil {
+			log.Error(err)
+		}
+		log.Debugf("data: %v\n", buf.String())
+	}
+
+	if f, ok := c.Response().Writer.(http.Flusher); ok {
+		f.Flush()
+	}
+	return nil
 }
