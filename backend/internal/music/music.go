@@ -242,7 +242,7 @@ func (p *Player) handleStreamEnd(stream *bot.Stream) {
 		if err == nil {
 			log.Debugf("[%s] stream ended", p.guildID)
 		} else {
-			log.Debugf("[%s] stream ended with error: %e", p.guildID, err)
+			log.Debugf("[%s] stream ended with error: %v", p.guildID, err)
 		}
 
 		// Do nothing if the player is stopped
