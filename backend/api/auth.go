@@ -4,14 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
-	"strings"
-
 	"github.com/ggresillion/discordsoundboard/backend/internal/config"
 	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
 	"github.com/labstack/echo/v4"
 	discordAuth "github.com/ravener/discord-oauth2"
 	"golang.org/x/oauth2"
+	"net/http"
+	"strings"
 )
 
 var state = "random"

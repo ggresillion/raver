@@ -75,13 +75,12 @@ func (b *Audio) startStream(url string, start time.Duration) (*StreamingSession,
 
 func (s *StreamingSession) updateStreamProgress(stop chan bool) {
 	for {
+		startTime := time.Duration(s.options.StartTime) * time.Second
+		s.progress <- startTime + s.streamingSession.PlaybackPosition()
+		time.Sleep(time.Second)
 		select {
 		case <-stop:
 			return
-		default:
-			startTime := time.Duration(s.options.StartTime) * time.Second
-			s.progress <- startTime + s.streamingSession.PlaybackPosition()
-			time.Sleep(time.Second)
 		}
 	}
 }
