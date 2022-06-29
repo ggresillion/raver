@@ -108,6 +108,12 @@ func (a *MusicAPI) GetState(c echo.Context) error {
 // @Failure      500      {object}  api.HTTPError
 // @Router       /guilds/{guildID}/player/subscribe [get]
 func (a *MusicAPI) SubscribeToState(c echo.Context) error {
+
+	flusher, ok := c.Response().Writer.(http.Flusher)
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError, "unsupported protocol")
+	}
+
 	guildID := c.Param("guildID")
 
 	player, err := a.manager.GetPlayer(guildID)
@@ -119,25 +125,28 @@ func (a *MusicAPI) SubscribeToState(c echo.Context) error {
 	c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
 	c.Response().Header().Set(echo.HeaderConnection, "keep-alive")
 
-	select {
-	case ev := <-player.SubscribeToPlayerState():
-		var buf bytes.Buffer
-		enc := json.NewEncoder(&buf)
-		err := enc.Encode(ev)
-		if err != nil {
-			log.Error(err)
-		}
-		_, err = fmt.Fprintf(c.Response().Writer, "data: %v\n\n", buf.String())
-		if err != nil {
-			log.Error(err)
+	subscriber := player.SubscribeToPlayerState()
+
+	defer func() { subscriber.Done <- nil }()
+
+	for {
+		select {
+		case ev := <-subscriber.Change:
+			var buf bytes.Buffer
+			enc := json.NewEncoder(&buf)
+			err := enc.Encode(ev)
+			if err != nil {
+				log.Error(err)
+			}
+			_, err = fmt.Fprintf(c.Response().Writer, "data: %v\n\n", buf.String())
+			if err != nil {
+				log.Error(err)
+			}
+			flusher.Flush()
+		case <-subscriber.Done:
+			return nil
 		}
 	}
-
-	if f, ok := c.Response().Writer.(http.Flusher); ok {
-		f.Flush()
-	}
-	return nil
-
 }
 
 // AddToPlaylist godoc
@@ -447,6 +456,11 @@ func (a *MusicAPI) GetProgress(c echo.Context) error {
 // @Failure      500      {object}  api.HTTPError
 // @Router       /guilds/{guildID}/player/progress/subscribe [get]
 func (a *MusicAPI) SubscribeToProgress(c echo.Context) error {
+	flusher, ok := c.Response().Writer.(http.Flusher)
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError, "unsupported protocol")
+	}
+
 	guildID := c.Param("guildID")
 
 	player, err := a.manager.GetPlayer(guildID)
@@ -458,23 +472,26 @@ func (a *MusicAPI) SubscribeToProgress(c echo.Context) error {
 	c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
 	c.Response().Header().Set(echo.HeaderConnection, "keep-alive")
 
-	select {
-	case ev := <-player.SubscribeToProgress():
-		var buf bytes.Buffer
-		enc := json.NewEncoder(&buf)
-		err := enc.Encode(ev)
-		if err != nil {
-			log.Error(err)
-		}
-		_, err = fmt.Fprintf(c.Response().Writer, "data: %v\n\n", buf.String())
-		if err != nil {
-			log.Error(err)
-		}
-		log.Debugf("data: %v\n", buf.String())
-	}
+	subscriber := player.SubscribeToProgress()
 
-	if f, ok := c.Response().Writer.(http.Flusher); ok {
-		f.Flush()
+	defer func() { subscriber.Done <- nil }()
+
+	for {
+		select {
+		case ev := <-subscriber.Change:
+			var buf bytes.Buffer
+			enc := json.NewEncoder(&buf)
+			err := enc.Encode(ev)
+			if err != nil {
+				log.Error(err)
+			}
+			_, err = fmt.Fprintf(c.Response().Writer, "data: %v\n\n", buf.String())
+			if err != nil {
+				log.Error(err)
+			}
+			flusher.Flush()
+		case <-subscriber.Done:
+			return nil
+		}
 	}
-	return nil
 }
