@@ -481,7 +481,7 @@ func (a *MusicAPI) SubscribeToProgress(c echo.Context) error {
 		case ev := <-subscriber.Change:
 			var buf bytes.Buffer
 			enc := json.NewEncoder(&buf)
-			err := enc.Encode(ev)
+			err := enc.Encode(ev.Milliseconds())
 			if err != nil {
 				log.Error(err)
 			}

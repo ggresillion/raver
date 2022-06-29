@@ -8,11 +8,11 @@ import (
 )
 
 type StreamingSession struct {
+	End              chan error
+	Progress         chan time.Duration
 	url              string
-	end              chan error
 	naturalEnd       chan error
 	options          *dca.EncodeOptions
-	progress         chan time.Duration
 	encodingSession  *dca.EncodeSession
 	streamingSession *dca.StreamingSession
 	swappingStream   bool
@@ -26,9 +26,9 @@ func (b *Audio) startStream(url string, start time.Duration) (*StreamingSession,
 	options.StartTime = int(start.Seconds())
 
 	b.session = &StreamingSession{
+		End:              make(chan error),
 		url:              url,
-		end:              make(chan error),
-		progress:         make(chan time.Duration),
+		Progress:         make(chan time.Duration),
 		options:          options,
 		encodingSession:  nil,
 		streamingSession: nil,
@@ -63,9 +63,9 @@ func (b *Audio) startStream(url string, start time.Duration) (*StreamingSession,
 			b.session = nil
 			return
 		}
-	}(b.session.end)
+	}(b.session.End)
 
-	// Updates the stream progress
+	// Updates the stream Progress
 	go b.session.updateStreamProgress(stopProgress)
 
 	b.setStatus(Playing)
@@ -74,13 +74,14 @@ func (b *Audio) startStream(url string, start time.Duration) (*StreamingSession,
 }
 
 func (s *StreamingSession) updateStreamProgress(stop chan bool) {
+	ticker := time.NewTicker(500 * time.Millisecond)
 	for {
-		startTime := time.Duration(s.options.StartTime) * time.Second
-		s.progress <- startTime + s.streamingSession.PlaybackPosition()
-		time.Sleep(time.Second)
 		select {
 		case <-stop:
 			return
+		case <-ticker.C:
+			startTime := time.Duration(s.options.StartTime) * time.Second
+			s.Progress <- startTime + s.streamingSession.PlaybackPosition()
 		}
 	}
 }
