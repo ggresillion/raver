@@ -1,9 +1,11 @@
 <script lang="ts">
-  import { playerState } from '$lib/stores/player-state.store.js';
-  import { PlayerStatus } from '$lib/model/player-status.js';
-  import { selectedGuildId } from '../../lib/stores/guild.store.js';
-  import { subscribeToPlayerState } from '../../lib/api/music.api';
+  import { playerState } from '$lib/stores/player-state.store';
+  import { PlayerStatus } from '$lib/model/player-status';
+  import { selectedGuildId } from '../../lib/stores/guild.store';
+  import { getPlayerState, subscribeToPlayerState } from '../../lib/api/music.api';
   import RangeSlider from 'svelte-range-slider-pips';
+  import { pause, play, skip } from '../../lib/api/music.api.js';
+  import Loader from '../../lib/components/Loader.svelte';
 
   function millisToMinutesAndSeconds(millis: number) {
     const minutes = Math.floor(millis / 60000);
@@ -25,63 +27,77 @@
     return time.minutes + ':' + seconds;
   }
 
-  selectedGuildId.subscribe((val) => {
+  selectedGuildId.subscribe(async (val) => {
     if (!val) return;
-    subscribeToPlayerState(val);
+    playerState.set(await getPlayerState($selectedGuildId));
+    await subscribeToPlayerState(val);
   });
 </script>
 
 <div class="player">
-  <div class="track">
-    {#if $playerState}
-      <img class="track-thumbnail" src={$playerState.playlist[0].thumbnail}/>
-      <div class="track-info">
-        <span class="track-name">{$playerState.playlist[0].title}</span>
-        <span class="track-artist">{$playerState.playlist[0].artists.map(a => a.name)
-        .join(', ')}</span>
-      </div>
-      <!--        <Soundwave play={playerState.status === PlayerStatus.PLAYING}></Soundwave>-->
-    {/if}
-  </div>
-
-  <div class="controls">
-    <div class="buttons">
-      <button type="button" style={{ visibility: 'hidden' }}>
-      </button>
-      <button type="button"
-              class="skip-next"
-              disabled={!$playerState || $playerState.playlist.length <= 0}></button>
+  {#if !$playerState}
+    <Loader/>
+  {:else}
+    <div class="track">
+      {#if $playerState.playlist.length > 0}
+        <img class="track-thumbnail" src={$playerState.playlist[0].thumbnail} alt="thumbnail"/>
+        <div class="track-info">
+          <span class="track-name">{$playerState.playlist[0].title}</span>
+          <span class="track-artist">{$playerState.playlist[0].artists.map(a => a.name)
+          .join(', ')}</span>
+        </div>
+        <!--        <Soundwave play={playerState.status === PlayerStatus.PLAYING}></Soundwave>-->
+      {/if}
     </div>
 
-    {#if $playerState && $playerState.status === PlayerStatus.PLAYING}
-      <div class="bottom">
-        <!--          <span>{getCurrentTime()}</span>-->
-        <!--          <ReactSlider value={playerState.progress}-->
-        <!--                       onAfterChange={setProgress}-->
-        <!--                       min={0}-->
-        <!--                       max={playerState?.playlist[0].duration}/>-->
-        <div class="progress-bar">
-          <RangeSlider values={[50]}/>
-        </div>
-        <span>{getTotalTime()}</span>
+    <div class="controls">
+      <div>
+        <button type="button" style="visibility: hidden"></button>
+        {#if $playerState.status === PlayerStatus.IDLE || $playerState.status === PlayerStatus.PAUSED}
+          <button type="button" class="play" on:click={play($selectedGuildId)}></button>
+        {:else if $playerState.status === PlayerStatus.PLAYING}
+          <button type="button" class="pause" on:click={pause($selectedGuildId)}></button>
+        {:else if $playerState.status === PlayerStatus.BUFFERING}
+          <button type="button" class="buffering" disabled></button>
+        {:else}
+          <button type="button" class="play" disabled></button>
+        {/if}
+        <button type="button"
+                class="skip-next"
+                on:click={skip($selectedGuildId)}
+                disabled={!$playerState || $playerState.playlist.length <= 0}></button>
       </div>
-    {:else}
-      <div class="bottom">
-        <span>-:-</span>
-        <!--          <ReactSlider disabled/>-->
-        <div class="progress-bar">
-          <RangeSlider values={[0]} disabled/>
-        </div>
-        <span>-:-</span>
-      </div>
-    {/if}
-  </div>
 
-  <div class="extra">
-    <button class="join-channel"
-            title="Join voice channel"
-            disabled></button>
-  </div>
+      {#if $playerState && $playerState.status === PlayerStatus.PLAYING}
+        <div>
+          <!--          <span>{getCurrentTime()}</span>-->
+          <!--          <ReactSlider value={playerState.progress}-->
+          <!--                       onAfterChange={setProgress}-->
+          <!--                       min={0}-->
+          <!--                       max={playerState?.playlist[0].duration}/>-->
+          <div class="progress-bar">
+            <RangeSlider values={[50]}/>
+          </div>
+          <span>{getTotalTime()}</span>
+        </div>
+      {:else}
+        <div>
+          <div>-:-</div>
+          <!--          <ReactSlider disabled/>-->
+          <div class="progress-bar">
+            <RangeSlider values={[0]} disabled/>
+          </div>
+          <span>-:-</span>
+        </div>
+      {/if}
+    </div>
+
+    <div class="extra">
+      <button class="join-channel"
+              title="Join voice channel"
+              disabled></button>
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -89,9 +105,9 @@
     position: fixed;
     bottom: 0;
     left: 0;
-    height: 80px;
+    height: 100px;
     width: 100vw;
-    padding: 2px 16px;
+    padding: 12px;
     background-color: rgb(53, 53, 53);
     filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
     color: white;
@@ -107,7 +123,7 @@
       gap: 26px;
 
       .track-thumbnail {
-        height: 50px;
+        height: 80px;
         filter: none;
       }
 
@@ -134,16 +150,16 @@
       justify-content: center;
       gap: 6px;
 
-      .bottom {
+      & > div {
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 6px;
         width: 100%;
-        min-width: 100%;
+      }
 
-        .progress-bar {
-          width: 500px;
-        }
+      .progress-bar {
+        flex: 1;
       }
     }
 
@@ -183,68 +199,62 @@
     }
   }
 
-  .buttons {
+  button {
+    cursor: pointer;
+    user-select: none;
+    background-color: white;
+    height: 36px;
+    width: 36px;
+    border-radius: 99px;
+    border: none;
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    background-size: contain;
+    box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
+    -moz-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
+    -webkit-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
+    -o-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
 
-    button {
-      cursor: pointer;
-      user-select: none;
-      background-color: white;
-      height: 36px;
-      width: 36px;
-      border-radius: 99px;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-size: contain;
-      box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
-      -moz-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
-      -webkit-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
-      -o-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
+    &.pause {
+      background: url("$lib/assets/icons/pause.svg");
+    }
 
-      &.pause {
-        background: url("$lib/assets/icons/pause.svg");
-      }
+    &.play {
+      background: url("$lib/assets/icons/play.svg");
+    }
 
-      &.play {
-        background: url("$lib/assets/icons/play.svg");
-      }
+    &.buffering {
+      background: url("$lib/assets/icons/buffering.svg");
+      animation: rotation 2s infinite linear;
 
-      &.buffering {
-        background: url("$lib/assets/icons/buffering.svg");
-        animation: rotation 2s infinite linear;
-
-        @keyframes rotation {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(359deg);
-          }
+      @keyframes rotation {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(359deg);
         }
       }
+    }
 
-      &.skip-next {
-        background: url("$lib/assets/icons/skip_next.svg");
-        width: 32px;
-        height: 32px;
-      }
+    &.skip-next {
+      background: url("$lib/assets/icons/skip_next.svg");
+      width: 32px;
+      height: 32px;
+    }
 
-      &:disabled {
-        opacity: 0.2;
-        cursor: inherit;
-
-        &:hover {
-          transform: none;
-        }
-      }
+    &:disabled {
+      opacity: 0.2;
+      cursor: inherit;
 
       &:hover {
-        transform: scale(1.1);
+        transform: none;
       }
+    }
+
+    &:hover {
+      transform: scale(1.1);
     }
   }
 

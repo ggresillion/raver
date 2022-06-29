@@ -18,15 +18,20 @@
 <script>
   import { onMount } from 'svelte';
   import '$lib/styles/index.scss';
+  import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
 
   onMount(() => {
-    const params = (new URL(document.location)).searchParams;
+    let params = new URLSearchParams($page.url.searchParams);
     if (params.get('accessToken')) {
       const accessToken = params.get('accessToken');
       const refreshToken = params.get('refreshToken');
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       isAuthenticated.set(true);
+      params.delete('accessToken');
+      params.delete('refreshToken');
+      goto(`?${params.toString()}`);
     }
   });
 </script>

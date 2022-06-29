@@ -21,17 +21,17 @@ type Connector interface {
 }
 
 type Player struct {
-	guildID        string
-	connector      Connector
-	hub            *messaging.Hub
-	botAudio       *bot.Audio
-	playlist       []*Track
-	progress       time.Duration
-	progressChange chan time.Duration
-	stateChange    chan PlayerState
-	currentUrl     string
-	stopped        bool
-	preventSkip    bool
+	guildID             string
+	connector           Connector
+	hub                 *messaging.Hub
+	botAudio            *bot.Audio
+	playlist            []*Track
+	progress            time.Duration
+	progressSubscribers []*Subscriber[time.Duration]
+	stateSubscribers    []*Subscriber[PlayerState]
+	currentUrl          string
+	stopped             bool
+	preventSkip         bool
 }
 
 type PlayerManager struct {
@@ -79,6 +79,11 @@ type PlayerState struct {
 	Playlist []*Track        `json:"playlist"`
 }
 
+type Subscriber[T any] struct {
+	Change chan T
+	Done   chan error
+}
+
 type ElementType int
 
 const (
@@ -111,15 +116,15 @@ func (m *PlayerManager) GetPlayer(guildID string) (*Player, error) {
 	}
 
 	p := &Player{
-		guildID:        guildID,
-		connector:      m.connector,
-		hub:            m.hub,
-		botAudio:       m.bot.GetGuildVoice(guildID),
-		stateChange:    make(chan PlayerState),
-		playlist:       []*Track{},
-		stopped:        false,
-		preventSkip:    false,
-		progressChange: make(chan time.Duration),
+		guildID:             guildID,
+		connector:           m.connector,
+		hub:                 m.hub,
+		botAudio:            m.bot.GetGuildVoice(guildID),
+		stateSubscribers:    []*Subscriber[PlayerState]{},
+		playlist:            []*Track{},
+		stopped:             false,
+		preventSkip:         false,
+		progressSubscribers: []*Subscriber[time.Duration]{},
 	}
 	m.players[guildID] = p
 	p.subscribeToAudioStatusChange()
@@ -229,7 +234,9 @@ func (p *Player) handleProgress(stream *bot.Stream) {
 				return
 			}
 			p.progress = pr
-			p.progressChange <- pr
+			for _, s := range p.progressSubscribers {
+				s.Change <- pr
+			}
 		}
 	}()
 }
@@ -293,6 +300,7 @@ func (p *Player) Skip() error {
 	p.stopped = false
 	p.botAudio.Stop()
 	log.Debugf("[%s] (skip) skipped next music", p.guildID)
+	p.propagateState()
 	return nil
 }
 
@@ -309,23 +317,38 @@ func (p *Player) BotAudio() *bot.Audio {
 	return p.botAudio
 }
 
-func (p *Player) SubscribeToPlayerState() chan PlayerState {
-	return p.stateChange
+func (p *Player) SubscribeToPlayerState() *Subscriber[PlayerState] {
+	subscriber := &Subscriber[PlayerState]{
+		Change: make(chan PlayerState),
+		Done:   make(chan error),
+	}
+	go func() {
+		<-subscriber.Done
+		close(subscriber.Change)
+		close(subscriber.Done)
+		return
+	}()
+	p.stateSubscribers = append(p.stateSubscribers, subscriber)
+	return subscriber
 }
 
 func (p *Player) Progress() time.Duration {
 	return p.progress
 }
 
-func (p *Player) SubscribeToProgress() chan time.Duration {
-	c := make(chan time.Duration)
+func (p *Player) SubscribeToProgress() *Subscriber[time.Duration] {
+	subscriber := &Subscriber[time.Duration]{
+		Change: make(chan time.Duration),
+		Done:   make(chan error),
+	}
 	go func() {
-		for {
-			val := <-p.progressChange
-			c <- val
-		}
+		<-subscriber.Done
+		close(subscriber.Change)
+		close(subscriber.Done)
+		return
 	}()
-	return c
+	p.progressSubscribers = append(p.progressSubscribers, subscriber)
+	return subscriber
 }
 
 func (p *Player) propagateState() {
@@ -335,7 +358,9 @@ func (p *Player) propagateState() {
 	}
 	log.Debugf("[%s] (propagate) next state: {status: %s, playlist: %d element(s)}", p.guildID, state.Status,
 		len(state.Playlist))
-	p.stateChange <- state
+	for _, s := range p.stateSubscribers {
+		s.Change <- state
+	}
 }
 
 func (p *Player) subscribeToAudioStatusChange() {

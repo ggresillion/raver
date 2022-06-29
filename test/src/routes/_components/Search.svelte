@@ -1,10 +1,9 @@
 <script lang="ts">
   import searchIcon from '$lib/assets/icons/search_white_24dp.svg';
   import playIcon from '$lib/assets/icons/play.svg';
-  import { search } from '$lib/api/music.api';
+  import { search, addToPlaylist } from '$lib/api/music.api';
   import type { MusicSearchResult } from '$lib/model/music-search-result';
   import Loader from '$lib/components/Loader.svelte';
-  import { addToPlaylist } from '$lib/api/music.api.js';
   import { selectedGuildId } from '$lib/stores/guild.store';
 
   let searchInput = '';

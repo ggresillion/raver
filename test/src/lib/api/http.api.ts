@@ -1,26 +1,21 @@
 import { config } from './config.api';
 
 export async function get<T>(path: string) {
-  const res = await fetch(config.apiUrl + path, {
-    headers: {
-      'Authorization': 'Bearer ' + localStorage.getItem('accessToken'),
-    },
-  });
-  if (!res.ok) {
-    throw res.body;
-  }
-  const obj = await res.json();
-  return obj as T;
+  return make<T, unknown>(path, 'GET');
 }
 
-export async function post<T, B>(path: string, body: B) {
+export async function post<T, B>(path: string, body?: B) {
+  return make<T, B>(path, 'POST', body);
+}
+
+async function make<T, B>(path: string, method: 'GET' | 'POST', body?: B) {
   const res = await fetch(config.apiUrl + path, {
     headers: {
-      'Authorization': 'Bearer ' + localStorage.getItem('accessToken'),
-      'Content-Type': 'application/json'
+      ...localStorage.getItem('accessToken') && { 'Authorization': 'Bearer ' + localStorage.getItem('accessToken') },
+      'Content-Type': 'application/json',
     },
-    method: 'POST',
-    body: JSON.stringify(body),
+    body: body ? JSON.stringify(body) : null,
+    method,
   });
   if (!res.ok) {
     throw res.body;
