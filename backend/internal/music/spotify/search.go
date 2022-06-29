@@ -23,6 +23,8 @@ type SpotifyConnector struct {
 	client *spotify.Client
 }
 
+var ErrCouldNotFindVideo = errors.New("could not find video on youtube")
+
 func NewSpotifyConnector() *SpotifyConnector {
 	ctx := context.Background()
 	config := &clientcredentials.Config{
@@ -145,6 +147,10 @@ func (c SpotifyConnector) GetStreamURL(ID string) (string, error) {
 	result, err := s.Next()
 	if err != nil {
 		return "", err
+	}
+	if len(result.Tracks) < 1 {
+		return "", ErrCouldNotFindVideo
+
 	}
 	videoID := result.Tracks[0].VideoID
 

@@ -29,6 +29,19 @@ export async function skip(guildId: string) {
   return post<MusicPlayerState, void>(`/guilds/${guildId}/player/skip`);
 }
 
+export async function moveInPlaylist(params: { guildId: string, from: number, to: number }) {
+  return post<MusicPlayerState, { from: number, to: number }>(`/guilds/${params.guildId}/player/playlist/move`, {
+    from: params.from,
+    to: params.to,
+  });
+}
+
+export async function removeFromPlaylist(params: { guildId: string, index: number }) {
+  return post<MusicPlayerState, { index: number }>(`/guilds/${params.guildId}/player/playlist/remove`, {
+    index: params.index,
+  });
+}
+
 export async function subscribeToPlayerState(guildId: string) {
   const eventSource = new EventSource(`${config.apiUrl}/guilds/${guildId}/player/subscribe?access_token=${localStorage.getItem('accessToken')}`);
   eventSource.onmessage = (event) => {

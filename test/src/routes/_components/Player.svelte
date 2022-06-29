@@ -23,8 +23,8 @@
   }
 
   function progressToPercent(actual: number, total: number): number {
-    if (!actual || !total) return 0;
-    return actual / total * 100;
+    if (!actual || !total || isNaN(actual) || isNaN(total)) return 0;
+    return Math.round(actual / total * 100);
   }
 
   selectedGuildId.subscribe(async (val) => {
