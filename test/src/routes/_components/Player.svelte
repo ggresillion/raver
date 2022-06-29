@@ -2,36 +2,36 @@
   import { playerState } from '$lib/stores/player-state.store';
   import { PlayerStatus } from '$lib/model/player-status';
   import { selectedGuildId } from '../../lib/stores/guild.store';
-  import { getPlayerState, subscribeToPlayerState } from '../../lib/api/music.api';
+  import {
+    getPlayerState,
+    subscribeToPlayerState,
+    subscribeToProgress,
+  } from '../../lib/api/music.api';
   import RangeSlider from 'svelte-range-slider-pips';
   import { pause, play, skip } from '../../lib/api/music.api.js';
   import Loader from '../../lib/components/Loader.svelte';
   import { join } from '../../lib/api/bot.api.js';
 
-  function millisToMinutesAndSeconds(millis: number) {
-    const minutes = Math.floor(millis / 60000);
-    const seconds = ((millis % 60000) / 1000).toFixed(0);
-    return { minutes, seconds };
-  }
-
-  function getCurrentTime() {
-    if (!$playerState || !$playerState.progress) return '-:-';
-    const time = millisToMinutesAndSeconds($playerState.progress);
+  function formatMillisToMinutesAndSeconds(millis: number): string {
+    const time = {
+      minutes: Math.floor(millis / 60000),
+      seconds: ((millis % 60000) / 1000).toFixed(0),
+    };
+    if (!millis) return '-:-';
     const seconds = (parseInt(time.seconds) < 10 ? '0' : '') + time.seconds;
     return time.minutes + ':' + seconds;
   }
 
-  function getTotalTime() {
-    if (!playerState) return;
-    const time = millisToMinutesAndSeconds($playerState?.playlist[0].duration);
-    const seconds = (parseInt(time.seconds) < 10 ? '0' : '') + time.seconds;
-    return time.minutes + ':' + seconds;
+  function progressToPercent(actual: number, total: number): number {
+    if (!actual || !total) return 0;
+    return actual / total * 100;
   }
 
   selectedGuildId.subscribe(async (val) => {
     if (!val) return;
     playerState.set(await getPlayerState($selectedGuildId));
     await subscribeToPlayerState(val);
+    await subscribeToProgress(val);
   });
 </script>
 
@@ -70,12 +70,24 @@
       </div>
 
       <div>
-        <div>-:-</div>
-        <div class="progress-bar">
-          <RangeSlider values={[0]} disabled/>
-        </div>
         {#if $playerState.playlist.length > 0}
-          <span>{getTotalTime()}</span>
+          <div>{formatMillisToMinutesAndSeconds($playerState.progress)}</div>
+          <div class="progress-bar">
+            <RangeSlider values={[progressToPercent($playerState.progress,
+          $playerState.playlist[0].duration)]}
+                         max="100"
+                         disabled/>
+          </div>
+        {:else}
+          <div>-:-</div>
+          <div class="progress-bar">
+            <RangeSlider max="100"
+                         values="{[0]}"
+                         disabled/>
+          </div>
+        {/if}
+        {#if $playerState.playlist.length > 0}
+          <span>{formatMillisToMinutesAndSeconds($playerState.playlist[0].duration)}</span>
         {:else}
           <span>-:-</span>
         {/if}

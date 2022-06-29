@@ -73,7 +73,7 @@ func (b *Audio) JoinUserChannel(userID string) error {
 	return errors.New("user not in a voice channel")
 }
 
-func (b *Audio) Play(url string, start time.Duration) (*Stream, error) {
+func (b *Audio) Play(url string, start time.Duration) (*StreamingSession, error) {
 
 	switch b.audioStatus {
 	case NotConnected:
@@ -96,10 +96,7 @@ func (b *Audio) Play(url string, start time.Duration) (*Stream, error) {
 		return nil, ErrCouldNotStartStream
 	}
 
-	return &Stream{
-		Progress: b.session.progress,
-		End:      b.session.end,
-	}, nil
+	return b.session, nil
 }
 
 func (b *Audio) Status() AudioStatus {

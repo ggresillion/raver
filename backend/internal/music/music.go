@@ -23,7 +23,6 @@ type Connector interface {
 type Player struct {
 	guildID             string
 	connector           Connector
-	hub                 *messaging.Hub
 	botAudio            *bot.Audio
 	playlist            []*Track
 	progress            time.Duration
@@ -37,7 +36,6 @@ type Player struct {
 type PlayerManager struct {
 	players   map[string]*Player
 	connector Connector
-	hub       *messaging.Hub
 	bot       *bot.Bot
 }
 
@@ -99,7 +97,6 @@ func NewPlayerManager(connector Connector, hub *messaging.Hub, bot *bot.Bot) *Pl
 	return &PlayerManager{
 		players:   make(map[string]*Player),
 		connector: connector,
-		hub:       hub,
 		bot:       bot,
 	}
 }
@@ -118,7 +115,6 @@ func (m *PlayerManager) GetPlayer(guildID string) (*Player, error) {
 	p := &Player{
 		guildID:             guildID,
 		connector:           m.connector,
-		hub:                 m.hub,
 		botAudio:            m.bot.GetGuildVoice(guildID),
 		stateSubscribers:    []*Subscriber[PlayerState]{},
 		playlist:            []*Track{},
@@ -226,7 +222,7 @@ func (p *Player) Play() error {
 
 // handleProgress
 // handles the stream progress change
-func (p *Player) handleProgress(stream *bot.Stream) {
+func (p *Player) handleProgress(stream *bot.StreamingSession) {
 	go func() {
 		for {
 			pr, more := <-stream.Progress
@@ -243,7 +239,7 @@ func (p *Player) handleProgress(stream *bot.Stream) {
 
 // handleStreamEnd
 // handles the stream ending
-func (p *Player) handleStreamEnd(stream *bot.Stream) {
+func (p *Player) handleStreamEnd(stream *bot.StreamingSession) {
 	go func() {
 		err := <-stream.End
 		if err == nil {

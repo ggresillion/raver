@@ -1,14 +1,9 @@
 <script>
   import { getUser } from '$lib/api/user.api.ts';
-  import { onMount } from 'svelte';
   import appIcon from '$lib/assets/icons/app_white_24dp.svg';
 
   const latency = 1;
-  let user;
 
-  onMount(async () => {
-    user = await getUser();
-  });
 </script>
 
 <style>
@@ -69,12 +64,14 @@
 <div class="header">
   <img src={appIcon} alt="logo" class="logo"/>
   <span>Discord Sound Board</span>
-  <div class="user">
-    <div class="latency">
-      <div class="icon"></div>
-      <div class="value">{latency} ms</div>
+  {#await getUser() then user}
+    <div class="user">
+      <div class="latency">
+        <div class="icon"></div>
+        <div class="value">{latency} ms</div>
+      </div>
+      <span><span class="thin">Welcome, </span>{user?.username}</span>
+      <img src={`https://cdn.discordapp.com/avatars/${user?.id}/${user?.avatar}.png`} alt="avatar"/>
     </div>
-    <span><span class="thin">Welcome, </span>{user?.username}</span>
-    <img src={`https://cdn.discordapp.com/avatars/${user?.id}/${user?.avatar}.png`} alt="avatar"/>
-  </div>
+  {/await}
 </div>

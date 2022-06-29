@@ -3,6 +3,7 @@ import type { MusicSearchResult } from '../model/music-search-result';
 import { config } from './config.api';
 import { playerState } from '../stores/player-state.store';
 import type { MusicPlayerState } from '../model/player-state';
+import { get as getValue } from 'svelte/store';
 
 export async function search(q: string) {
   return get<MusicSearchResult>(`/music/search?q=${q}`);
@@ -34,5 +35,16 @@ export async function subscribeToPlayerState(guildId: string) {
     const data = JSON.parse(event.data);
     console.log('got message', data);
     playerState.set(data);
+  }
+}
+
+export async function subscribeToProgress(guildId: string) {
+  const eventSource = new EventSource(`${config.apiUrl}/guilds/${guildId}/player/progress/subscribe?access_token=${localStorage.getItem('accessToken')}`);
+  eventSource.onmessage = (event) => {
+    const data = event.data;
+    const p = getValue(playerState);
+    if (!p) return;
+    p.progress = data;
+    playerState.set(p);
   }
 }
