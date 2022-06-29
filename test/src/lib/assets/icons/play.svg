@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" height="36" width="36">
-    <mask id="icon">
-        <rect x="0" y="0" width="36" height="36" fill="white" />
-        <path transform="translate(1,2) scale(0.7)" fill="black" d="M18.3 36.4Q17.55 36.9 16.775 36.45Q16 36 16 35.1V12.6Q16 11.7 16.775 11.25Q17.55 10.8 18.3 11.3L36 22.6Q36.7 23.05 36.7 23.85Q36.7 24.65 36 25.1Z" />
-    </mask>
-    <circle cx="18" cy="18" r="18" fill="white" mask="url(#icon)"></circle>
-</svg>

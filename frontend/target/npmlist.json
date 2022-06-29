@@ -1,1 +1,0 @@
-{"version":"0.0.0","name":"discordsoundboard","dependencies":{"@reduxjs/toolkit":{"version":"1.8.0"},"react-beautiful-dnd":{"version":"13.1.0"},"react-dom":{"version":"17.0.2"},"react-redux":{"version":"7.2.6"},"react-router-dom":{"version":"6.2.1"},"react":{"version":"17.0.2"},"redux-logger":{"version":"3.0.6"},"sass":{"version":"1.49.9"},"uuid":{"version":"8.3.2"}}}
