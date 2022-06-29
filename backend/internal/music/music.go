@@ -122,7 +122,7 @@ func (m *PlayerManager) GetPlayer(guildID string) (*Player, error) {
 		botAudio:            m.bot.GetGuildVoice(guildID),
 		stateSubscribers:    []*Subscriber[PlayerState]{},
 		playlist:            []*Track{},
-		stopped:             false,
+		stopped:             true,
 		preventSkip:         false,
 		progressSubscribers: []*Subscriber[time.Duration]{},
 	}
@@ -292,15 +292,20 @@ func (p *Player) Stop() {
 }
 
 func (p *Player) Skip() error {
-	if len(p.playlist) < 2 {
+	if len(p.playlist) < 1 {
 		log.Debugf("[%s] (skip) could not skip, no next music", p.guildID)
+		return nil
+	}
+
+	if p.stopped {
+		p.playlist = p.playlist[1:]
+		p.propagateState()
 		return nil
 	}
 
 	p.stopped = false
 	p.botAudio.Stop()
 	log.Debugf("[%s] (skip) skipped next music", p.guildID)
-	p.propagateState()
 	return nil
 }
 

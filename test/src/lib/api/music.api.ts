@@ -31,7 +31,7 @@ export async function skip(guildId: string) {
 export async function subscribeToPlayerState(guildId: string) {
   const eventSource = new EventSource(`${config.apiUrl}/guilds/${guildId}/player/subscribe?access_token=${localStorage.getItem('accessToken')}`);
   eventSource.onmessage = (event) => {
-    const data = event.data;
+    const data = JSON.parse(event.data);
     console.log('got message', data);
     playerState.set(data);
   }

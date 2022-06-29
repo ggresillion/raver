@@ -6,6 +6,7 @@
   import RangeSlider from 'svelte-range-slider-pips';
   import { pause, play, skip } from '../../lib/api/music.api.js';
   import Loader from '../../lib/components/Loader.svelte';
+  import { join } from '../../lib/api/bot.api.js';
 
   function millisToMinutesAndSeconds(millis: number) {
     const minutes = Math.floor(millis / 60000);
@@ -68,34 +69,24 @@
                 disabled={!$playerState || $playerState.playlist.length <= 0}></button>
       </div>
 
-      {#if $playerState && $playerState.status === PlayerStatus.PLAYING}
-        <div>
-          <!--          <span>{getCurrentTime()}</span>-->
-          <!--          <ReactSlider value={playerState.progress}-->
-          <!--                       onAfterChange={setProgress}-->
-          <!--                       min={0}-->
-          <!--                       max={playerState?.playlist[0].duration}/>-->
-          <div class="progress-bar">
-            <RangeSlider values={[50]}/>
-          </div>
+      <div>
+        <div>-:-</div>
+        <div class="progress-bar">
+          <RangeSlider values={[0]} disabled/>
+        </div>
+        {#if $playerState.playlist.length > 0}
           <span>{getTotalTime()}</span>
-        </div>
-      {:else}
-        <div>
-          <div>-:-</div>
-          <!--          <ReactSlider disabled/>-->
-          <div class="progress-bar">
-            <RangeSlider values={[0]} disabled/>
-          </div>
+        {:else}
           <span>-:-</span>
-        </div>
-      {/if}
+        {/if}
+      </div>
     </div>
 
     <div class="extra">
       <button class="join-channel"
               title="Join voice channel"
-              disabled></button>
+              disabled={!$selectedGuildId}
+              on:click={join($selectedGuildId)}></button>
     </div>
   {/if}
 </div>
@@ -161,6 +152,52 @@
       .progress-bar {
         flex: 1;
       }
+
+      button {
+        cursor: pointer;
+        user-select: none;
+        background-color: white;
+        height: 36px;
+        width: 36px;
+        border-radius: 99px;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-size: contain;
+        box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
+        -moz-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
+        -webkit-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
+        -o-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
+
+        &.pause {
+          background: url("$lib/assets/icons/pause.svg");
+        }
+
+        &.play {
+          background: url("$lib/assets/icons/play.svg");
+        }
+
+        &.buffering {
+          background: url("$lib/assets/icons/buffering.svg");
+          animation: rotation 2s infinite linear;
+
+          @keyframes rotation {
+            from {
+              transform: rotate(0deg);
+            }
+            to {
+              transform: rotate(359deg);
+            }
+          }
+        }
+
+        &.skip-next {
+          background: url("$lib/assets/icons/skip_next.svg");
+          width: 32px;
+          height: 32px;
+        }
+      }
     }
 
     .extra {
@@ -186,75 +223,26 @@
         border: none;
         background: url("$lib/assets/icons/join_channel.svg");
         background-size: cover;
-        cursor: pointer;
-
-        &:disabled {
-          visibility: hidden;
-        }
 
         &:hover:not(:disabled) {
           transform: scale(1.1);
         }
       }
     }
-  }
 
-  button {
-    cursor: pointer;
-    user-select: none;
-    background-color: white;
-    height: 36px;
-    width: 36px;
-    border-radius: 99px;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-size: contain;
-    box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
-    -moz-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
-    -webkit-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
-    -o-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
+    button {
+      &:disabled {
+        opacity: 0.2;
+        cursor: default;
 
-    &.pause {
-      background: url("$lib/assets/icons/pause.svg");
-    }
-
-    &.play {
-      background: url("$lib/assets/icons/play.svg");
-    }
-
-    &.buffering {
-      background: url("$lib/assets/icons/buffering.svg");
-      animation: rotation 2s infinite linear;
-
-      @keyframes rotation {
-        from {
-          transform: rotate(0deg);
-        }
-        to {
-          transform: rotate(359deg);
+        &:hover {
+          transform: none;
         }
       }
-    }
-
-    &.skip-next {
-      background: url("$lib/assets/icons/skip_next.svg");
-      width: 32px;
-      height: 32px;
-    }
-
-    &:disabled {
-      opacity: 0.2;
-      cursor: inherit;
 
       &:hover {
-        transform: none;
+        transform: scale(1.1);
       }
-    }
-
-    &:hover {
-      transform: scale(1.1);
     }
   }
 
