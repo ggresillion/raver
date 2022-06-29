@@ -1,9 +1,20 @@
-<script>
+<script lang="ts">
   import { getUser } from '$lib/api/user.api.ts';
   import appIcon from '$lib/assets/icons/app_white_24dp.svg';
+  import { getLatency } from '../../lib/api/bot.api';
+  import { onMount } from 'svelte';
 
-  const latency = 1;
+  const LATENCY_POLL_INTERVAL_MS = 5000;
 
+  let latency: number;
+  onMount(async () => {
+    const res = await getLatency();
+    latency = res.latency;
+    setInterval(async () => {
+      const res = await getLatency();
+      latency = res.latency;
+    }, LATENCY_POLL_INTERVAL_MS);
+  });
 </script>
 
 <style>

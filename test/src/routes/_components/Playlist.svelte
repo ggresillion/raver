@@ -48,7 +48,7 @@
 
 </script>
 
-{#if $playerState}
+{#if $playerState && $playerState.playlist && $playerState.playlist.length > 0}
   <div class="playlist" class:open={isOpen}>
     <div class="handle" on:click={() => isOpen = !isOpen}>
       <button class="icon open" style:background-image={`url(${arrowIcon})`}></button>

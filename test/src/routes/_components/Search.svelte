@@ -1,6 +1,7 @@
 <script lang="ts">
   import searchIcon from '$lib/assets/icons/search_white_24dp.svg';
   import playIcon from '$lib/assets/icons/play.svg';
+  import fallbackImage from '$lib/assets/icons/music_note.svg';
   import { search, addToPlaylist } from '$lib/api/music.api';
   import type { MusicSearchResult } from '$lib/model/music-search-result';
   import Loader from '$lib/components/Loader.svelte';
@@ -8,6 +9,10 @@
 
   let searchInput = '';
   let searchPromise: Promise<MusicSearchResult>;
+
+  function handleImageError(ev) {
+    return ev.target.src = fallbackImage;
+  }
 
   function handleKeyUp(e: KeyboardEvent) {
     if (e.code === 'Enter') {
@@ -41,7 +46,7 @@
           {#each results.tracks as t}
             <div class="card">
               <div class="thumbnail">
-                <img src={t.thumbnail} alt="Thumbnail"/>
+                <img src={t.thumbnail} on:error={handleImageError} alt="Thumbnail"/>
               </div>
               <span class="title">{t.title}</span>
               <span class="artist">{t.artists.map(a => a.name).join(', ')}</span>
@@ -61,7 +66,7 @@
           {#each results.artists as t}
             <div class="card">
               <div class="thumbnail">
-                <img src={t.thumbnail} alt="Thumbnail"/>
+                <img src={t.thumbnail} on:error={handleImageError} alt="Thumbnail"/>
               </div>
               <span class="title">{t.name}</span>
               <button type="button"
@@ -80,7 +85,7 @@
           {#each results.albums as t}
             <div class="card">
               <div class="thumbnail">
-                <img src={t.thumbnail} alt="Thumbnail"/>
+                <img src={t.thumbnail} on:error={handleImageError} alt="Thumbnail"/>
               </div>
               <span class="title">{t.name}</span>
               <span class="artist">{t.artists.map(a => a.name).join(', ')}</span>
@@ -100,7 +105,7 @@
           {#each results.playlists as t}
             <div class="card">
               <div class="thumbnail">
-                <img src={t.thumbnail} alt="Thumbnail"/>
+                <img src={t.thumbnail} on:error={handleImageError} alt="Thumbnail"/>
               </div>
               <span class="title">{t.name}</span>
               <button type="button"

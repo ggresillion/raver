@@ -22,7 +22,7 @@
     position: absolute;
     top: 60px;
     left: 0;
-    height: calc(100% - 140px);
+    height: calc(100% - 160px);
     overflow-y: auto;
     overflow-x: hidden;
     width: 66px;
@@ -32,7 +32,7 @@
     position: fixed;
     top: 60px;
     left: 66px;
-    height: calc(100% - 140px);
+    height: calc(100% - 160px);
     width: calc(100% - 66px);
     background-color: rgb(56, 56, 56);
   }

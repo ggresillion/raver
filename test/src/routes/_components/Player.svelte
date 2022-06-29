@@ -11,6 +11,9 @@
   import { pause, play, skip } from '../../lib/api/music.api.js';
   import Loader from '../../lib/components/Loader.svelte';
   import { join } from '../../lib/api/bot.api.js';
+  import Soundwave from './Soundwave.svelte';
+
+  let progress = 0;
 
   function formatMillisToMinutesAndSeconds(millis: number): string {
     const time = {
@@ -26,6 +29,11 @@
     if (!actual || !total || isNaN(actual) || isNaN(total)) return 0;
     return Math.round(actual / total * 100);
   }
+
+  playerState.subscribe(p => {
+    if (!p) return;
+    progress = progressToPercent(p.progress, p.playlist[0].duration);
+  });
 
   selectedGuildId.subscribe(async (val) => {
     if (!val) return;
@@ -47,7 +55,7 @@
           <span class="track-artist">{$playerState.playlist[0].artists.map(a => a.name)
           .join(', ')}</span>
         </div>
-        <!--        <Soundwave play={playerState.status === PlayerStatus.PLAYING}></Soundwave>-->
+        <Soundwave play={$playerState.status === PlayerStatus.PLAYING}/>
       {/if}
     </div>
 
@@ -73,8 +81,7 @@
         {#if $playerState.playlist.length > 0}
           <div>{formatMillisToMinutesAndSeconds($playerState.progress)}</div>
           <div class="progress-bar">
-            <RangeSlider values={[progressToPercent($playerState.progress,
-          $playerState.playlist[0].duration)]}
+            <RangeSlider values={[progress]}
                          max="100"
                          disabled/>
           </div>
@@ -98,7 +105,8 @@
       <button class="join-channel"
               title="Join voice channel"
               disabled={!$selectedGuildId}
-              on:click={join($selectedGuildId)}></button>
+              on:click={join($selectedGuildId)}>Join my channel
+      </button>
     </div>
   {/if}
 </div>
@@ -110,7 +118,7 @@
     left: 0;
     height: 100px;
     width: 100vw;
-    padding: 12px;
+    padding: 6px;
     background-color: rgb(53, 53, 53);
     filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
     color: white;
@@ -230,11 +238,13 @@
       }
 
       .join-channel {
-        height: 40px;
-        width: 40px;
-        border: none;
-        background: url("$lib/assets/icons/join_channel.svg");
-        background-size: cover;
+        color: white;
+        background: none;
+        border: 2px white solid;
+        padding: 6px;
+        border-radius: 12px;
+        font-family: "Roboto-Bold", serif;
+        font-size: 1rem;
 
         &:hover:not(:disabled) {
           transform: scale(1.1);
