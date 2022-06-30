@@ -69,7 +69,6 @@ func (a *API) Listen() {
 	e.GET("/api/auth/login", a.authAPI.AuthLogin)
 	e.GET("/api/auth/callback", a.authAPI.AuthCallback)
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
-	e.Static("/", "./static")
 
 	// Authenticated routes
 	r := e.Group("/api")
