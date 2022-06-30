@@ -9,8 +9,8 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-and-push-image:
-    name: Build & Push
+  build-and-push-backend:
+    name: Build & Push Backend
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -47,7 +47,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: .
+          context: backend
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -58,25 +58,69 @@ jobs:
     outputs:
       tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
 
-  deploy:
-    name: Deploy
-    runs-on: "ubuntu-latest"
-    container: alpine/helm:3.8.1
-    needs: build-and-push-image
-    env:
-      TAG: ${{ needs.build-and-push-image.outputs.tag }}
-      NAME: discordsoundboard
-      CHART: chart
+  build-and-push-frontend:
+    name: Build & Push Frontend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name: Copy KUBECONFIG to ~/.kube/config
-        run: |
-          mkdir ~/.kube
-          echo $KUBECONFIG | base64 -d > ~/.kube/config
-        env:
-          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: 'arm64,arm'
 
-      - name: Perform the helm upgrade
-        run: |
-          helm upgrade --install --set image.tag=$TAG $NAME $CHART
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=sha,prefix=,format=short
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: frontend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm/v7
+
+    outputs:
+      tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+
+#  deploy:
+#    name: Deploy
+#    runs-on: "ubuntu-latest"
+#    container: alpine/helm:3.8.1
+#    needs: build-and-push-image
+#    env:
+#      TAG: ${{ needs.build-and-push-image.outputs.tag }}
+#      NAME: discordsoundboard
+#      CHART: chart
+#    steps:
+#      - uses: actions/checkout@v1
+#
+#      - uses: actions-hub/kubectl@master
+#        env:
+#          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+#        with:
+#          args: kubectl apply -f manifest.yaml
