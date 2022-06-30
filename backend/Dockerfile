@@ -4,11 +4,11 @@ RUN apk add build-base
 
 WORKDIR /app
 
-COPY go.mod ./backend/go.sum /app/
+COPY go.mod go.sum /app/
 
 RUN go mod download
 
-COPY ./backend /app/
+COPY . /app/
 
 RUN go build -o discordsoundboard ./cmd/discordsoundboard/main.go
 
