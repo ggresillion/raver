@@ -9,18 +9,16 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/ggresillion/discordsoundboard/backend/internal/config"
 	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
-	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 )
 
 type Bot struct {
-	hub         *messaging.Hub
 	session     *discordgo.Session
 	ready       bool
 	guildVoices map[string]*Audio
 }
 
-func NewBot(hub *messaging.Hub) *Bot {
-	return &Bot{hub: hub, session: nil, guildVoices: make(map[string]*Audio), ready: false}
+func NewBot() *Bot {
+	return &Bot{session: nil, guildVoices: make(map[string]*Audio), ready: false}
 }
 
 func (b *Bot) StartBot() error {

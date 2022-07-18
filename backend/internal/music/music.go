@@ -8,7 +8,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
-	"github.com/ggresillion/discordsoundboard/backend/internal/messaging"
 )
 
 type Connector interface {
@@ -93,7 +92,7 @@ const (
 
 var ErrEmptyPlaylist = errors.New("empty playlist")
 
-func NewPlayerManager(connector Connector, hub *messaging.Hub, bot *bot.Bot) *PlayerManager {
+func NewPlayerManager(connector Connector, bot *bot.Bot) *PlayerManager {
 	return &PlayerManager{
 		players:   make(map[string]*Player),
 		connector: connector,
