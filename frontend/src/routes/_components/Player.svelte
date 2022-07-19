@@ -32,6 +32,7 @@
 
   playerState.subscribe(p => {
     if (!p) return;
+    if (!p.playlist || p.playlist.length < 1) return;
     progress = progressToPercent(p.progress, p.playlist[0].duration);
   });
 

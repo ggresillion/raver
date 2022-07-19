@@ -22,7 +22,7 @@ FROM node:16-alpine
 WORKDIR /app
 
 # copy dependency list
-COPY --from=0 /app/package*.json ./
+COPY package.json yarn.lock ./
 
 # clean install dependencies, no devDependencies, no prepare script
 RUN yarn install --frozen-lockfile --production --ignore-scripts
