@@ -9,7 +9,6 @@ import (
 	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
 	"github.com/ggresillion/discordsoundboard/backend/internal/command"
 	"github.com/ggresillion/discordsoundboard/backend/internal/music"
-	"github.com/ggresillion/discordsoundboard/backend/internal/music/spotify"
 )
 
 func init() {
@@ -30,7 +29,7 @@ func main() {
 	}
 
 	// Deps
-	musicManager := music.NewPlayerManager(spotify.NewSpotifyConnector(), b)
+	musicManager := music.NewPlayerManager(music.NewSpotifyConnector(), b)
 
 	// Handle commands
 	command.NewCommandHandler(b, musicManager)

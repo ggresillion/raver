@@ -39,32 +39,32 @@ func NewAudio(guildID string, bot *Bot) *Audio {
 	return &Audio{guildID: guildID, bot: bot, audioStatus: NotConnected, audioStatusChange: make(chan AudioStatus)}
 }
 
-func (b *Audio) LeaveChannel() {
-	vc := b.voiceConnection
+func (a *Audio) LeaveChannel() {
+	vc := a.voiceConnection
 	if vc == nil {
 		return
 	}
 	vc.Disconnect()
 	vc.Close()
-	b.voiceConnection = nil
+	a.voiceConnection = nil
 }
 
-func (b *Audio) JoinUserChannel(userID string) error {
-	g, err := b.bot.session.State.Guild(b.guildID)
+func (a *Audio) JoinUserChannel(userID string) error {
+	g, err := a.bot.session.State.Guild(a.guildID)
 	if err != nil {
 		return err
 	}
-	defer log.Printf("[%s] joinned voice channel", b.guildID)
+	defer log.Printf("[%s] joinned voice channel", a.guildID)
 	for _, v := range g.VoiceStates {
 		if v.UserID == userID {
-			vc, err := b.bot.session.ChannelVoiceJoin(b.guildID, v.ChannelID, false, true)
+			vc, err := a.bot.session.ChannelVoiceJoin(a.guildID, v.ChannelID, false, true)
 			if err != nil {
 				return err
 			}
-			b.voiceConnection = vc
+			a.voiceConnection = vc
 
-			if b.audioStatus == NotConnected {
-				b.setStatus(IDLE)
+			if a.audioStatus == NotConnected {
+				a.setStatus(IDLE)
 			}
 
 			return nil
@@ -73,41 +73,41 @@ func (b *Audio) JoinUserChannel(userID string) error {
 	return errors.New("user not in a voice channel")
 }
 
-func (b *Audio) Play(url string, start time.Duration) (*StreamingSession, error) {
+func (a *Audio) Play(url string, start time.Duration) (*StreamingSession, error) {
 
-	switch b.audioStatus {
+	switch a.audioStatus {
 	case NotConnected:
 		return nil, ErrNotNotInVoiceChannel
 	case IDLE:
 		break
 	}
 
-	if b.voiceConnection == nil {
+	if a.voiceConnection == nil {
 		return nil, ErrNoVoiceConnection
 	}
 
-	err := b.voiceConnection.Speaking(true)
+	err := a.voiceConnection.Speaking(true)
 	if err != nil {
 		return nil, ErrCouldNotSetSpeaking
 	}
 
-	b.session, err = b.startStream(url, start)
+	a.session, err = a.startStream(url, start)
 	if err != nil {
 		return nil, ErrCouldNotStartStream
 	}
 
-	return b.session, nil
+	return a.session, nil
 }
 
-func (b *Audio) Status() AudioStatus {
-	return b.audioStatus
+func (a *Audio) Status() AudioStatus {
+	return a.audioStatus
 }
 
-func (b *Audio) StatusChange() chan AudioStatus {
-	return b.audioStatusChange
+func (a *Audio) StatusChange() chan AudioStatus {
+	return a.audioStatusChange
 }
 
-func (b *Audio) setStatus(s AudioStatus) {
-	b.audioStatus = s
-	b.audioStatusChange <- s
+func (a *Audio) setStatus(s AudioStatus) {
+	a.audioStatus = s
+	a.audioStatusChange <- s
 }

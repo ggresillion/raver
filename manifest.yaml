@@ -20,7 +20,7 @@ spec:
         - name: regcred
       containers:
         - name: discordsoundboard
-          image: ghcr.io/ggresillion/discordsoundboard_frontend:${IMAGE_TAG}
+          image: ghcr.io/ggresillion/discordsoundboard_frontend:$IMAGE_TAG
           ports:
             - containerPort: 3000
 
@@ -85,7 +85,6 @@ kind: SealedSecret
 metadata:
   creationTimestamp: null
   name: discordsoundboard-secret
-  namespace: default
 spec:
   encryptedData:
     botToken: AgBq9raduHOQNkbFz89EU1qFqBVZXPFR2fSbRIdt48RLy9W337cQEp/8ZRVW9R6Q/G0ozEs4tX3/wnaGWT+4ciAlrSalk3pqZ9J5X93xbRLOYm6KtCwYjSWt30KqIJJpC0rCE1G1wfzlZcv3LH8mXnIcejdqrBRpmXbg89XhVYYRqe9qyXpplICkong8TtHd6JDPOf/tXh1l1dsWvXVp7wqOjUstignw5Z8cpcz+76FeLy8AnfT7YHzLYAC78Owo1GCfChbSOB73jRD2EEeRzM2q+4SQd1MPW0w0XXIFA8SqYsg0BTtSo0THHundn7vzNcv7pa8MVtX42CSy9HEK8zMB3feSJtGrFt7KnZxjU0bPUigFZNpLlN8LAUWpYV3Jx8YZJ+k0/mACPCWtc44Otnuq1GTx/7uOlUubcGUNTrSeZqTCklsMqmzErisbskD6mVhnFqkRiWali4vLvBjz2dhKYJIvjLa/MPaJgtOhpZoXxqkOwcQDDhW6yw5V/eCl80XYefaKlHfH2wL14c6LfjWgpise8yzw62Y8LDZJ33iUr8Wl0rBmX9PSYn2KKfUTyX+96Te3fj8ORUZ5XCisO92J/e+XRI5XLtLrWyfMrWI4iI7yM1DoKnWiMso2S6MBaPGcRYAAZ+Q7A/xIKOgELvk9b5kcxKYbs+Qh6zvu65YgcrDP8LZoe7RtD9ZfSnWFiGFo7eO0A1Fiw4Y8N7M6gxB4y5eRmNlD3AD87Wn7DW9m+bdzqwjorHCnthLFhlMs149uTX/Ziad2KIdLO7GvH8ycyIONPEq7
@@ -108,7 +107,6 @@ kind: SealedSecret
 metadata:
   creationTimestamp: null
   name: regcred
-  namespace: default
 spec:
   encryptedData:
     .dockerconfigjson: AgBZH6vFN7L8YsaQIqqkBXFeT5f46mj5diQdotoBtl9UyQd9zjbqHVbT7dAl9J/NwHjffmAQ+yQZyPSq8Zs3TPb/F0U94lkM3xLYmIAUntX3X6DR9K5glkvtZa4LgiyTu1kWDJYzJ8lCaHHr6NaiZaEUjdHrnAFy3aSBAz256nDfbf+v/138a6lOysUJNirhMI+nNSD8r7hPJx74jHOVrO6KauCnw3O9iZmPiRn3H1ZQu5OJaPoGpsfL7TaAd1LN5tWQgTmdavZbntrXjVnEoRLt8Jv23ezdwaCHLLu2EhR27mK1oY+uvTaT37bX2jBQlZKgmZTAQaotAIf2T2B9VrKPe7FiAoGzUdp/UgLIczb51Xr19NSkd+Y4/cIZ/SLwFDgNMoCR3DwwtQP4wBmqL3677x1BY0RzC9SPL8MVDUee4G5yCgNZz+MvWxNS4y98SuZwyA2gI+Fl/W5uwCHWyzPR12DMcf8781TZq1OD2zoQkb/Ua3LrZjhsaWSynlgNYLOUKualEuz+7bVCzcBUZUeZ6b7ne0afAD1FoNgr3I2S9vbYQAUZ/65i7sRbUqYTtdnsD7WFkd2N6k3rWmRKbGWZ7kl43cg7pvQ28y6hFYDBkkm9p2pCa5mMZMXmodpWFcAet4FCOCeRZYaZWZpjQL5WvtKjiIyQoPLPTaEgKGKAA7ybJuhCRXycwqiFa2V+7xv9+3Sw/ap4oejEd7FejmCOnOeKU+XlTDP+ONbawHkqXjvLk7NAmDfdHqOwx9l33vgiRH6eNWHklkvDhr7NHXRjpM9DhoD9kUKOR6R66PLc11Dw6PYwp81RmZSIf8Uzg68QxG+vSjjDEK74iKytlZFnvEX5LtUVJA==

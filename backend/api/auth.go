@@ -85,7 +85,8 @@ func (a *AuthAPI) AuthCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.Redirect(http.StatusPermanentRedirect, fmt.Sprint("http://localhost:3000?accessToken=", token.AccessToken, "&refreshToken=", token.RefreshToken))
+	return c.Redirect(http.StatusPermanentRedirect, fmt.Sprint("http://localhost:3000/callback?accessToken=",
+		token.AccessToken, "&refreshToken=", token.RefreshToken))
 }
 
 // GetMe godoc
