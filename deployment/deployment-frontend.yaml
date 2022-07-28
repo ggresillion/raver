@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discordsoundboard-deployment-frontend
+  labels:
+    app: discordsoundboard
+    tier: frontend
+spec:
+  selector:
+    matchLabels:
+      app: discordsoundboard
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: discordsoundboard
+        tier: frontend
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: discordsoundboard
+          image: ghcr.io/ggresillion/discordsoundboard_frontend:$IMAGE_TAG
+          ports:
+            - containerPort: 3000
