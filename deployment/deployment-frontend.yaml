@@ -20,6 +20,10 @@ spec:
         - name: regcred
       containers:
         - name: discordsoundboard
-          image: ghcr.io/ggresillion/discordsoundboard_frontend:$IMAGE_TAG
+          image: ghcr.io/ggresillion/discordsoundboard_frontend:1.0.0
           ports:
             - containerPort: 3000
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
