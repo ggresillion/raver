@@ -1,4 +1,4 @@
-import { get, post } from './http.api';
+import { get, post } from './http';
 
 export async function getLatency() {
   return get<{latency: number}>(`/bot/latency`);

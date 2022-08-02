@@ -1,13 +1,16 @@
 package config
 
 import (
-	log "github.com/sirupsen/logrus"
 	"os"
+	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
+	Dev          bool
 	Host         string
 	BotToken     string
 	ClientID     string
@@ -29,8 +32,16 @@ func init() {
 		host = "https://" + os.Getenv("HOST")
 	}
 
+	var dev bool
+	if strings.HasPrefix(os.Getenv("APP_ENV"), "dev") {
+		dev = true
+	} else {
+		dev = false
+	}
+
 	config = &Config{
 		Host:         host,
+		Dev:          dev,
 		BotToken:     os.Getenv("BOT_TOKEN"),
 		ClientID:     os.Getenv("CLIENT_ID"),
 		ClientSecret: os.Getenv("CLIENT_SECRET"),

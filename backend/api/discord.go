@@ -27,12 +27,7 @@ func NewDiscordAPI() *DiscordAPI {
 // @Failure      500  {object}  HTTPError
 // @Router       /guilds [get]
 func (a *DiscordAPI) GetGuilds(c echo.Context) error {
-	token := getToken(c.Request())
-	if token == nil {
-		return echo.NewHTTPError(http.StatusUnauthorized)
-	}
-
-	dc := discord.NewDiscordClient(*token)
+	dc := discord.NewDiscordClient(GetToken(c))
 	guilds, err := dc.GetGuilds()
 	if err != nil {
 		switch e := err.(type) {

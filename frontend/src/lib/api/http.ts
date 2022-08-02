@@ -11,13 +11,15 @@ export async function post<T, B>(path: string, body?: B) {
 async function make<T, B>(path: string, method: 'GET' | 'POST', body?: B) {
   const res = await fetch(config.apiUrl + path, {
     headers: {
-      ...localStorage.getItem('accessToken') && { 'Authorization': 'Bearer ' + localStorage.getItem('accessToken') },
       'Content-Type': 'application/json',
     },
     body: body ? JSON.stringify(body) : null,
     method,
   });
   if (!res.ok) {
+    if (res.status === 401) {
+      window.location.replace("/login");
+    }
     throw res.body;
   }
   const obj = await res.json();

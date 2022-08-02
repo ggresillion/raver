@@ -1,4 +1,4 @@
-import { get, post } from './http.api';
+import { get, post } from './http';
 import type { MusicSearchResult } from '../model/music-search-result';
 import { config } from './config.api';
 import { playerState } from '../stores/player-state.store';

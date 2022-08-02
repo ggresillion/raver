@@ -3,17 +3,25 @@ package api
 import (
 	"context"
 	"errors"
-	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/ggresillion/discordsoundboard/backend/internal/config"
 	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	discordAuth "github.com/ravener/discord-oauth2"
 	"golang.org/x/oauth2"
-	"net/http"
-	"strings"
 )
 
-var state = "random"
+var (
+	ErrUserNotAuthenticated = errors.New("user not authenticated")
+)
+
+const (
+	AccessToken  = "access_token"
+	RefreshToken = "refresh_token"
+)
 
 var conf = &oauth2.Config{
 	RedirectURL: config.Get().Host + "/api/auth/callback",
@@ -31,23 +39,25 @@ func NewAuthAPI() *AuthAPI {
 	return &AuthAPI{}
 }
 
+func GetToken(c echo.Context) string {
+	return c.Get("token").(string)
+}
+
 func Authenticated(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		header := c.Request().Header.Get("Authorization")
-		if header != "" {
-			splitToken := strings.Split(header, "Bearer ")
-			if len(splitToken) < 2 {
-				return echo.NewHTTPError(http.StatusUnauthorized)
-			}
-			token := splitToken[1]
-			c.Set("token", token)
-			return next(c)
-		}
-		token := c.QueryParam("access_token")
-		if token == "" {
-			return echo.NewHTTPError(http.StatusUnauthorized)
+
+		var token string
+		cookie, err := c.Cookie(AccessToken)
+		if err == nil && cookie != nil {
+			token = cookie.Value
+		} else {
+			token = c.QueryParam(AccessToken)
 		}
 
+		if token == "" {
+			return echo.NewHTTPError(http.StatusUnauthorized)
+
+		}
 		c.Set("token", token)
 		return next(c)
 	}
@@ -63,7 +73,13 @@ func Authenticated(next echo.HandlerFunc) echo.HandlerFunc {
 // @Failure      500  {object}  api.HTTPError
 // @Router       /auth/login [get]
 func (a *AuthAPI) AuthLogin(c echo.Context) error {
-	return c.Redirect(http.StatusTemporaryRedirect, conf.AuthCodeURL(state))
+	uuid := uuid.New().String()
+	cookie := new(http.Cookie)
+	cookie.Name = "state"
+	cookie.Value = uuid
+	cookie.Expires = time.Now().Add(1 * time.Hour)
+	c.SetCookie(cookie)
+	return c.Redirect(http.StatusTemporaryRedirect, conf.AuthCodeURL(uuid))
 }
 
 // AuthCallback godoc
@@ -76,17 +92,39 @@ func (a *AuthAPI) AuthLogin(c echo.Context) error {
 // @Failure      500  {object}  api.HTTPError
 // @Router       /auth/callback [get]
 func (a *AuthAPI) AuthCallback(c echo.Context) error {
-	if c.FormValue("state") != state {
+	state, err := c.Cookie("state")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "missing state cookie")
+	}
+
+	if c.FormValue("state") != state.Value {
 		return echo.NewHTTPError(http.StatusBadRequest, "")
 	}
+
 	token, err := conf.Exchange(context.Background(), c.FormValue("code"))
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.Redirect(http.StatusPermanentRedirect, fmt.Sprint("http://localhost:3000/callback?accessToken=",
-		token.AccessToken, "&refreshToken=", token.RefreshToken))
+	accessTokenCookie := new(http.Cookie)
+	accessTokenCookie.Name = AccessToken
+	accessTokenCookie.Value = token.AccessToken
+	accessTokenCookie.Expires = token.Expiry
+	accessTokenCookie.Path = "/"
+	accessTokenCookie.HttpOnly = true
+	accessTokenCookie.Secure = !config.Get().Dev
+	c.SetCookie(accessTokenCookie)
+
+	refreshTokenCookie := new(http.Cookie)
+	refreshTokenCookie.Name = RefreshToken
+	refreshTokenCookie.Value = token.RefreshToken
+	refreshTokenCookie.Path = "/"
+	refreshTokenCookie.HttpOnly = true
+	refreshTokenCookie.Secure = !config.Get().Dev
+	c.SetCookie(refreshTokenCookie)
+
+	return c.Redirect(http.StatusPermanentRedirect, "/")
 }
 
 // GetMe godoc
@@ -115,14 +153,4 @@ func (a *AuthAPI) GetMe(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, user)
-}
-
-func getToken(r *http.Request) *string {
-	reqToken := r.Header.Get("Authorization")
-	splitToken := strings.Split(reqToken, "Bearer ")
-	if len(splitToken) < 2 {
-		return nil
-	}
-	reqToken = splitToken[1]
-	return &reqToken
 }

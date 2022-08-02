@@ -3,7 +3,7 @@
   import playlistIcon from '$lib/assets/icons/queue_music.svg';
   import arrowIcon from '$lib/assets/icons/double_arrow.svg';
   import { playerState } from '$lib/stores/player-state.store';
-  import { dndzone } from 'svelte-dnd-action';
+  import { dndzone, type DndEvent } from 'svelte-dnd-action';
   import { flip } from 'svelte/animate';
   import { onMount } from 'svelte';
   import type { Track } from '$lib/model/track';
@@ -24,11 +24,12 @@
     });
   })
 
-  function handleDndConsider(e) {
+  function handleDndConsider(e: CustomEvent<DndEvent<any>>) {
     upcoming = e.detail.items;
   }
 
-  async function handleDndFinalize(e) {
+  async function handleDndFinalize(e: CustomEvent<DndEvent<any>>) {
+    if (!$selectedGuildId) return;
     const id = e.detail.info.id;
     const from = savedUpcoming.findIndex(t => t.id === id) + 1;
     const to = e.detail.items.findIndex(t => t.id === id) + 1;
@@ -42,6 +43,7 @@
   }
 
   async function onDelete(id: string) {
+    if (!$selectedGuildId) return;
     const index = upcoming.findIndex(t => t.id === id) + 1;
     await removeFromPlaylist({ index, guildId: $selectedGuildId });
   }

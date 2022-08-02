@@ -21,6 +21,9 @@ require (
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/gorilla/context v1.1.1 // indirect
+	github.com/gorilla/securecookie v1.1.1 // indirect
+	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/jonas747/ogg v0.0.0-20161220051205-b4f6f4cf3757 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/labstack/gommon v0.3.1 // indirect
@@ -30,10 +33,10 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	golang.org/x/exp v0.0.0-20220414153411-bcd21879b8fd // indirect
-	golang.org/x/net v0.0.0-20220421235706-1d1ef9303861 // indirect
-	golang.org/x/sys v0.0.0-20220422013727-9388b58f7150 // indirect
+	golang.org/x/net v0.0.0-20220728030405-41545e8bf201 // indirect
+	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/time v0.0.0-20220411224347-583f2d630306 // indirect
+	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9 // indirect
 	golang.org/x/tools v0.1.10 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
@@ -42,8 +45,10 @@ require (
 
 require (
 	github.com/ggresillion/dca v0.0.0-20220511155008-b9c59f016f5c
-	github.com/gorilla/websocket v1.5.0
+	github.com/google/uuid v1.3.0
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/kkdai/youtube/v2 v2.7.11
+	github.com/labstack/echo-contrib v0.13.0
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/raitonoberu/ytmusic v0.0.0-20220205190837-b5a9d8620bf3
 	github.com/ravener/discord-oauth2 v0.0.0-20210928130214-d7697a35c387
@@ -52,5 +57,5 @@ require (
 	github.com/swaggo/echo-swagger v1.3.0
 	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2 // indirect
 	github.com/zmb3/spotify/v2 v2.0.1
-	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
+	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
 )

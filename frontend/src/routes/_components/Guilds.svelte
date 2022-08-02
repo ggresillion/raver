@@ -64,10 +64,6 @@
     overflow-y: auto;
     box-sizing: border-box;
 
-    .loader {
-      transform: scale(0.5);
-    }
-
     &::-webkit-scrollbar {
       display: none;
     }
