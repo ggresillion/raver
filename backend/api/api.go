@@ -4,12 +4,13 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"net/http"
+	"net/url"
 
 	_ "github.com/ggresillion/discordsoundboard/backend/api/docs"
+	"github.com/ggresillion/discordsoundboard/backend/internal/config"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 type HTTPError struct {
@@ -60,18 +61,20 @@ func (a *API) Listen() {
 		Output: log.StandardLogger().Writer(),
 	}))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions},
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowCredentials: true,
+		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions},
 	}))
 
 	// Register routes
 	// Public routes
-	e.GET("/api/auth/login", a.authAPI.AuthLogin)
-	e.GET("/api/auth/callback", a.authAPI.AuthCallback)
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	api := e.Group("/api")
+	api.GET("/auth/login", a.authAPI.AuthLogin)
+	api.GET("/auth/callback", a.authAPI.AuthCallback)
+	// api.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// Authenticated routes
-	r := e.Group("/api")
+	r := api.Group("")
 	r.Use(Authenticated)
 
 	// User
@@ -101,6 +104,18 @@ func (a *API) Listen() {
 	r.POST("/guilds/:guildID/player/time", a.musicAPI.Time)
 
 	r.GET("/music/search", a.musicAPI.Search)
+
+	// Proxy frontend
+	if config.Get().Dev {
+		url, _ := url.Parse("http://localhost:5173")
+		targets := []*middleware.ProxyTarget{
+			{
+				URL: url,
+			},
+		}
+
+		e.Group("").Use(middleware.Proxy(middleware.NewRoundRobinBalancer(targets)))
+	}
 
 	// Start API
 	log.Println("listening on 8080")
