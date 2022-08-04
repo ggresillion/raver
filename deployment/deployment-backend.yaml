@@ -50,6 +50,6 @@ spec:
                   name: discordsoundboard-application-secrets
                   key: spotifySecret
             - name: DSB_HOST
-              value: https://discordsounboard.ggresillion.tk
+              value: https://discordsoundboard.ggresillion.tk
             - name: DSB_DEV
               value: "false"
