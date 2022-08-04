@@ -51,3 +51,5 @@ spec:
                   key: spotifySecret
             - name: HOST
               value: https://discordsounboard.ggresillion.tk
+            - name: APP_ENV
+              value: production
