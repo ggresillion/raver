@@ -1,58 +1,53 @@
 package config
 
 import (
-	"os"
-	"strconv"
-	"strings"
-
-	log "github.com/sirupsen/logrus"
-
 	"github.com/joho/godotenv"
+	"github.com/spf13/viper"
 )
 
 type Config struct {
-	Dev          bool
-	Host         string
-	Port         int
-	BotToken     string
-	ClientID     string
-	ClientSecret string
+	Dev           bool
+	Host          string
+	Port          int
+	BotToken      string
+	ClientID      string
+	ClientSecret  string
+	SpotifyID     string
+	SpotifySecret string
 }
 
 var config *Config
 
 func init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Debugf("error loading config %e", err)
-	}
+	godotenv.Load()
 
-	port := 8080
-	if os.Getenv("PORT") != "" {
-		port, _ = strconv.Atoi(os.Getenv("PORT"))
-	}
+	viper.AddConfigPath(".")
 
-	var dev bool
-	if strings.HasPrefix(os.Getenv("APP_ENV"), "dev") {
-		dev = true
-	} else {
-		dev = false
-	}
+	viper.SetEnvPrefix("dsb")
+	viper.BindEnv("dev")
+	viper.BindEnv("host")
+	viper.BindEnv("port")
+	viper.BindEnv("bot_token")
+	viper.BindEnv("client_id")
+	viper.BindEnv("client_secret")
+	viper.BindEnv("spotify_id")
+	viper.BindEnv("spotify_secret")
 
-	var host string
-	if dev {
-		host = "http://localhost:" + strconv.Itoa(port)
-	} else {
-		os.Getenv("HOST")
-	}
+	viper.ReadInConfig()
+
+	viper.SetDefault("dev", true)
+	viper.SetDefault("host", "http://localhost:8080")
+	viper.SetDefault("port", 8080)
 
 	config = &Config{
-		Dev:          dev,
-		Host:         host,
-		Port:         port,
-		BotToken:     os.Getenv("BOT_TOKEN"),
-		ClientID:     os.Getenv("CLIENT_ID"),
-		ClientSecret: os.Getenv("CLIENT_SECRET"),
+		Dev:           viper.GetBool("dev"),
+		Host:          viper.GetString("host"),
+		Port:          viper.GetInt("port"),
+		BotToken:      viper.GetString("bot_token"),
+		ClientID:      viper.GetString("client_id"),
+		ClientSecret:  viper.GetString("client_secret"),
+		SpotifyID:     viper.GetString("spotify_id"),
+		SpotifySecret: viper.GetString("spotify_secret"),
 	}
 }
 

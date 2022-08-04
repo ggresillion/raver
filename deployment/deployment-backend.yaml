@@ -20,36 +20,36 @@ spec:
         - name: regcred
       containers:
         - name: discordsoundboard
-          image: ghcr.io/ggresillion/discordsoundboard_backend:1.0.6
+          image: ghcr.io/ggresillion/discordsoundboard_backend:1.0.7
           ports:
             - containerPort: 8080
           env:
-            - name: BOT_TOKEN
+            - name: DSB_BOT_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: discordsoundboard-application-secrets
                   key: botToken
-            - name: CLIENT_ID
+            - name: DSB_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: discordsoundboard-application-secrets
                   key: clientId
-            - name: CLIENT_SECRET
+            - name: DSB_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: discordsoundboard-application-secrets
                   key: clientSecret
-            - name: SPOTIFY_ID
+            - name: DSB_SPOTIFY_ID
               valueFrom:
                 secretKeyRef:
                   name: discordsoundboard-application-secrets
                   key: spotifyId
-            - name: SPOTIFY_SECRET
+            - name: DSB_SPOTIFY_SECRET
               valueFrom:
                 secretKeyRef:
                   name: discordsoundboard-application-secrets
                   key: spotifySecret
-            - name: HOST
+            - name: DSB_HOST
               value: https://discordsounboard.ggresillion.tk
-            - name: APP_ENV
-              value: production
+            - name: DSB_DEV
+              value: "false"

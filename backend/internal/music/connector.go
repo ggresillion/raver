@@ -3,8 +3,8 @@ package music
 import (
 	"context"
 	"errors"
+
 	"github.com/raitonoberu/ytmusic"
-	"os"
 
 	log "github.com/sirupsen/logrus"
 
@@ -12,6 +12,7 @@ import (
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/common"
+	"github.com/ggresillion/discordsoundboard/backend/internal/config"
 	ytdl "github.com/kkdai/youtube/v2"
 	"github.com/zmb3/spotify/v2"
 	"golang.org/x/oauth2/clientcredentials"
@@ -27,8 +28,8 @@ var ErrCouldNotFindVideo = errors.New("could not find video on youtube")
 func NewSpotifyConnector() *SpotifyConnector {
 	ctx := context.Background()
 	config := &clientcredentials.Config{
-		ClientID:     os.Getenv("SPOTIFY_ID"),
-		ClientSecret: os.Getenv("SPOTIFY_SECRET"),
+		ClientID:     config.Get().SpotifyID,
+		ClientSecret: config.Get().SpotifySecret,
 		TokenURL:     spotifyauth.TokenURL,
 	}
 	token, err := config.Token(ctx)
