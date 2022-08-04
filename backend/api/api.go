@@ -60,17 +60,13 @@ func (a *API) Listen() {
 		Format: "${method} ${uri} ${status}\n",
 		Output: log.StandardLogger().Writer(),
 	}))
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:5173"},
-		AllowCredentials: true,
-		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions},
-	}))
 
 	// Register routes
 	// Public routes
 	api := e.Group("/api")
-	api.GET("/auth/login", a.authAPI.AuthLogin)
+	api.GET("/auth/login", a.authAPI.Login)
 	api.GET("/auth/callback", a.authAPI.AuthCallback)
+	api.GET("/auth/logout", a.authAPI.Logout)
 	// api.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// Authenticated routes
@@ -105,8 +101,10 @@ func (a *API) Listen() {
 
 	r.GET("/music/search", a.musicAPI.Search)
 
-	// Proxy frontend
+	// Dev config
 	if config.Get().Dev {
+
+		// Proxy frontend
 		url, _ := url.Parse("http://localhost:5173")
 		targets := []*middleware.ProxyTarget{
 			{
@@ -115,6 +113,13 @@ func (a *API) Listen() {
 		}
 
 		e.Group("").Use(middleware.Proxy(middleware.NewRoundRobinBalancer(targets)))
+
+		// CORS
+		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins:     []string{"http://localhost:5173"},
+			AllowCredentials: true,
+			AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions},
+		}))
 	}
 
 	// Start API
