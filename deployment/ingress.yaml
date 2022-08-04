@@ -8,7 +8,7 @@ metadata:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
-  - host: discordsounboard.ggresillion.tk
+  - host: discordsoundboard.ggresillion.tk
     http:
       paths:
       - pathType: Prefix
