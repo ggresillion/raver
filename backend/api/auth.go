@@ -3,9 +3,7 @@ package api
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/config"
@@ -26,6 +24,7 @@ const (
 )
 
 var conf = &oauth2.Config{
+	RedirectURL:  config.Get().Host + "/api/auth/callback",
 	ClientID:     config.Get().ClientID,
 	ClientSecret: config.Get().ClientSecret,
 	Scopes:       []string{discordAuth.ScopeIdentify},
@@ -80,17 +79,6 @@ func (a *AuthAPI) Login(c echo.Context) error {
 	cookie.Expires = time.Now().Add(1 * time.Hour)
 	c.SetCookie(cookie)
 
-	host := c.Request().Host
-
-	var scheme string
-	if !strings.HasPrefix(host, "localhost") {
-		scheme = "https://"
-	} else {
-		scheme = "http://"
-	}
-
-	conf.RedirectURL = scheme + host + "/api/auth/callback"
-	fmt.Println(conf.RedirectURL)
 	return c.Redirect(http.StatusTemporaryRedirect, conf.AuthCodeURL(uuid))
 }
 

@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strconv"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -12,6 +13,7 @@ import (
 type Config struct {
 	Dev          bool
 	Host         string
+	Port         int
 	BotToken     string
 	ClientID     string
 	ClientSecret string
@@ -25,6 +27,11 @@ func init() {
 		log.Debugf("error loading config %e", err)
 	}
 
+	port := 8080
+	if os.Getenv("PORT") != "" {
+		port, _ = strconv.Atoi(os.Getenv("PORT"))
+	}
+
 	var dev bool
 	if strings.HasPrefix(os.Getenv("APP_ENV"), "dev") {
 		dev = true
@@ -32,8 +39,17 @@ func init() {
 		dev = false
 	}
 
+	var host string
+	if dev {
+		host = "http://localhost:" + strconv.Itoa(port)
+	} else {
+		os.Getenv("HOST")
+	}
+
 	config = &Config{
 		Dev:          dev,
+		Host:         host,
+		Port:         port,
 		BotToken:     os.Getenv("BOT_TOKEN"),
 		ClientID:     os.Getenv("CLIENT_ID"),
 		ClientSecret: os.Getenv("CLIENT_SECRET"),

@@ -1,6 +1,8 @@
 package api
 
 import (
+	"strconv"
+
 	log "github.com/sirupsen/logrus"
 
 	"net/http"
@@ -124,5 +126,5 @@ func (a *API) Listen() {
 
 	// Start API
 	log.Println("listening on 8080")
-	log.Fatal(http.ListenAndServe(":8080", e))
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Get().Port), e))
 }
