@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -24,8 +25,6 @@ const (
 )
 
 var conf = &oauth2.Config{
-	RedirectURL: config.Get().Host + "/api/auth/callback",
-	// This next 2 lines must be edited before running this.
 	ClientID:     config.Get().ClientID,
 	ClientSecret: config.Get().ClientSecret,
 	Scopes:       []string{discordAuth.ScopeIdentify},
@@ -63,7 +62,7 @@ func Authenticated(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-// AuthLogin godoc
+// Login godoc
 // @Summary      Login
 // @Description  Redirects to login page
 // @Tags         auth
@@ -72,13 +71,23 @@ func Authenticated(next echo.HandlerFunc) echo.HandlerFunc {
 // @Success      200  {string}  string  "ok"
 // @Failure      500  {object}  api.HTTPError
 // @Router       /auth/login [get]
-func (a *AuthAPI) AuthLogin(c echo.Context) error {
+func (a *AuthAPI) Login(c echo.Context) error {
 	uuid := uuid.New().String()
 	cookie := new(http.Cookie)
 	cookie.Name = "state"
 	cookie.Value = uuid
 	cookie.Expires = time.Now().Add(1 * time.Hour)
 	c.SetCookie(cookie)
+
+	var scheme string
+	if c.Request().TLS != nil {
+		scheme = "https://"
+	} else {
+		scheme = "http://"
+	}
+
+	conf.RedirectURL = scheme + c.Request().Host + "/api/auth/callback"
+	fmt.Println(conf.RedirectURL)
 	return c.Redirect(http.StatusTemporaryRedirect, conf.AuthCodeURL(uuid))
 }
 
@@ -153,4 +162,29 @@ func (a *AuthAPI) GetMe(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, user)
+}
+
+// Logout godoc
+// @Summary      Logout
+// @Description  Logout, removing the token from cookies
+// @Tags         auth
+// @Success      200  {object}  discord.User
+// @Failure      500  {object}  api.HTTPError
+// @Router       /auth/logout [get]
+func (a *AuthAPI) Logout(c echo.Context) error {
+	accessTokenCookie := new(http.Cookie)
+	accessTokenCookie.Name = AccessToken
+	accessTokenCookie.Value = ""
+	accessTokenCookie.Expires = time.Now()
+	accessTokenCookie.Path = "/"
+	c.SetCookie(accessTokenCookie)
+
+	refreshTokenCookie := new(http.Cookie)
+	refreshTokenCookie.Name = RefreshToken
+	refreshTokenCookie.Value = ""
+	refreshTokenCookie.Expires = time.Now()
+	refreshTokenCookie.Path = "/"
+	c.SetCookie(refreshTokenCookie)
+
+	return c.NoContent(http.StatusOK)
 }

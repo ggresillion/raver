@@ -45,7 +45,7 @@
     <Guilds/>
   </div>
   
-  <div class="main">
+  <div class="main -z-10">
     <Music/>
     <Player/>
   </div>

@@ -31,13 +31,13 @@
 	}
 
 	playerState.subscribe((p) => {
-		if (!p) return;
+		if (!p || !p.progress) return;
 		if (!p.playlist || p.playlist.length < 1) return;
 		progress = progressToPercent(p.progress, p.playlist[0].duration);
 	});
 
 	selectedGuildId.subscribe(async (val) => {
-		if (!val) return;
+		if (!val || !$selectedGuildId) return;
 		playerState.set(await getPlayerState($selectedGuildId));
 		await subscribeToPlayerState(val);
 		await subscribeToProgress(val);
@@ -67,9 +67,17 @@
 			<div>
 				<button type="button" style="visibility: hidden" />
 				{#if $playerState.status === PlayerStatus.IDLE || $playerState.status === PlayerStatus.PAUSED}
-					<button type="button" class="play" on:click={play($selectedGuildId)} />
+					<button
+						type="button"
+						class="play"
+						on:click={() => !$selectedGuildId || play($selectedGuildId)}
+					/>
 				{:else if $playerState.status === PlayerStatus.PLAYING}
-					<button type="button" class="pause" on:click={pause($selectedGuildId)} />
+					<button
+						type="button"
+						class="pause"
+						on:click={() => !$selectedGuildId || pause($selectedGuildId)}
+					/>
 				{:else if $playerState.status === PlayerStatus.BUFFERING}
 					<button type="button" class="buffering" disabled />
 				{:else}
@@ -78,21 +86,35 @@
 				<button
 					type="button"
 					class="skip-next"
-					on:click={skip($selectedGuildId)}
+					on:click={() => !$selectedGuildId || skip($selectedGuildId)}
 					disabled={!$playerState || $playerState.playlist.length <= 0}
 				/>
 			</div>
 
 			<div>
-				{#if $playerState.playlist.length > 0}
+				{#if $playerState.playlist.length > 0 && $playerState.progress}
 					<div>{formatMillisToMinutesAndSeconds($playerState.progress)}</div>
 					<div class="progress-bar">
-						<RangeSlider values={[progress]} max="100" disabled />
+						<div class="progress-bar">
+							<input
+								id="disabled-range"
+								type="range"
+								value={progress}
+								class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+								disabled
+							/>
+						</div>
 					</div>
 				{:else}
 					<div>-:-</div>
 					<div class="progress-bar">
-						<RangeSlider max="100" values={[0]} disabled />
+						<input
+							id="disabled-range"
+							type="range"
+							value="0"
+							class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+							disabled
+						/>
 					</div>
 				{/if}
 				{#if $playerState.playlist.length > 0}
@@ -105,12 +127,12 @@
 
 		<div class="extra">
 			<button
-				class="join-channel"
+				type="button"
+				class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
 				title="Join voice channel"
 				disabled={!$selectedGuildId}
-				on:click={join($selectedGuildId)}
-				>Join my channel
-			</button>
+				on:click={() => !$selectedGuildId || join($selectedGuildId)}>Join my channel</button
+			>
 		</div>
 	{/if}
 </div>

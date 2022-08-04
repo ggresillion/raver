@@ -1,88 +1,75 @@
 <script lang="ts">
-  import { getUser } from '$lib/api/user.api.ts';
-  import appIcon from '$lib/assets/icons/app_white_24dp.svg';
-  import { getLatency } from '../../lib/api/bot.api';
-  import { onMount } from 'svelte';
+	import appIcon from '$lib/assets/icons/app_white_24dp.svg';
+	import { onMount } from 'svelte';
+	import { getLatency } from '../../lib/api/bot.api';
+	import User from './User.svelte';
 
-  const LATENCY_POLL_INTERVAL_MS = 5000;
+	const LATENCY_POLL_INTERVAL_MS = 5000;
 
-  let latency: number;
-  onMount(async () => {
-    const res = await getLatency();
-    latency = res.latency;
-    setInterval(async () => {
-      const res = await getLatency();
-      latency = res.latency;
-    }, LATENCY_POLL_INTERVAL_MS);
-  });
+	let latency: number;
+	onMount(async () => {
+		const res = await getLatency();
+		latency = res.latency;
+		setInterval(async () => {
+			const res = await getLatency();
+			latency = res.latency;
+		}, LATENCY_POLL_INTERVAL_MS);
+	});
 </script>
 
-<style>
-    .header {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        padding: 0 16px;
-        color: white;
-        background: #03a9f4;
-        background: linear-gradient(90deg, rgba(3, 169, 244, 1) 35%, rgba(109, 5, 255, 0.6194852941176471) 100%);
-        box-sizing: border-box;
-    }
-
-    .logo {
-        height: calc(100% - 12px);
-    }
-
-    .latency {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-    }
-
-    .icon {
-        width: 8px;
-        height: 8px;
-        background-color: rgb(0, 199, 0);
-        border-radius: 99px;
-    }
-
-    .value {
-        font-family: "Roboto-Thin", sans-serif;
-        font-size: 11px;
-    }
-
-    .user {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        margin-left: auto;
-    }
-
-    img {
-        border-radius: 99px;
-        height: 42px;
-        width: 42px;
-    }
-
-    .thin {
-        font-family: "Roboto-Thin", sans-serif;
-    }
-</style>
-
 <div class="header">
-  <img src={appIcon} alt="logo" class="logo"/>
-  <span>Discord Sound Board</span>
-  {#await getUser() then user}
-    <div class="user">
-      <div class="latency">
-        <div class="icon"></div>
-        <div class="value">{latency} ms</div>
-      </div>
-      <span><span class="thin">Welcome, </span>{user?.username}</span>
-      <img src={`https://cdn.discordapp.com/avatars/${user?.id}/${user?.avatar}.png`} alt="avatar"/>
-    </div>
-  {/await}
+	<img src={appIcon} alt="logo" class="logo" />
+	<span>Discord Sound Board</span>
+	<div class="flex ml-auto justify-items-end">
+		<div class="latency">
+			<div class="icon" />
+			<div class="value">{latency} ms</div>
+		</div>
+		<User />
+		
+
+
+	</div>
 </div>
+
+<style>
+	.header {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		padding: 0 16px;
+		color: white;
+		background: #03a9f4;
+		background: linear-gradient(
+			90deg,
+			rgba(3, 169, 244, 1) 35%,
+			rgba(109, 5, 255, 0.6194852941176471) 100%
+		);
+		box-sizing: border-box;
+	}
+
+	.logo {
+		height: calc(100% - 12px);
+	}
+
+	.latency {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+	}
+
+	.icon {
+		width: 8px;
+		height: 8px;
+		background-color: rgb(0, 199, 0);
+		border-radius: 99px;
+	}
+
+	.value {
+		font-family: 'Roboto-Thin', sans-serif;
+		font-size: 11px;
+	}
+</style>
