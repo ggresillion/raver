@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/config"
@@ -79,14 +80,16 @@ func (a *AuthAPI) Login(c echo.Context) error {
 	cookie.Expires = time.Now().Add(1 * time.Hour)
 	c.SetCookie(cookie)
 
+	host := c.Request().Host
+
 	var scheme string
-	if c.Request().TLS != nil {
+	if !strings.HasPrefix(host, "localhost") {
 		scheme = "https://"
 	} else {
 		scheme = "http://"
 	}
 
-	conf.RedirectURL = scheme + c.Request().Host + "/api/auth/callback"
+	conf.RedirectURL = scheme + host + "/api/auth/callback"
 	fmt.Println(conf.RedirectURL)
 	return c.Redirect(http.StatusTemporaryRedirect, conf.AuthCodeURL(uuid))
 }
