@@ -49,3 +49,5 @@ spec:
                 secretKeyRef:
                   name: discordsoundboard-application-secrets
                   key: spotifySecret
+            - name: HOST
+              value: https://discordsounboard.ggresillion.tk
