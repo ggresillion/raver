@@ -5,7 +5,8 @@
 
 	const dispatch = createEventDispatcher();
 
-	function submit(): void {
+	function submit(e: SubmitEvent): void {
+		e.preventDefault();
 		dispatch('submit', input);
 	}
 </script>

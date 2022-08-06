@@ -1,3 +1,4 @@
+import { createToaster } from '../stores/toaster.store';
 import { config } from './config.api';
 
 export async function get<T>(path: string) {
@@ -20,6 +21,8 @@ async function make<T, B>(path: string, method: 'GET' | 'POST', body?: B) {
     if (res.status === 401) {
       window.location.replace("/login");
     }
+    const obj = await res.json();
+    createToaster({type: 'ERROR', text: obj.message});
     throw res.body;
   }
   const obj = await res.json();

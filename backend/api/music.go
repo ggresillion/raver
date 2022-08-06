@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/common"
 	"github.com/ggresillion/discordsoundboard/backend/internal/music"
@@ -66,7 +67,7 @@ func (a *MusicAPI) Search(c echo.Context) error {
 
 	result, err := a.manager.Search(q, 0)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, result)
@@ -89,7 +90,7 @@ func (a *MusicAPI) GetState(c echo.Context) error {
 
 	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return a.returnPlayerState(c, player)
@@ -118,7 +119,7 @@ func (a *MusicAPI) SubscribeToState(c echo.Context) error {
 
 	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	c.Response().Header().Set(echo.HeaderContentType, "text/event-stream")
@@ -174,7 +175,7 @@ func (a *MusicAPI) AddToPlaylist(c echo.Context) error {
 
 	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	var elementType music.ElementType
@@ -226,7 +227,7 @@ func (a *MusicAPI) MoveInPlaylist(c echo.Context) error {
 
 	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	player.MoveInPlaylist(body.From, body.To)
@@ -258,7 +259,7 @@ func (a *MusicAPI) RemoveFromPlaylist(c echo.Context) error {
 
 	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	player.RemoveFromPlaylist(body.Index)
@@ -284,12 +285,12 @@ func (a *MusicAPI) Play(c echo.Context) error {
 
 	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	err = player.Play()
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return a.returnPlayerState(c, player)
@@ -313,7 +314,7 @@ func (a *MusicAPI) Pause(c echo.Context) error {
 
 	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	player.Pause()
@@ -339,7 +340,7 @@ func (a *MusicAPI) Stop(c echo.Context) error {
 
 	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	player.Stop()
@@ -365,7 +366,7 @@ func (a *MusicAPI) Skip(c echo.Context) error {
 
 	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	player.Skip()
@@ -396,12 +397,12 @@ func (a *MusicAPI) Time(c echo.Context) error {
 
 	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	err = player.SetTime(time.Duration(body.Millis) * time.Millisecond)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return a.returnPlayerState(c, player)
@@ -434,7 +435,7 @@ func (a *MusicAPI) GetProgress(c echo.Context) error {
 
 	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	progress := player.Progress()
@@ -465,7 +466,7 @@ func (a *MusicAPI) SubscribeToProgress(c echo.Context) error {
 
 	player, err := a.manager.GetPlayer(guildID)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	c.Response().Header().Set(echo.HeaderContentType, "text/event-stream")

@@ -149,7 +149,7 @@ func (a *AuthAPI) GetMe(c echo.Context) error {
 				return echo.NewHTTPError(http.StatusUnauthorized, discordError.Message)
 			}
 		}
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, user)

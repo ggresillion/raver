@@ -90,7 +90,7 @@
 			</div>
 		</div>
 	{:catch error}
-		<span>{error}</span>
+		<span>{error.message}</span>
 	{/await}
 {/if}
 

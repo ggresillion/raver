@@ -34,7 +34,7 @@ func (a *DiscordAPI) GetGuilds(c echo.Context) error {
 		case *discord.ApiError:
 			return echo.NewHTTPError(e.Code, e.Message)
 		default:
-			return err
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
 
