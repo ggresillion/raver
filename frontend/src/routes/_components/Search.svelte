@@ -2,7 +2,6 @@
 	import { search } from '$lib/api/music.api';
 	import Loader from '$lib/components/Loader.svelte';
 	import type { MusicSearchResult } from '$lib/model/music-search-result';
-	import { onMount } from 'svelte';
 	import Card from '../../lib/components/Card.svelte';
 	import SearchBar from '../../lib/components/SearchBar.svelte';
 
@@ -13,9 +12,6 @@
 		searchPromise = search(e.detail);
 	}
 
-	onMount(() => {
-		searchPromise = search('test');
-	});
 </script>
 
 <SearchBar on:submit={submitSearch} />
