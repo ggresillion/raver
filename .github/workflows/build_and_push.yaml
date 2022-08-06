@@ -52,7 +52,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=user/app:latest
+          cache-from: type=registry,ref=ggresillion/discordsoundboard_backend:latest
           cache-to: type=inline
           platforms: linux/amd64,linux/arm/v7
 
@@ -101,7 +101,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=user/app:latest
+          cache-from: type=registry,ref=ggresillion/discordsoundboard_frontend:latest
           cache-to: type=inline
           platforms: linux/amd64,linux/arm/v7
 
