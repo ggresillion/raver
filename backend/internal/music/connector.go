@@ -65,7 +65,7 @@ func (c SpotifyConnector) Search(q string, p uint) (*SearchResult, error) {
 func (c SpotifyConnector) FindTrack(ID string) (*Track, error) {
 	t, err := c.client.GetTrack(c.ctx, spotify.ID(ID))
 	if err != nil {
-		var sErr *spotify.Error
+		sErr := new(spotify.Error)
 		if errors.As(err, sErr) {
 			if sErr.Status == 404 {
 				return nil, &common.NotFoundError{Err: err}
