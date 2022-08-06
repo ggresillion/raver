@@ -20,6 +20,6 @@ spec:
         - name: regcred
       containers:
         - name: discordsoundboard
-          image: ghcr.io/ggresillion/discordsoundboard_frontend:1.0.7
+          image: ghcr.io/ggresillion/discordsoundboard_frontend:1.0.8
           ports:
             - containerPort: 3000
