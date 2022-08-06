@@ -42,10 +42,9 @@ func main() {
 
 	// Start API
 	authAPI := api.NewAuthAPI()
-	discordAPI := api.NewDiscordAPI()
 	musicAPI := api.NewMusicAPI(musicManager)
 	botAPI := api.NewBotAPI(b)
-	a := api.NewAPI(authAPI, discordAPI, musicAPI, botAPI)
+	a := api.NewAPI(authAPI, musicAPI, botAPI)
 
 	a.Listen()
 }

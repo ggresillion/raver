@@ -16,10 +16,6 @@ type LatencyResponse struct {
 	Latency int `json:"latency"`
 }
 
-type GuildsResponse struct {
-	Guilds []discord.Guild `json:"guilds"`
-}
-
 type BotAPI struct {
 	bot *bot.Bot
 }
@@ -48,7 +44,7 @@ func (a *BotAPI) GetGuilds(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, &GuildsResponse{Guilds: guilds})
+	return c.JSON(http.StatusOK, guilds)
 }
 
 // JoinChannel godoc
