@@ -3,7 +3,7 @@
   import Search from './Search.svelte';
 </script>
 
-<div class="music-container">
+<div class="max-h-full overflow-y-auto p-6">
   <Search/>
 </div>
 <div>

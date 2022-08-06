@@ -17,7 +17,7 @@
 	});
 </script>
 
-<div class="header">
+<div class="header bg-gradient-to-br from-purple-600 to-blue-500">
 	<img src={appIcon} alt="logo" class="logo" />
 	<span>Discord Sound Board</span>
 	<div class="flex ml-auto justify-items-end">
@@ -41,12 +41,6 @@
 		gap: 16px;
 		padding: 0 16px;
 		color: white;
-		background: #03a9f4;
-		background: linear-gradient(
-			90deg,
-			rgba(3, 169, 244, 1) 35%,
-			rgba(109, 5, 255, 0.6194852941176471) 100%
-		);
 		box-sizing: border-box;
 	}
 
