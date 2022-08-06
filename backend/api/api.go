@@ -20,19 +20,17 @@ type HTTPError struct {
 }
 
 type API struct {
-	authAPI    *AuthAPI
-	discordAPI *DiscordAPI
-	musicAPI   *MusicAPI
-	botAPI     *BotAPI
+	authAPI  *AuthAPI
+	musicAPI *MusicAPI
+	botAPI   *BotAPI
 }
 
 func NewAPI(
 	authAPI *AuthAPI,
-	discordAPI *DiscordAPI,
 	musicAPI *MusicAPI,
 	botAPI *BotAPI,
 ) *API {
-	return &API{authAPI, discordAPI, musicAPI, botAPI}
+	return &API{authAPI, musicAPI, botAPI}
 }
 
 // @title           DiscordSoundBoard API
@@ -79,7 +77,6 @@ func (a *API) Listen() {
 	r.GET("/auth/user", a.authAPI.GetMe)
 
 	// Guilds
-	r.GET("/guilds", a.discordAPI.GetGuilds)
 	r.POST("/guilds/:guildID/join", a.botAPI.JoinChannel)
 	r.GET("/guilds/add", a.botAPI.AddBotToGuild)
 
