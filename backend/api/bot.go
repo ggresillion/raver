@@ -45,7 +45,7 @@ func (a *BotAPI) GetGuilds(c echo.Context) error {
 
 	guilds, err := a.bot.GetGuilds(token)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, &GuildsResponse{Guilds: guilds})
@@ -72,7 +72,7 @@ func (a *BotAPI) JoinChannel(c echo.Context) error {
 
 	user, err := dc.GetUser()
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return a.bot.GetGuildVoice(guildID).JoinUserChannel(user.ID)
