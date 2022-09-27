@@ -1,7 +1,7 @@
 <script lang="ts">
 	import appIcon from '$lib/assets/icons/app_white_24dp.svg';
 	import { onMount } from 'svelte';
-	import { getLatency } from '../../lib/api/bot.api';
+	import { getLatency } from '$lib/api/bot.api';
 	import User from './User.svelte';
 
 	const LATENCY_POLL_INTERVAL_MS = 5000;

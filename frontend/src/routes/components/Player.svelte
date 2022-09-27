@@ -1,16 +1,15 @@
 <script lang="ts">
-	import { playerState } from '$lib/stores/player-state.store';
-	import { PlayerStatus } from '$lib/model/player-status';
-	import { selectedGuildId } from '../../lib/stores/guild.store';
+	import { join } from '$lib/api/bot.api.js';
 	import {
 		getPlayerState,
 		subscribeToPlayerState,
 		subscribeToProgress
-	} from '../../lib/api/music.api';
-	import RangeSlider from 'svelte-range-slider-pips';
-	import { pause, play, skip } from '../../lib/api/music.api.js';
-	import Loader from '../../lib/components/Loader.svelte';
-	import { join } from '../../lib/api/bot.api.js';
+	} from '$lib/api/music.api';
+	import { pause, play, skip } from '$lib/api/music.api.js';
+	import Loader from '$lib/components/Loader.svelte';
+	import { PlayerStatus } from '$lib/model/player-status';
+	import { selectedGuildId } from '$lib/stores/guild.store';
+	import { playerState } from '$lib/stores/player-state.store';
 	import Soundwave from './Soundwave.svelte';
 
 	let progress = 0;
@@ -250,20 +249,6 @@
 			display: flex;
 			justify-content: flex-end;
 			align-items: center;
-
-			.join-channel {
-				color: white;
-				background: none;
-				border: 2px white solid;
-				padding: 6px;
-				border-radius: 12px;
-				font-family: 'Roboto-Bold', serif;
-				font-size: 1rem;
-
-				&:hover:not(:disabled) {
-					transform: scale(1.1);
-				}
-			}
 		}
 
 		button {
