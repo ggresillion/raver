@@ -48,9 +48,6 @@ jobs:
           cache-to: type=gha,mode=max,scope=backend
           platforms: linux/amd64,linux/arm/v7
 
-    outputs:
-      tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
-
   build-and-push-frontend:
     name: Build & Push Frontend
     runs-on: ubuntu-latest
@@ -88,6 +85,3 @@ jobs:
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
           platforms: linux/amd64,linux/arm/v7
-
-    outputs:
-      tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
