@@ -1,9 +1,13 @@
 name: Build & Push Docker images
 
 on:
-  release:
-    types:
-      - published
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push-backend:
@@ -28,21 +32,31 @@ jobs:
       - name: Log in to the Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}_backend
+          tags: |
+            type=semver,pattern={{version}}
+            type=sha,prefix=,format=short
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: backend
           push: true
-          tags: |
-            ghcr.io/discordsoundboard_backend:latest
-            ghcr.io/discordsoundboard_backend:${{ github.event.release.tag_name }}
-          cache-from: type=gha,scope=backend
-          cache-to: type=gha,mode=max,scope=backend
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=ggresillion/discordsoundboard_backend:latest
+          cache-to: type=inline
           platforms: linux/amd64,linux/arm/v7
+
+    outputs:
+      tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
 
   build-and-push-frontend:
     name: Build & Push Frontend
@@ -58,7 +72,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
         with:
-         platforms: 'arm64,arm'
+          platforms: 'arm64,arm'
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -66,18 +80,28 @@ jobs:
       - name: Log in to the Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}_frontend
+          tags: |
+            type=semver,pattern={{version}}
+            type=sha,prefix=,format=short
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: frontend
           push: true
-          tags: |
-            ghcr.io/discordsoundboard_frontend:latest
-            ghcr.io/discordsoundboard_frontend:${{ github.event.release.tag_name }}
-          cache-from: type=gha,scope=frontend
-          cache-to: type=gha,mode=max,scope=frontend
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=ggresillion/discordsoundboard_frontend:latest
+          cache-to: type=inline
           platforms: linux/amd64,linux/arm/v7
+
+    outputs:
+      tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
