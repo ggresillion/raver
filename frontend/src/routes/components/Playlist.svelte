@@ -7,8 +7,8 @@
   import { flip } from 'svelte/animate';
   import { onMount } from 'svelte';
   import type { Track } from '$lib/model/track';
-  import { moveInPlaylist, removeFromPlaylist } from '../../lib/api/music.api';
-  import { selectedGuildId } from '../../lib/stores/guild.store';
+  import { moveInPlaylist, removeFromPlaylist } from '$lib/api/music.api';
+  import { selectedGuildId } from '$lib/stores/guild.store';
 
   const flipDurationMs = 300;
 

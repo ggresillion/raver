@@ -10,7 +10,7 @@ RUN go mod download
 
 COPY . /app/
 
-RUN go build -o discordsoundboard ./cmd/discordsoundboard/main.go
+RUN go build -o discordsoundboard ./cmd/main.go
 
 FROM alpine:3.15.2
 

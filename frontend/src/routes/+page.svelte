@@ -1,10 +1,10 @@
 <script>
-    import Header from './_components/Header.svelte';
-    import Guilds from './_components/Guilds.svelte';
-    import Music from './_components/Music.svelte';
+    import Header from './components/Header.svelte';
+    import Guilds from './components/Guilds.svelte';
+    import Music from './components/Music.svelte';
     import { selectedGuildId } from '$lib/stores/guild.store';
     import { onMount } from 'svelte';
-    import Player from './_components/Player.svelte';
+    import Player from './components/Player.svelte';
   
     onMount(() => {
       selectedGuildId.set(localStorage.getItem('selectedGuildId'));
