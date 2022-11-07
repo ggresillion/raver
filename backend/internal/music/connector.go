@@ -19,36 +19,37 @@ import (
 )
 
 type SpotifyConnector struct {
-	ctx    context.Context
-	client *spotify.Client
+	ctx context.Context
 }
 
 var ErrCouldNotFindVideo = errors.New("could not find video on youtube")
 
 func NewSpotifyConnector() *SpotifyConnector {
 	ctx := context.Background()
+
+	return &SpotifyConnector{
+		ctx: ctx,
+	}
+}
+
+func (c SpotifyConnector) GetClient() *spotify.Client {
 	config := &clientcredentials.Config{
 		ClientID:     config.Get().SpotifyID,
 		ClientSecret: config.Get().SpotifySecret,
 		TokenURL:     spotifyauth.TokenURL,
 	}
-	token, err := config.Token(ctx)
+	token, err := config.Token(c.ctx)
 	if err != nil {
 		log.Fatalf("couldn't get token: %v", err)
 	}
 
-	httpClient := spotifyauth.New().Client(ctx, token)
-	client := spotify.New(httpClient)
-
-	return &SpotifyConnector{
-		ctx:    ctx,
-		client: client,
-	}
+	httpClient := spotifyauth.New().Client(c.ctx, token)
+	return spotify.New(httpClient)
 }
 
 // Search on spotify
 func (c SpotifyConnector) Search(q string, p uint) (*SearchResult, error) {
-	results, err := c.client.Search(c.ctx, q, spotify.SearchTypePlaylist|spotify.SearchTypeAlbum|spotify.SearchTypeArtist|spotify.SearchTypeTrack)
+	results, err := c.GetClient().Search(c.ctx, q, spotify.SearchTypePlaylist|spotify.SearchTypeAlbum|spotify.SearchTypeArtist|spotify.SearchTypeTrack)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +64,7 @@ func (c SpotifyConnector) Search(q string, p uint) (*SearchResult, error) {
 
 // FindTrack by ID
 func (c SpotifyConnector) FindTrack(ID string) (*Track, error) {
-	t, err := c.client.GetTrack(c.ctx, spotify.ID(ID))
+	t, err := c.GetClient().GetTrack(c.ctx, spotify.ID(ID))
 	if err != nil {
 		sErr := new(spotify.Error)
 		if errors.As(err, sErr) {
@@ -80,7 +81,7 @@ func (c SpotifyConnector) FindTrack(ID string) (*Track, error) {
 }
 
 func (c SpotifyConnector) FindPlaylistTracks(ID string) ([]*Track, error) {
-	playlist, err := c.client.GetPlaylistTracks(c.ctx, spotify.ID(ID))
+	playlist, err := c.GetClient().GetPlaylistTracks(c.ctx, spotify.ID(ID))
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +91,7 @@ func (c SpotifyConnector) FindPlaylistTracks(ID string) ([]*Track, error) {
 }
 
 func (c SpotifyConnector) FindArtistTopTracks(ID string) ([]*Track, error) {
-	artistTopTracks, err := c.client.GetArtistsTopTracks(c.ctx, spotify.ID(ID), "FR")
+	artistTopTracks, err := c.GetClient().GetArtistsTopTracks(c.ctx, spotify.ID(ID), "FR")
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +101,7 @@ func (c SpotifyConnector) FindArtistTopTracks(ID string) ([]*Track, error) {
 }
 
 func (c SpotifyConnector) FindAlbumTracks(ID string) ([]*Track, error) {
-	album, err := c.client.GetAlbum(c.ctx, spotify.ID(ID))
+	album, err := c.GetClient().GetAlbum(c.ctx, spotify.ID(ID))
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +132,7 @@ func (c SpotifyConnector) FindAlbumTracks(ID string) ([]*Track, error) {
 // GetStreamURL Get the stream for a given track
 func (c SpotifyConnector) GetStreamURL(ID string) (string, error) {
 
-	track, err := c.client.GetTrack(c.ctx, spotify.ID(ID))
+	track, err := c.GetClient().GetTrack(c.ctx, spotify.ID(ID))
 	if err != nil {
 		return "", err
 	}
