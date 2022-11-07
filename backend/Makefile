@@ -2,7 +2,7 @@ GO_CMD=go
 BINARY_NAME=discordsoundboard
 OUT_DIR=./out
 BIN_DIR=${OUT_DIR}/bin
-MAIN=cmd/discordsoundboard/main.go
+MAIN=cmd/main.go
 
 GREEN  := $(shell tput -Txterm setaf 2)
 YELLOW := $(shell tput -Txterm setaf 3)
