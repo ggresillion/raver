@@ -13,18 +13,20 @@ type CommandHandler struct {
 
 // Command handler is responsible for handling bot slash commands
 func NewCommandHandler(b *bot.Bot, musicManager *music.PlayerManager) *CommandHandler {
-	h := &CommandHandler{b, musicManager}
-	h.bot.RegisterCommands([]*bot.CommandAndHandler{
-		h.join(),
-		h.leave(),
-		h.play(),
-		h.pause(),
-		h.stop(),
-		h.clear(),
-		h.skip(),
-		h.playlist(),
+	c := &CommandHandler{b, musicManager}
+	c.bot.RegisterCommands([]*bot.CommandAndHandler{
+		c.join(),
+		c.leave(),
+		c.play(),
+		c.pause(),
+		c.stop(),
+		c.clear(),
+		c.skip(),
+		c.playlist(),
+		c.search(),
 	})
-	return h
+	c.bot.RegisterAdditionalHandler(c.handlePlay)
+	return c
 }
 
 func respond(s *discordgo.Session, i *discordgo.InteractionCreate, m string) {

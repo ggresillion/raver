@@ -2,11 +2,139 @@ package command
 
 import (
 	"fmt"
+	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
 	"github.com/ggresillion/discordsoundboard/backend/internal/music"
 )
+
+var (
+	messagesToDeleteByInteractionID = make(map[string][]string)
+)
+
+// Extract infos from received commands
+// Parameters are separated by '_'
+func extractInfosFromPlayCommand(command string) (interactionID string, songId string) {
+	splited := strings.Split(command, "_")
+	return splited[0], splited[2]
+}
+
+// Handle the play response
+func (c *CommandHandler) handlePlay(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	switch i.Type {
+	case discordgo.InteractionMessageComponent:
+		action := i.MessageComponentData().CustomID
+		if strings.Contains(action, "_play_") {
+			interactionID, _ := extractInfosFromPlayCommand(action)
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "Added song to playlist",
+				},
+			})
+
+			messagesToDelete := messagesToDeleteByInteractionID[interactionID]
+			if len(messagesToDelete) == 0 {
+				return
+			}
+			err := s.ChannelMessagesBulkDelete(i.ChannelID, messagesToDelete)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+		}
+	}
+}
+
+// Search for a song
+func (c *CommandHandler) search() *bot.CommandAndHandler {
+	return &bot.CommandAndHandler{
+		Command: &discordgo.ApplicationCommand{
+			Name:        "search",
+			Description: "Search for a song",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "query",
+					Description: "name, id or url for the song",
+					Required:    true,
+					Type:        discordgo.ApplicationCommandOptionString,
+				},
+			},
+		}, Handler: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			data := i.ApplicationCommandData()
+			if len(data.Options) == 0 {
+				return
+			}
+			q := data.Options[0].StringValue()
+
+			result, err := c.musicManager.Search(q, 0)
+			if err != nil {
+				respond(s, i, fmt.Sprintf("failed to search %s", err.Error()))
+				return
+			}
+
+			err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "Here are some songs i found",
+				},
+			})
+
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+			messagesToDeleteByInteractionID[i.ID] = make([]string, 0)
+			for index, r := range result.Tracks {
+
+				if index > 4 {
+					return
+				}
+
+				artists := ""
+				for _, a := range r.Artists {
+					artists = artists + a.Name
+				}
+
+				m, err := s.ChannelMessageSendComplex(i.ChannelID, &discordgo.MessageSend{
+					Content: r.Title,
+					Embeds: []*discordgo.MessageEmbed{
+						{
+							Type:        discordgo.EmbedTypeImage,
+							Title:       r.Title,
+							Description: artists,
+							URL:         "https://www.youtube.com/watch?v=" + r.ID,
+							Image: &discordgo.MessageEmbedImage{
+								URL: r.Thumbnail,
+							},
+						},
+					},
+					Components: []discordgo.MessageComponent{
+						discordgo.ActionsRow{
+							Components: []discordgo.MessageComponent{
+								discordgo.Button{
+									Label:    "Play",
+									Style:    discordgo.SecondaryButton,
+									Disabled: false,
+									CustomID: i.ID + "_play_" + r.ID,
+								},
+							},
+						},
+					},
+				})
+				if err != nil {
+					log.Error(err)
+					return
+				}
+				messagesToDeleteByInteractionID[i.ID] = append(messagesToDeleteByInteractionID[i.ID], m.ID)
+			}
+		},
+	}
+}
 
 // Play a song
 // It first adds it to the playlist, then start the stream if no song is currently playing
