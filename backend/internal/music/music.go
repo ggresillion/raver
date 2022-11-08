@@ -326,7 +326,6 @@ func (p *Player) SubscribeToPlayerState() *Subscriber[PlayerState] {
 		<-subscriber.Done
 		close(subscriber.Change)
 		close(subscriber.Done)
-		return
 	}()
 	p.stateSubscribers = append(p.stateSubscribers, subscriber)
 	return subscriber
@@ -345,22 +344,27 @@ func (p *Player) SubscribeToProgress() *Subscriber[time.Duration] {
 		<-subscriber.Done
 		close(subscriber.Change)
 		close(subscriber.Done)
-		return
 	}()
 	p.progressSubscribers = append(p.progressSubscribers, subscriber)
 	return subscriber
 }
 
-func (p *Player) propagateState() {
-	state := PlayerState{
+func (p *Player) GetState() PlayerState {
+	return PlayerState{
 		Status:   p.botAudio.Status(),
 		Playlist: p.playlist,
 	}
-	log.Debugf("[%s] (propagate) next state: {status: %s, playlist: %d element(s)}", p.guildID, state.Status,
-		len(state.Playlist))
-	for _, s := range p.stateSubscribers {
-		s.Change <- state
-	}
+}
+
+func (p *Player) propagateState() {
+	go func() {
+		state := p.GetState()
+		log.Debugf("[%s] (propagate) next state: {status: %s, playlist: %d element(s)}", p.guildID, state.Status,
+			len(state.Playlist))
+		for _, s := range p.stateSubscribers {
+			s.Change <- state
+		}
+	}()
 }
 
 func (p *Player) subscribeToAudioStatusChange() {

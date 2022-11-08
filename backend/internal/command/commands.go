@@ -25,7 +25,7 @@ func NewCommandHandler(b *bot.Bot, musicManager *music.PlayerManager) *CommandHa
 		c.playlist(),
 		c.search(),
 	})
-	c.bot.RegisterAdditionalHandler(c.handlePlay)
+	c.bot.RegisterAdditionalHandler(c.handlePlayResponse)
 	return c
 }
 
