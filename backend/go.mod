@@ -64,6 +64,7 @@ require (
 	github.com/samber/lo v1.33.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.14.0
+	github.com/thoas/go-funk v0.9.2
 	github.com/zmb3/spotify/v2 v2.3.0
 	golang.org/x/crypto v0.1.0 // indirect
 )
