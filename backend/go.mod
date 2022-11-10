@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/bwmarrin/discordgo v0.26.1
 	github.com/joho/godotenv v1.4.0
+	github.com/mavolin/dismock v1.3.4
 	github.com/swaggo/swag v1.8.7
 	golang.org/x/oauth2 v0.1.0
 )
@@ -12,6 +13,8 @@ require (
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/bitly/go-simplejson v0.5.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/diamondburned/arikawa v1.3.6 // indirect
 	github.com/dlclark/regexp2 v1.7.0 // indirect
 	github.com/dop251/goja v0.0.0-20221106173738-3b8a68ca89b4 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
@@ -22,6 +25,7 @@ require (
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jonas747/ogg v0.0.0-20161220051205-b4f6f4cf3757 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
@@ -33,10 +37,13 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/afero v1.9.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stretchr/testify v1.8.1 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
@@ -64,7 +71,7 @@ require (
 	github.com/samber/lo v1.33.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.14.0
-	github.com/thoas/go-funk v0.9.2
+	github.com/thoas/go-funk v0.9.2 // indirect
 	github.com/zmb3/spotify/v2 v2.3.0
 	golang.org/x/crypto v0.1.0 // indirect
 )

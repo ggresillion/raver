@@ -7,23 +7,23 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/ggresillion/discordsoundboard/backend/internal/config"
 	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
 )
 
 type Bot struct {
+	botToken    string
 	session     *discordgo.Session
 	ready       bool
 	guildVoices map[string]*Audio
 }
 
-func NewBot() *Bot {
-	return &Bot{session: nil, guildVoices: make(map[string]*Audio), ready: false}
+func NewBot(botToken string) *Bot {
+	return &Bot{botToken: botToken, session: nil, guildVoices: make(map[string]*Audio), ready: false}
 }
 
 func (b *Bot) StartBot() error {
 
-	token := config.Get().BotToken
+	token := b.botToken
 
 	if token == "" {
 		return fmt.Errorf("no token provided")
