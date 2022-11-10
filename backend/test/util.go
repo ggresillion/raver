@@ -3,18 +3,16 @@ package test
 import (
 	"os"
 	"regexp"
-	"testing"
 
+	"github.com/ggresillion/discordsoundboard/backend/internal/config"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/ggresillion/discordsoundboard/backend/app"
-	"github.com/ggresillion/discordsoundboard/backend/internal/config"
 	"github.com/joho/godotenv"
 )
 
 const projectDirName = "discordsoundboard"
 
-func LoadEnv() {
+func loadEnv() {
 	re := regexp.MustCompile(`^(.*` + projectDirName + `)`)
 	cwd, _ := os.Getwd()
 	rootPath := re.Find([]byte(cwd))
@@ -30,10 +28,9 @@ func LoadEnv() {
 	}
 }
 
-func TestConnect(t *testing.T) {
-	LoadEnv()
-
-	go app.Start(&config.Config{
+func TestConfig() *config.Config {
+	loadEnv()
+	return &config.Config{
 		BotToken:      os.Getenv("DSB_BOT_TOKEN"),
 		Dev:           true,
 		Host:          "localhost",
@@ -42,6 +39,5 @@ func TestConnect(t *testing.T) {
 		ClientSecret:  os.Getenv("DSB_CLIENT_SECRET"),
 		SpotifyID:     os.Getenv("DSB_SPOTIFY_ID"),
 		SpotifySecret: os.Getenv("DSB_SPOTIFY_SECRET"),
-	})
-
+	}
 }
