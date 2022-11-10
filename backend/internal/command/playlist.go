@@ -26,22 +26,6 @@ func clearMessages(s *discordgo.Session, i *discordgo.InteractionCreate) error {
 // Send a message containing the playlist
 func printPlaylist(s *discordgo.Session, i *discordgo.InteractionCreate, state music.PlayerState) {
 
-	// embeds := []*discordgo.MessageEmbed{
-	// 	{
-	// 		Type:        discordgo.EmbedTypeRich,
-	// 		Title:       "",
-	// 		URL:         "https://discordsoundboard.ggresillion.tk",
-	// 		Description: "Current list of tracks",
-	// 		Fields: lo.Map(state.Playlist, func(item *music.Track, index int) *discordgo.MessageEmbedField {
-	// 			return &discordgo.MessageEmbedField{
-	// 				Name:   item.Title,
-	// 				Value:  item.Album.Name,
-	// 				Inline: false,
-	// 			}
-	// 		}),
-	// 	},
-	// }
-
 	embeds := lo.Map(state.Playlist, func(item *music.Track, index int) *discordgo.MessageEmbed {
 		return &discordgo.MessageEmbed{
 			Title:       item.Title,
@@ -54,14 +38,66 @@ func printPlaylist(s *discordgo.Session, i *discordgo.InteractionCreate, state m
 		}
 	})
 
+	// Buttons
+	var playPauseButton discordgo.MessageComponent
+
+	switch state.Status {
+	case bot.Playing:
+
+		playPauseButton = discordgo.Button{
+			Label: "",
+			Emoji: discordgo.ComponentEmoji{
+				Name: "⏸️",
+			},
+			Style:    discordgo.SecondaryButton,
+			Disabled: false,
+			CustomID: i.ID + "_pause",
+		}
+
+	case bot.Paused:
+		playPauseButton = discordgo.Button{
+			Label: "",
+			Emoji: discordgo.ComponentEmoji{
+				Name: "▶️",
+			},
+			Style:    discordgo.SecondaryButton,
+			Disabled: false,
+			CustomID: i.ID + "_play",
+		}
+	case bot.IDLE:
+	default:
+		playPauseButton = discordgo.Button{
+			Label: "",
+			Emoji: discordgo.ComponentEmoji{
+				Name: "▶️",
+			},
+			Style:    discordgo.SecondaryButton,
+			Disabled: true,
+			CustomID: i.ID + "_play",
+		}
+	}
+
 	components := []discordgo.MessageComponent{
 		discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{
+				playPauseButton,
 				discordgo.Button{
-					Label:    "Pause",
+					Label: "",
+					Emoji: discordgo.ComponentEmoji{
+						Name: "⏮️",
+					},
 					Style:    discordgo.SecondaryButton,
-					Disabled: false,
-					CustomID: i.ID + "_pause",
+					Disabled: true,
+					CustomID: i.ID + "_previous",
+				},
+				discordgo.Button{
+					Label: "",
+					Emoji: discordgo.ComponentEmoji{
+						Name: "⏩",
+					},
+					Style:    discordgo.SecondaryButton,
+					Disabled: true,
+					CustomID: i.ID + "_skip",
 				},
 			},
 		},

@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
-	"github.com/ggresillion/discordsoundboard/backend/internal/config"
 	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
 	"github.com/labstack/echo/v4"
 )
@@ -17,11 +16,12 @@ type LatencyResponse struct {
 }
 
 type BotAPI struct {
-	bot *bot.Bot
+	clientID string
+	bot      *bot.Bot
 }
 
-func NewBotAPI(bot *bot.Bot) *BotAPI {
-	return &BotAPI{bot}
+func NewBotAPI(clientID string, bot *bot.Bot) *BotAPI {
+	return &BotAPI{clientID, bot}
 }
 
 // GetGuilds godoc
@@ -85,7 +85,7 @@ func (a *BotAPI) JoinChannel(c echo.Context) error {
 // @Failure      500  {object}  api.HTTPError
 // @Router       /bot/guilds/add [post]
 func (a *BotAPI) AddBotToGuild(c echo.Context) error {
-	clientID := config.Get().ClientID
+	clientID := a.clientID
 	return c.Redirect(http.StatusPermanentRedirect, "https://discord.com/oauth2/authorize?client_id="+clientID+"&permissions="+permissions+"&scope=bot%20applications.commands")
 }
 

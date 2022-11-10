@@ -5,8 +5,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
-	"github.com/ggresillion/discordsoundboard/backend/internal/music"
-	log "github.com/sirupsen/logrus"
 )
 
 // Play a song
@@ -25,12 +23,6 @@ func (c *CommandHandler) play() *bot.CommandAndHandler {
 				},
 			},
 		}, Handler: func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			data := i.ApplicationCommandData()
-			if len(data.Options) == 0 {
-				return
-			}
-			q := data.Options[0].StringValue()
-
 			p, err := c.musicManager.GetPlayer(i.GuildID)
 			if err != nil {
 				respond(s, i, fmt.Sprintf("cannot get player for guildID %s", i.GuildID))
@@ -41,20 +33,6 @@ func (c *CommandHandler) play() *bot.CommandAndHandler {
 				p.BotAudio().JoinUserChannel(i.Member.User.ID)
 			}
 
-			res, err := c.musicManager.Search(q, 0)
-			if err != nil {
-				log.Error(err)
-				return
-			}
-
-			t := res.Tracks[0]
-
-			err = p.AddToPlaylist(t.ID, music.TrackElement)
-			if err != nil {
-				respond(s, i, fmt.Sprintf("error while adding song to playlist %s", err.Error()))
-				return
-			}
-
 			err = p.Play()
 			if err != nil {
 				respond(s, i, fmt.Sprintf("error while playing the song %s", err.Error()))
@@ -62,17 +40,7 @@ func (c *CommandHandler) play() *bot.CommandAndHandler {
 			}
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Embeds: []*discordgo.MessageEmbed{
-						{
-							Title:       t.Title,
-							Description: t.Album.Name,
-							Image: &discordgo.MessageEmbedImage{
-								URL: t.Thumbnail,
-							},
-						},
-					},
-				},
+				Data: &discordgo.InteractionResponseData{},
 			})
 		},
 	}

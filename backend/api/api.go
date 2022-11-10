@@ -9,7 +9,6 @@ import (
 	"net/url"
 
 	_ "github.com/ggresillion/discordsoundboard/backend/api/docs"
-	"github.com/ggresillion/discordsoundboard/backend/internal/config"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -20,17 +19,21 @@ type HTTPError struct {
 }
 
 type API struct {
+	dev      bool
+	port     int
 	authAPI  *AuthAPI
 	musicAPI *MusicAPI
 	botAPI   *BotAPI
 }
 
 func NewAPI(
+	dev bool,
+	port int,
 	authAPI *AuthAPI,
 	musicAPI *MusicAPI,
 	botAPI *BotAPI,
 ) *API {
-	return &API{authAPI, musicAPI, botAPI}
+	return &API{dev, port, authAPI, musicAPI, botAPI}
 }
 
 // @title           DiscordSoundBoard API
@@ -101,7 +104,7 @@ func (a *API) Listen() {
 	r.GET("/music/search", a.musicAPI.Search)
 
 	// Dev config
-	if config.Get().Dev {
+	if a.dev {
 
 		// Proxy frontend
 		url, _ := url.Parse("http://localhost:5173")
@@ -123,5 +126,5 @@ func (a *API) Listen() {
 
 	// Start API
 	log.Println("listening on 8080")
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Get().Port), e))
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(a.port), e))
 }

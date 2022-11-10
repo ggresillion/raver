@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ggresillion/discordsoundboard/backend/internal/config"
 	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -23,19 +22,19 @@ const (
 	RefreshToken = "refresh_token"
 )
 
-var conf = &oauth2.Config{
-	RedirectURL:  config.Get().Host + "/api/auth/callback",
-	ClientID:     config.Get().ClientID,
-	ClientSecret: config.Get().ClientSecret,
-	Scopes:       []string{discordAuth.ScopeIdentify},
-	Endpoint:     discordAuth.Endpoint,
-}
-
 type AuthAPI struct {
+	conf *oauth2.Config
+	dev  bool
 }
 
-func NewAuthAPI() *AuthAPI {
-	return &AuthAPI{}
+func NewAuthAPI(host, clientID, clientSecret string, dev bool) *AuthAPI {
+	return &AuthAPI{&oauth2.Config{
+		RedirectURL:  host + "/api/auth/callback",
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		Scopes:       []string{discordAuth.ScopeIdentify},
+		Endpoint:     discordAuth.Endpoint,
+	}, dev}
 }
 
 func GetToken(c echo.Context) string {
@@ -79,7 +78,7 @@ func (a *AuthAPI) Login(c echo.Context) error {
 	cookie.Expires = time.Now().Add(1 * time.Hour)
 	c.SetCookie(cookie)
 
-	return c.Redirect(http.StatusTemporaryRedirect, conf.AuthCodeURL(uuid))
+	return c.Redirect(http.StatusTemporaryRedirect, a.conf.AuthCodeURL(uuid))
 }
 
 // AuthCallback godoc
@@ -101,7 +100,7 @@ func (a *AuthAPI) AuthCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "")
 	}
 
-	token, err := conf.Exchange(context.Background(), c.FormValue("code"))
+	token, err := a.conf.Exchange(context.Background(), c.FormValue("code"))
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -113,7 +112,7 @@ func (a *AuthAPI) AuthCallback(c echo.Context) error {
 	accessTokenCookie.Expires = token.Expiry
 	accessTokenCookie.Path = "/"
 	accessTokenCookie.HttpOnly = true
-	accessTokenCookie.Secure = !config.Get().Dev
+	accessTokenCookie.Secure = !a.dev
 	c.SetCookie(accessTokenCookie)
 
 	refreshTokenCookie := new(http.Cookie)
@@ -121,7 +120,7 @@ func (a *AuthAPI) AuthCallback(c echo.Context) error {
 	refreshTokenCookie.Value = token.RefreshToken
 	refreshTokenCookie.Path = "/"
 	refreshTokenCookie.HttpOnly = true
-	refreshTokenCookie.Secure = !config.Get().Dev
+	refreshTokenCookie.Secure = !a.dev
 	c.SetCookie(refreshTokenCookie)
 
 	return c.Redirect(http.StatusPermanentRedirect, "/")

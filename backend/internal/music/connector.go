@@ -12,30 +12,33 @@ import (
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 
 	"github.com/ggresillion/discordsoundboard/backend/internal/common"
-	"github.com/ggresillion/discordsoundboard/backend/internal/config"
 	ytdl "github.com/kkdai/youtube/v2"
 	"github.com/zmb3/spotify/v2"
 	"golang.org/x/oauth2/clientcredentials"
 )
 
 type SpotifyConnector struct {
-	ctx context.Context
+	spotifyID     string
+	spotifySecret string
+	ctx           context.Context
 }
 
 var ErrCouldNotFindVideo = errors.New("could not find video on youtube")
 
-func NewSpotifyConnector() *SpotifyConnector {
+func NewSpotifyConnector(spotifyID, spotifySecret string) *SpotifyConnector {
 	ctx := context.Background()
 
 	return &SpotifyConnector{
-		ctx: ctx,
+		spotifyID:     spotifyID,
+		spotifySecret: spotifySecret,
+		ctx:           ctx,
 	}
 }
 
 func (c SpotifyConnector) GetClient() *spotify.Client {
 	config := &clientcredentials.Config{
-		ClientID:     config.Get().SpotifyID,
-		ClientSecret: config.Get().SpotifySecret,
+		ClientID:     c.spotifyID,
+		ClientSecret: c.spotifySecret,
 		TokenURL:     spotifyauth.TokenURL,
 	}
 	token, err := config.Token(c.ctx)
