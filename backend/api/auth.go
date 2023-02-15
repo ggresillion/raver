@@ -32,7 +32,7 @@ func NewAuthAPI(host, clientID, clientSecret string, dev bool) *AuthAPI {
 		RedirectURL:  host + "/api/auth/callback",
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		Scopes:       []string{discordAuth.ScopeIdentify},
+		Scopes:       []string{discordAuth.ScopeIdentify, discordAuth.ScopeGuilds},
 		Endpoint:     discordAuth.Endpoint,
 	}, dev}
 }

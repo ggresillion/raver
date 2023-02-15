@@ -12,6 +12,7 @@ import (
 
 type Connector interface {
 	Search(q string, p uint) (*SearchResult, error)
+	SearchSimple(q string) ([]*Track, error)
 	FindTrack(ID string) (*Track, error)
 	FindPlaylistTracks(ID string) ([]*Track, error)
 	FindAlbumTracks(ID string) ([]*Track, error)
@@ -65,10 +66,10 @@ type Artist struct {
 }
 
 type SearchResult struct {
-	Tracks    []Track    `json:"tracks"`
-	Playlists []Playlist `json:"playlists"`
-	Albums    []Album    `json:"albums"`
-	Artists   []Artist   `json:"artists"`
+	Tracks    []*Track    `json:"tracks"`
+	Playlists []*Playlist `json:"playlists"`
+	Albums    []*Album    `json:"albums"`
+	Artists   []*Artist   `json:"artists"`
 }
 
 type PlayerState struct {
@@ -128,6 +129,19 @@ func (m *PlayerManager) GetPlayer(guildID string) (*Player, error) {
 
 func (m *PlayerManager) Search(query string, page uint) (*SearchResult, error) {
 	return m.connector.Search(query, page)
+}
+
+func (m *PlayerManager) SearchSimple(query string, page uint) ([]*Track, error) {
+	return m.connector.SearchSimple(query)
+}
+
+func (p *Player) AddSongToPlaylist(ID string) (*Track, error) {
+	track, err := p.connector.FindTrack(ID)
+	if err != nil {
+		return nil, err
+	}
+	p.playlist = append(p.playlist, track)
+	return track, nil
 }
 
 func (p *Player) AddToPlaylist(ID string, elemType ElementType) error {

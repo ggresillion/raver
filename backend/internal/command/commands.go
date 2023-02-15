@@ -4,6 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
 	"github.com/ggresillion/discordsoundboard/backend/internal/music"
+	"github.com/rs/zerolog/log"
 )
 
 type CommandHandler struct {
@@ -36,5 +37,13 @@ func respond(s *discordgo.Session, i *discordgo.InteractionCreate, m string) {
 			Flags:   discordgo.MessageFlagsEphemeral,
 			Content: m,
 		},
+	})
+}
+
+func handleError(s *discordgo.Session, i *discordgo.InteractionCreate, err error, msg string) {
+	errorMessage := "Sorry, I encoutered an error"
+	log.Error().Stack().Str("guildID", i.GuildID).Str("channelID", i.ChannelID).Str("userID", i.Member.User.ID).Err(err).Msg(msg)
+	s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+		Content: &errorMessage,
 	})
 }
