@@ -51,12 +51,35 @@ func (c SpotifyConnector) GetClient() *spotify.Client {
 }
 
 // Search on spotify
+func (c SpotifyConnector) SearchSimple(q string) ([]*Track, error) {
+	// Get video ID from YouTube
+	s := ytmusic.Search(q)
+	result, err := s.Next()
+	if err != nil {
+		return nil, err
+	}
+	return lo.Map(result.Tracks, func(t *ytmusic.TrackItem, i int) *Track {
+		return &Track{
+			ID:        t.VideoID,
+			Title:     t.Title,
+			Thumbnail: t.Thumbnails[0].URL,
+			Artists:   []Artist{},
+			Album: Album{
+				ID:      t.Album.ID,
+				Name:    t.Album.Name,
+				Artists: []Artist{},
+			},
+			Duration: uint(t.Duration),
+		}
+	}), nil
+}
+
+// Search on spotify
 func (c SpotifyConnector) Search(q string, p uint) (*SearchResult, error) {
 	results, err := c.GetClient().Search(c.ctx, q, spotify.SearchTypePlaylist|spotify.SearchTypeAlbum|spotify.SearchTypeArtist|spotify.SearchTypeTrack)
 	if err != nil {
 		return nil, err
 	}
-
 	return &SearchResult{
 		Tracks:    getTracks(results),
 		Artists:   getArtist(results),
@@ -154,7 +177,6 @@ func (c SpotifyConnector) GetStreamURL(ID string) (string, error) {
 	}
 	if len(result.Tracks) < 1 {
 		return "", ErrCouldNotFindVideo
-
 	}
 	videoID := result.Tracks[0].VideoID
 
@@ -175,9 +197,9 @@ func (c SpotifyConnector) GetStreamURL(ID string) (string, error) {
 	return url, nil
 }
 
-func getTracks(res *spotify.SearchResult) []Track {
+func getTracks(res *spotify.SearchResult) []*Track {
 
-	tracks := make([]Track, 0)
+	tracks := make([]*Track, 0)
 	for _, t := range res.Tracks.Tracks {
 
 		artists := make([]Artist, 0)
@@ -188,7 +210,7 @@ func getTracks(res *spotify.SearchResult) []Track {
 			})
 		}
 
-		tracks = append(tracks, Track{
+		tracks = append(tracks, &Track{
 			ID:      string(t.ID),
 			Title:   t.Name,
 			Artists: artists,
@@ -204,10 +226,10 @@ func getTracks(res *spotify.SearchResult) []Track {
 	return tracks
 }
 
-func getArtist(res *spotify.SearchResult) []Artist {
-	artists := make([]Artist, 0)
+func getArtist(res *spotify.SearchResult) []*Artist {
+	artists := make([]*Artist, 0)
 	for _, a := range res.Artists.Artists {
-		artists = append(artists, Artist{
+		artists = append(artists, &Artist{
 			ID:        string(a.ID),
 			Name:      a.Name,
 			Thumbnail: getThumbnail(a.Images),
@@ -216,9 +238,9 @@ func getArtist(res *spotify.SearchResult) []Artist {
 	return artists
 }
 
-func getAlbums(res *spotify.SearchResult) []Album {
+func getAlbums(res *spotify.SearchResult) []*Album {
 
-	albums := make([]Album, 0)
+	albums := make([]*Album, 0)
 	for _, a := range res.Albums.Albums {
 
 		artists := make([]Artist, 0)
@@ -229,7 +251,7 @@ func getAlbums(res *spotify.SearchResult) []Album {
 			})
 		}
 
-		albums = append(albums, Album{
+		albums = append(albums, &Album{
 			ID:        string(a.ID),
 			Name:      a.Name,
 			Thumbnail: getThumbnail(a.Images),
@@ -239,10 +261,10 @@ func getAlbums(res *spotify.SearchResult) []Album {
 	return albums
 }
 
-func getPlaylists(res *spotify.SearchResult) []Playlist {
-	playlists := make([]Playlist, 0)
+func getPlaylists(res *spotify.SearchResult) []*Playlist {
+	playlists := make([]*Playlist, 0)
 	for _, p := range res.Playlists.Playlists {
-		playlists = append(playlists, Playlist{
+		playlists = append(playlists, &Playlist{
 			ID:        string(p.ID),
 			Name:      p.Name,
 			Thumbnail: getThumbnail(p.Images),

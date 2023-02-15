@@ -1,7 +1,6 @@
 package command
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -47,14 +46,6 @@ func (c *CommandHandler) handlePlayResponse(s *discordgo.Session, i *discordgo.I
 				return
 			}
 
-			// Respond to interaction
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "Added song to playlist",
-				},
-			})
-
 			// Delete track messages
 			messagesToDelete := messagesToDeleteByInteractionID[interactionID]
 			if len(messagesToDelete) == 0 {
@@ -94,7 +85,7 @@ func (c *CommandHandler) search() *bot.CommandAndHandler {
 			// Search for the songs
 			result, err := c.musicManager.Search(q, 0)
 			if err != nil {
-				respond(s, i, fmt.Sprintf("failed to search %s", err.Error()))
+				handleError(s, i, err, "failed to search")
 				return
 			}
 
@@ -102,17 +93,19 @@ func (c *CommandHandler) search() *bot.CommandAndHandler {
 			err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "Here are some songs i found",
+					Flags:   discordgo.MessageFlagsEphemeral,
+					Content: "Here are the songs I found: ",
 				},
 			})
-
 			if err != nil {
-				log.Error(err)
+				handleError(s, i, err, "failed to respond")
 				return
 			}
 
+			err = s.InteractionResponseDelete(i.Interaction)
+
 			// Append tracks to response
-			messagesToDeleteByInteractionID[i.ID] = make([]string, 0)
+			messagesToDeleteByInteractionID[i.ID] = []string{}
 			for index, r := range result.Tracks {
 
 				if index > 4 {
@@ -151,7 +144,7 @@ func (c *CommandHandler) search() *bot.CommandAndHandler {
 					},
 				})
 				if err != nil {
-					log.Error(err)
+					handleError(s, i, err, "failed to print search results")
 					return
 				}
 				messagesToDeleteByInteractionID[i.ID] = append(messagesToDeleteByInteractionID[i.ID], m.ID)

@@ -1,10 +1,6 @@
 <script lang="ts">
 	import { join } from '$lib/api/bot.api.js';
-	import {
-		getPlayerState,
-		subscribeToPlayerState,
-		subscribeToProgress
-	} from '$lib/api/music.api';
+	import { getPlayerState, subscribeToPlayerState, subscribeToProgress } from '$lib/api/music.api';
 	import { pause, play, skip } from '$lib/api/music.api.js';
 	import Loader from '$lib/components/Loader.svelte';
 	import { PlayerStatus } from '$lib/model/player-status';
@@ -145,7 +141,7 @@
 		width: 100vw;
 		padding: 6px;
 		background-color: rgb(53, 53, 53);
-		filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
+		filter: drop-shadow(3px 5px 2px rgb(0, 0, 0));
 		color: white;
 		box-sizing: border-box;
 
@@ -210,10 +206,10 @@
 				align-items: center;
 				justify-content: center;
 				background-size: contain;
-				box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
-				-moz-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
-				-webkit-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
-				-o-box-shadow: 0 0 20px 0 rgb(0 0 0 / 60%);
+				box-shadow: 0 0 20px 0 rgb(0, 0, 0);
+				-moz-box-shadow: 0 0 20px 0 rgb(0, 0, 0);
+				-webkit-box-shadow: 0 0 20px 0 rgb(0, 0, 0);
+				-o-box-shadow: 0 0 20px 0 rgb(0, 0, 0);
 
 				&.pause {
 					background: url('$lib/assets/icons/pause.svg');

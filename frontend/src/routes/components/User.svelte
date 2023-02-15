@@ -32,6 +32,9 @@
 				src={`https://cdn.discordapp.com/avatars/${user?.id}/${user?.avatar}.png`}
 				alt="avatar"
 				on:click={() => toggle()}
+				on:keydown={() => {}}
+				on:keyup={() => {}}
+				on:keypress={() => {}}
 			/>
 			<div
 				class="group z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 block absolute right-0 top-16"
@@ -40,7 +43,7 @@
 				<ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefault">
 					<li>
 						<a
-							href={"#"}
+							href={'#'}
 							class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
 							on:click={() => signOut()}>Sign out</a
 						>

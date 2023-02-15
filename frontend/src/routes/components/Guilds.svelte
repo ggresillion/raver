@@ -40,6 +40,9 @@
 				style:background={stringToRGB(name)}
 				title={name}
 				on:click={() => selectGuild(id)}
+				on:keydown={() => {}}
+				on:keyup={() => {}}
+				on:keypress={() => {}}
 			>
 				{#if icon}
 					<img
@@ -52,7 +55,14 @@
 				{/if}
 			</div>
 		{/each}
-		<div class="w-12 h-12 rounded-full cursor-pointer" title="Add to guild" on:click={addGuild}>
+		<div
+			class="w-12 h-12 rounded-full cursor-pointer"
+			title="Add to guild"
+			on:click={addGuild}
+			on:keydown={() => {}}
+			on:keyup={() => {}}
+			on:keypress={() => {}}
+		>
 			<img class="w-12 h-12" src={addIcon} alt="Add to guild" />
 		</div>
 	{/await}

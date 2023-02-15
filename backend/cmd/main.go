@@ -4,7 +4,10 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	log "github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/rs/zerolog/pkgerrors"
 	"github.com/spf13/viper"
 
 	"github.com/ggresillion/discordsoundboard/backend/app"
@@ -13,10 +16,16 @@ import (
 
 func init() {
 	// Change log output from stderr to stdout
-	log.SetOutput(os.Stdout)
+	log.Output(os.Stdout)
 
 	// Set the level to debug
-	log.SetLevel(log.DebugLevel)
+	log.Level(zerolog.DebugLevel)
+
+	// Configure logger
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	zerolog.ErrorStackMarshaler = func(err error) interface{} {
+		return pkgerrors.MarshalStack(errors.WithStack(err))
+	}
 
 	godotenv.Load()
 
