@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
+	"github.com/bwmarrin/discordgo"
+	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	discordAuth "github.com/ravener/discord-oauth2"
@@ -25,16 +26,20 @@ const (
 type AuthAPI struct {
 	conf *oauth2.Config
 	dev  bool
+	bot  *bot.Bot
 }
 
-func NewAuthAPI(host, clientID, clientSecret string, dev bool) *AuthAPI {
-	return &AuthAPI{&oauth2.Config{
-		RedirectURL:  host + "/api/auth/callback",
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		Scopes:       []string{discordAuth.ScopeIdentify, discordAuth.ScopeGuilds},
-		Endpoint:     discordAuth.Endpoint,
-	}, dev}
+func NewAuthAPI(host, clientID, clientSecret string, dev bool, bot *bot.Bot) *AuthAPI {
+	return &AuthAPI{
+		&oauth2.Config{
+			RedirectURL:  host + "/api/auth/callback",
+			ClientID:     clientID,
+			ClientSecret: clientSecret,
+			Scopes:       []string{discordAuth.ScopeIdentify, discordAuth.ScopeGuilds},
+			Endpoint:     discordAuth.Endpoint,
+		},
+		dev,
+		bot}
 }
 
 func GetToken(c echo.Context) string {
@@ -138,13 +143,11 @@ func (a *AuthAPI) AuthCallback(c echo.Context) error {
 func (a *AuthAPI) GetMe(c echo.Context) error {
 	token := c.Get("token").(string)
 
-	dc := discord.NewDiscordClient(token)
-
-	user, err := dc.GetUser()
+	user, err := a.bot.GetUser(token)
 	if err != nil {
-		var discordError *discord.ApiError
+		var discordError *discordgo.RESTError
 		if errors.As(err, &discordError) {
-			if discordError.Code == http.StatusUnauthorized {
+			if discordError.Response.StatusCode == http.StatusUnauthorized {
 				return echo.NewHTTPError(http.StatusUnauthorized, discordError.Message)
 			}
 		}

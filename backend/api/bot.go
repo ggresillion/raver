@@ -1,10 +1,11 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/ggresillion/discordsoundboard/backend/internal/bot"
-	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
 	"github.com/labstack/echo/v4"
 )
 
@@ -64,10 +65,14 @@ func (a *BotAPI) JoinChannel(c echo.Context) error {
 	guildID := c.Param("guildID")
 	token := c.Get("token").(string)
 
-	dc := discord.NewDiscordClient(token)
-
-	user, err := dc.GetUser()
+	user, err := a.bot.GetUser(token)
 	if err != nil {
+		var discordError *discordgo.RESTError
+		if errors.As(err, &discordError) {
+			if discordError.Response.StatusCode == http.StatusUnauthorized {
+				return echo.NewHTTPError(http.StatusUnauthorized, discordError.Message)
+			}
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
