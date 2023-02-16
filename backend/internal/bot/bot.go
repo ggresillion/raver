@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/samber/lo"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/ggresillion/discordsoundboard/backend/internal/discord"
 )
 
 type Bot struct {
@@ -34,6 +34,8 @@ func (b *Bot) StartBot() error {
 	if err != nil {
 		return fmt.Errorf("error creating Discord session: %w", err)
 	}
+
+	b.session.Debug = true
 
 	b.session.AddHandler(ready)
 	b.session.AddHandler(b.guildCreate)
@@ -74,20 +76,19 @@ func (b *Bot) GetLatency() time.Duration {
 	return b.session.HeartbeatLatency()
 }
 
-func (b *Bot) GetGuilds(token string) ([]discord.Guild, error) {
-	dc := discord.NewDiscordClient(token)
-	userGuilds, err := dc.GetGuilds()
+func (b *Bot) GetGuilds(token string) ([]*discordgo.UserGuild, error) {
+	userGuilds, err := b.session.UserGuilds(100, "", "", discordgo.WithHeader("Authorization", "Bearer "+token))
 	if err != nil {
 		return nil, err
 	}
 
-	guilds := make([]discord.Guild, 0)
-	for _, g1 := range b.session.State.Guilds {
-		for _, g2 := range userGuilds {
-			if g1.ID == g2.ID {
-				guilds = append(guilds, g2)
-			}
-		}
-	}
-	return guilds, nil
+	return lo.Filter(userGuilds, func(g1 *discordgo.UserGuild, _ int) bool {
+		return lo.ContainsBy(b.session.State.Guilds, func(g2 *discordgo.Guild) bool {
+			return g1.ID == g2.ID
+		})
+	}), nil
+}
+
+func (b *Bot) GetUser(token string) (*discordgo.User, error) {
+	return b.session.User("@me", discordgo.WithHeader("Authorization", "Bearer "+token))
 }

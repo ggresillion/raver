@@ -23,7 +23,7 @@ func Start(conf *config.Config) {
 	command.NewCommandHandler(b, musicManager)
 
 	// Start API
-	authAPI := api.NewAuthAPI(conf.Host, conf.ClientID, conf.ClientSecret, conf.Dev)
+	authAPI := api.NewAuthAPI(conf.Host, conf.ClientID, conf.ClientSecret, conf.Dev, b)
 	musicAPI := api.NewMusicAPI(musicManager)
 	botAPI := api.NewBotAPI(conf.ClientID, b)
 	a := api.NewAPI(conf.Dev, conf.Port, authAPI, musicAPI, botAPI)
