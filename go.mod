@@ -2,7 +2,10 @@ module raver
 
 go 1.21.1
 
-require github.com/bwmarrin/discordgo v0.27.1
+require (
+	github.com/buger/jsonparser v1.1.1
+	github.com/bwmarrin/discordgo v0.27.1
+)
 
 require (
 	github.com/bitly/go-simplejson v0.5.1 // indirect
@@ -22,7 +25,6 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/jfbus/httprs v1.0.1
 	github.com/kkdai/youtube/v2 v2.9.0
-	github.com/raitonoberu/ytmusic v0.0.0-20220927155833-3d1de71caa11
-	golang.org/x/crypto v0.7.0 // indirect
+	golang.org/x/crypto v0.13.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 )

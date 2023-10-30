@@ -5,7 +5,7 @@ type AudioStream struct {
 	In chan []byte
 	// Output audio stream
 	Out     chan []byte
-	stop    chan error
+	End     chan error
 	queue   chan []byte
 	pause   chan bool
 	playing bool
@@ -14,15 +14,22 @@ type AudioStream struct {
 func NewAudioStream() *AudioStream {
 	return &AudioStream{
 		In:      make(chan []byte),
-		Out:     make(chan []byte),
 		queue:   make(chan []byte),
-		stop:    make(chan error),
+		End:     make(chan error),
 		pause:   make(chan bool),
 		playing: false,
 	}
 }
 
+func (s *AudioStream) Bind(c chan []byte) {
+	s.Out = c
+}
+
 func (s *AudioStream) Play() {
+	if s.playing {
+		s.pause <- true
+		return
+	}
 	s.playing = true
 	go func() {
 	play:
@@ -30,10 +37,16 @@ func (s *AudioStream) Play() {
 			select {
 			case <-s.pause:
 				goto pause
-			case <-s.stop:
+			case <-s.End:
 				s.playing = false
 				return
-			case s.Out <- <-s.In:
+			case data, more := <-s.In:
+				if !more {
+					s.playing = false
+					s.End <- nil
+					return
+				}
+				s.Out <- data
 			}
 		}
 	pause:
@@ -43,17 +56,13 @@ func (s *AudioStream) Play() {
 }
 
 func (s *AudioStream) Stop() {
-	s.stop <- nil
+	s.End <- nil
 }
 
 func (s *AudioStream) Pause() {
 	s.pause <- true
 }
 
-func (s *AudioStream) Resume() {
-	s.pause <- false
-}
-
 func (s *AudioStream) BlockUntilStop() {
-	<-s.stop
+	<-s.End
 }

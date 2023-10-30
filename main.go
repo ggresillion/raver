@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -9,43 +8,26 @@ import (
 	"raver/discord"
 )
 
-var (
-	token string
-)
+var token string
 
 func init() {
-	flag.StringVar(&token, "t", "", "Bot Token")
-	flag.Parse()
+	token = os.Getenv("BOT_TOKEN")
 }
 
-func main() {
-	bot := discord.NewBot(token)
+func Start(bot *discord.Bot) {
 	err := bot.Connect()
 	if err != nil {
 		panic(err)
 	}
-
-	// tracks, err := youtube.Search("Daft punk")
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// fmt.Println(tracks)
-
-	// audioStream, err := youtube.GetStreamFromYoutube(tracks[1].ID)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// bot.PlayStream(audioStream, "423590632582414346", "423590632582414350")
-
-	// audioStream.BlockUntilStop()
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 	fmt.Println("Blocking, press ctrl+c to continue...")
 	<-stop
-
 	log.Println("Gracefully shutting down")
 	bot.Stop()
+}
 
+func main() {
+	bot := discord.NewBot(token)
+	Start(bot)
 }
