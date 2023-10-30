@@ -1,8 +1,10 @@
 package discord
 
 import (
+	"errors"
 	"fmt"
 	"log"
+
 	"raver/audio"
 
 	"github.com/bwmarrin/discordgo"
@@ -11,40 +13,56 @@ import (
 type Bot struct {
 	token   string
 	session *discordgo.Session
+	gbots   map[string]*GBot
+}
+
+type GBot struct {
+	Playlist          *audio.Playlist
+	PlaylistMessageID *string
+	session           *discordgo.Session
+	guild             *discordgo.Guild
+	vc                *discordgo.VoiceConnection
 }
 
 func NewBot(token string) *Bot {
-	return &Bot{token: token}
+	return &Bot{token: token, gbots: map[string]*GBot{}}
 }
 
 func (b *Bot) Connect() error {
-	// Create a new Discord session using the provided bot token.
-	session, err := discordgo.New("Bot " + b.token)
-	if err != nil {
-		return fmt.Errorf("error creating Discord session: %w", err)
+	if b.session == nil {
+		// Create a new Discord session using the provided bot token.
+		session, err := discordgo.New("Bot " + b.token)
+		if err != nil {
+			return fmt.Errorf("error creating Discord session: %w", err)
+		}
+		b.session = session
 	}
-	b.session = session
 
 	// We need information about guilds (which includes their channels),
 	// messages and voice states.
 	b.session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsGuildVoiceStates
 
 	// Register handlers
-	b.session.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) { log.Println("Bot is connected") })
+	b.session.AddHandler(func(_ *discordgo.Session, _ *discordgo.Ready) { log.Println("Bot: connected") })
 	b.session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
-			h(b, s, i)
+		if h, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
+			g, err := b.Guild(i.GuildID)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			h(g, s, i)
 		}
 	})
 
 	// Open the websocket and begin listening.
-	err = b.session.Open()
+	err := b.session.Open()
 	if err != nil {
 		return fmt.Errorf("error opening Discord session: %w", err)
 	}
 
 	// Create commands
-	_, err = b.session.ApplicationCommandBulkOverwrite(b.session.State.User.ID, "", commands)
+	_, err = b.session.ApplicationCommandBulkOverwrite(b.session.State.User.ID, "", Commands)
 	if err != nil {
 		log.Fatalf("Cannot register commands: %v", err)
 	}
@@ -56,23 +74,69 @@ func (b *Bot) Stop() {
 	b.session.Close()
 }
 
-func (b *Bot) PlayStream(audioStream *audio.AudioStream, guildID, channelID string) (err error) {
+func (b *Bot) Guild(guildID string) (*GBot, error) {
+	g, exists := b.gbots[guildID]
+	if exists {
+		return g, nil
+	}
+	guild, err := b.session.State.Guild(guildID)
+	if err != nil {
+		return nil, err
+	}
+	g = &GBot{
+		session: b.session,
+		guild:   guild,
+		Playlist: audio.NewPlaylist(
+			guildID,
+			func(stream *audio.AudioStream) error {
+				return g.BindStream(stream)
+			}),
+	}
+	b.gbots[guildID] = g
+	return g, nil
+}
 
-	log.Printf("Connecting to channel %q in guild %q", channelID, guildID)
-
-	vc, err := b.session.ChannelVoiceJoin(guildID, channelID, false, true)
+func (g *GBot) BindStream(audioStream *audio.AudioStream) error {
+	if g.vc == nil {
+		return errors.New("no voice connection available")
+	}
+	err := g.vc.Speaking(true)
 	if err != nil {
 		return err
 	}
 
-	vc.Speaking(true)
+	audioStream.Out = g.vc.OpusSend
 
 	go func() {
-		audioStream.Out = vc.OpusSend
-		audioStream.Play()
 		audioStream.BlockUntilStop()
-		vc.Speaking(false)
+		err := g.vc.Speaking(false)
+		if err != nil {
+			log.Println(err)
+		}
 	}()
 
+	log.Printf("Bot: playing stream %p", audioStream)
 	return nil
+}
+
+func (g *GBot) JoinUserChannel(userID string) error {
+	log.Printf("Bot: trying to join voice channel for user %s", userID)
+	// guild, err := g.session.State.Guild(g.guild.ID)
+	// if err != nil {
+	// 	return err
+	// }
+	for _, v := range g.guild.VoiceStates {
+		if v.UserID == userID {
+			vc, err := g.session.ChannelVoiceJoin(g.guild.ID, v.ChannelID, false, true)
+			if err != nil {
+				return err
+			}
+
+			g.vc = vc
+			vc.Speaking(true)
+			log.Printf("Bot: joinned voice channel %s", vc.ChannelID)
+			return nil
+		}
+	}
+	return fmt.Errorf("Bot: user %s not in a voice channel", userID)
 }

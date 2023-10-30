@@ -12,7 +12,7 @@ import (
 	"github.com/kkdai/youtube/v2"
 )
 
-func GetStreamFromYoutube(videoID string) (*audio.AudioStream, error) {
+func GetPlayableTrackFromYoutube(videoID string) (*audio.Track, error) {
 	client := youtube.Client{}
 
 	video, err := client.GetVideo(videoID)
@@ -20,7 +20,7 @@ func GetStreamFromYoutube(videoID string) (*audio.AudioStream, error) {
 		return nil, err
 	}
 
-	log.Printf("Got video info %q", video.ID)
+	log.Printf("Youtube: got video info %q", video.ID)
 
 	formats := video.Formats.FindByItag(251) // only get videos with audio
 
@@ -35,14 +35,15 @@ func GetStreamFromYoutube(videoID string) (*audio.AudioStream, error) {
 	}
 
 	rs := httprs.NewHttpReadSeeker(resp)
-	log.Println("Got video stream")
+	log.Println("Youtube: got webm video stream")
 
 	audioStream, err := extractOpus(rs)
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("Youtube: converting to opus stream %p", audioStream)
 
-	return audioStream, nil
+	return audio.NewTrack(audio.TrackInfo{video.ID, video.Title, video.Author, video.Duration, false}, audioStream), nil
 }
 
 func extractOpus(stream io.ReadSeeker) (*audio.AudioStream, error) {
