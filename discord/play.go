@@ -95,19 +95,13 @@ func addToPlaylist(g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate
 		return
 	}
 
-	go func() {
-		change := g.Player.Change
-		for {
-			<-change
-			g.PrintPlaylist(s, i.Interaction)
-		}
-	}()
-
 	err = g.Player.Add(track)
 	if err != nil {
 		sendError(s, i.Interaction, err)
 		return
 	}
+
+	g.PrintPlaylist(s, i.Interaction)
 
 	err = s.InteractionResponseDelete(i.Interaction)
 	if err != nil {

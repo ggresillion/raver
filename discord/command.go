@@ -19,6 +19,7 @@ var (
 		"pause":    PauseCommand{}.Handler,
 		"resume":   PauseCommand{}.Handler,
 		"skip":     SkipCommand{}.Handler,
+		"stop":     StopCommand{}.Handler,
 	}
 )
 
@@ -29,10 +30,4 @@ func sendError(s *discordgo.Session, i *discordgo.Interaction, err error) error 
 		Flags:   discordgo.MessageFlagsEphemeral,
 	})
 	return err
-	// return s.InteractionRespond(i, &discordgo.InteractionResponse{
-	// 	Type: discordgo.InteractionResponseChannelMessageWithSource,
-	// 	Data: &discordgo.InteractionResponseData{
-	// 		Content: err.Error(),
-	// 	},
-	// })
 }

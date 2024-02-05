@@ -1,0 +1,5 @@
+**/.vscode
+**/__debug*
+.git
+
+fly.toml
