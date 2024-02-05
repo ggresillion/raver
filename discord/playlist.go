@@ -24,6 +24,16 @@ func (c PlaylistCommand) Handler(g *GBot, s *discordgo.Session, i *discordgo.Int
 
 func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
 	log.Printf("bot: updating playlist display for: %s", i.ChannelID)
+	if len(g.Player.Queue) == 0 {
+		err := s.ChannelMessageDelete(g.PlaylistChannelID, g.PlaylistMessageID)
+		if err != nil {
+			sendError(s, i, err)
+			return
+		}
+		g.PlaylistChannelID = ""
+		g.PlaylistMessageID = ""
+		return
+	}
 	var tracks []*discordgo.MessageEmbedField
 	for _, track := range g.Player.Queue {
 		tracks = append(tracks, &discordgo.MessageEmbedField{
