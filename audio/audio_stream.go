@@ -36,66 +36,73 @@ func NewAudioStream(in chan []byte) *AudioStream {
 			select {
 			case data, more := <-s.In:
 				if !more {
-					log.Println("stream: end of stream")
-					s.end <- nil
+					log.Printf("stream[%p]: end of stream", s)
+					close(s.buffer)
 					return
 				}
 				s.buffer <- data
 			case <-s.OnStop():
-				log.Println("stream: closing buffer")
+				log.Printf("stream[%p]: closing buffer", s)
 				close(s.buffer)
 				return
 			}
 		}
 	}()
+	log.Printf("stream[%p]: created a new stream", s)
 	return s
 }
 
 func (s *AudioStream) Play() {
 	if s.playing {
 		s.pause <- true
-		log.Println("stream: pausing stream")
+		log.Printf("stream[%p]: pausing stream", s)
 		return
 	}
 	s.playing = true
-	log.Println("stream: playing stream")
+	log.Printf("stream[%p]: playing stream", s)
 	// main loop
 	go func() {
+		defer func() {
+			s.playing = false
+			for _, ch := range s.endChannels {
+				close(ch)
+			}
+			close(s.Out)
+			close(s.pause)
+			close(s.queue)
+			close(s.end)
+			log.Printf("stream[%p]: closed stream", s)
+		}()
 	play:
 		for {
 			select {
 			case <-s.pause:
-				log.Println("stream: pausing stream")
+				log.Printf("stream[%p]: pausing stream", s)
 				goto pause
 			case <-s.end:
-				log.Println("stream: starting closing sequence")
-				s.playing = false
-				for _, ch := range s.endChannels {
-					close(ch)
-				}
-				close(s.Out)
-				close(s.pause)
-				close(s.queue)
-				close(s.end)
-				log.Println("stream: closed stream")
+				log.Printf("stream[%p]: stopping stream", s)
 				return
-			case data := <-s.buffer:
+			case data, ok := <-s.buffer:
+				if !ok {
+					log.Printf("stream[%p]: no more data in buffer, closing", s)
+					return
+				}
 				s.Out <- data
 			}
 		}
 	pause:
 		<-s.pause
-		log.Println("stream: resuming stream")
+		log.Printf("stream[%p]: resuming stream", s)
 		goto play
 	}()
 }
 
 func (s *AudioStream) Stop() {
 	if !s.playing {
+		log.Printf("stream[%p]: not playing", s)
 		return
 	}
-	s.end <- nil
-	log.Println("stream: sent end signal")
+	go func() { s.end <- nil }()
 }
 
 func (s *AudioStream) OnStop() <-chan struct{} {

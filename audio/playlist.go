@@ -104,8 +104,9 @@ func (p *Player) Add(t *Track) error {
 		if err != nil {
 			return fmt.Errorf("player: error playing track: %v", err)
 		}
+	} else {
+		p.notifyChange()
 	}
-	p.notifyChange()
 	return nil
 }
 

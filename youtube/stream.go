@@ -59,15 +59,16 @@ func extractOpus(stream io.ReadSeeker) (*audio.AudioStream, error) {
 
 	go func() {
 		<-audioStream.OnStop()
-		log.Println("youtube: stoping input stream")
+		log.Printf("youtube[%p]: stoping input stream", audioStream)
 		wr.Shutdown()
 	}()
 
 	go func() {
 		for {
 			packet, ok := <-wr.Chan
-			if !ok {
-				audioStream.Stop()
+			if len(packet.Data) == 0 || !ok {
+				log.Printf("youtube[%p]: end of input stream", audioStream)
+				close(audioStream.In)
 				return
 			}
 			audioStream.In <- packet.Data
