@@ -4,18 +4,18 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type PauseCommand struct{}
+type SkipCommand struct{}
 
-func (c PauseCommand) Command() *discordgo.ApplicationCommand {
+func (c SkipCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
-		Name:        "pause",
-		Description: "Pause the current track",
+		Name:        "skip",
+		Description: "Skip the current track",
 		Type:        discordgo.ChatApplicationCommand,
 	}
 }
 
-func (c PauseCommand) Handler(g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	g.Player.Pause()
+func (c SkipCommand) Handler(g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	g.Player.Skip()
 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseUpdateMessage,

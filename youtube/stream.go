@@ -12,6 +12,7 @@ import (
 	"github.com/kkdai/youtube/v2"
 )
 
+// GetPlayableTrackFromYoutube returns a audio.Track from a given videoID
 func GetPlayableTrackFromYoutube(videoID string) (*audio.Track, error) {
 	client := youtube.Client{}
 
@@ -20,11 +21,11 @@ func GetPlayableTrackFromYoutube(videoID string) (*audio.Track, error) {
 		return nil, err
 	}
 
-	log.Printf("Youtube: got video info %q", video.ID)
+	log.Printf("youtube: got video info %q", video.ID)
 
-	formats := video.Formats.FindByItag(251) // only get videos with audio
+	formats := video.Formats.Quality("251") // only get videos with audio
 
-	url, err := client.GetStreamURL(video, formats)
+	url, err := client.GetStreamURL(video, &formats[0])
 	if err != nil {
 		return nil, err
 	}
@@ -35,19 +36,21 @@ func GetPlayableTrackFromYoutube(videoID string) (*audio.Track, error) {
 	}
 
 	rs := httprs.NewHttpReadSeeker(resp)
-	log.Println("Youtube: got webm video stream")
+	log.Println("youtube: got webm video stream")
 
 	audioStream, err := extractOpus(rs)
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Youtube: converting to opus stream %p", audioStream)
+	log.Println("youtube: converting to opus stream")
 
-	return audio.NewTrack(audio.TrackInfo{video.ID, video.Title, video.Author, video.Duration, false}, audioStream), nil
+	return audio.NewTrack(audio.TrackInfo{ID: video.ID, Title: video.Title, Artist: video.Author, Duration: video.Duration, Live: false}, audioStream), nil
 }
 
+// extractOpus reads the incoming stream, parses it as a webm container and extract opus stream.
 func extractOpus(stream io.ReadSeeker) (*audio.AudioStream, error) {
-	audioStream := audio.NewAudioStream()
+	in := make(chan []byte)
+	audioStream := audio.NewAudioStream(in)
 	var w webm.WebM
 	wr, err := webm.Parse(stream, &w)
 	if err != nil {
@@ -55,9 +58,19 @@ func extractOpus(stream io.ReadSeeker) (*audio.AudioStream, error) {
 	}
 
 	go func() {
+		<-audioStream.OnStop()
+		log.Println("youtube: stoping input stream")
+		wr.Shutdown()
+	}()
+
+	go func() {
 		for {
-			el := <-wr.Chan
-			audioStream.In <- el.Data
+			packet, ok := <-wr.Chan
+			if !ok {
+				audioStream.Stop()
+				return
+			}
+			audioStream.In <- packet.Data
 		}
 	}()
 

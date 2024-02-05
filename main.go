@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -21,7 +20,7 @@ func Start(bot *discord.Bot) {
 	}
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
-	fmt.Println("Blocking, press ctrl+c to continue...")
+	log.Println("Blocking, press ctrl+c to continue...")
 	<-stop
 	log.Println("Gracefully shutting down")
 	bot.Stop()

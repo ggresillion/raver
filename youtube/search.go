@@ -2,15 +2,13 @@ package youtube
 
 import (
 	"fmt"
-	"io"
 	"log"
-	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
 	"raver/audio"
 
+	"github.com/Pauloo27/searchtube"
 	"github.com/buger/jsonparser"
 )
 
@@ -46,102 +44,24 @@ func parseDurationFromMMSS(input string) (time.Duration, error) {
 	return duration, nil
 }
 
+// Search searches for audio tracks on YouTube.
 func Search(searchTerm string, limit int) (results []audio.TrackInfo, err error) {
-	url := fmt.Sprintf("https://www.youtube.com/results?search_query=%s", url.QueryEscape(searchTerm))
+	videos, err := searchtube.Search(searchTerm, limit)
 
-	var httpClient = &http.Client{}
-	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return
+		return nil, err
 	}
-	req.Header.Add("Accept-Language", "en")
-	res, err := httpClient.Do(req)
-	if err != nil {
-		return
+	for _, v := range videos {
+		duration, _ := v.GetDuration()
+		track := audio.TrackInfo{
+			ID:       v.ID,
+			Title:    v.Title,
+			Artist:   v.Uploader,
+			Duration: duration,
+			Live:     v.Live,
+		}
+		results = append(results, track)
 	}
-
-	defer res.Body.Close()
-	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
-	}
-
-	buffer, err := io.ReadAll(res.Body)
-	if err != nil {
-		return
-	}
-
-	body := string(buffer)
-	splittedScript := strings.Split(body, `window["ytInitialData"] = `)
-	if len(splittedScript) != 2 {
-		splittedScript = strings.Split(body, `var ytInitialData = `)
-	}
-
-	if len(splittedScript) != 2 {
-		if err != nil {
-			return
-		}
-	}
-	splittedScript = strings.Split(splittedScript[1], `window["ytInitialPlayerResponse"] = null;`)
-	jsonData := []byte(splittedScript[0])
-
-	index := 0
-	var contents []byte
-
-	for {
-		contents = getContent(jsonData, index)
-		_, _, _, err = jsonparser.Get(contents, "[0]", "carouselAdRenderer")
-
-		if err == nil {
-			index++
-		} else {
-			break
-		}
-	}
-
-	_, err = jsonparser.ArrayEach(contents, func(value []byte, t jsonparser.ValueType, i int, err error) {
-		if err != nil {
-			return
-		}
-		if limit > 0 && len(results) >= limit {
-			return
-		}
-
-		id, err := jsonparser.GetString(value, "videoRenderer", "videoId")
-		if err != nil {
-			return
-		}
-
-		title, err := jsonparser.GetString(value, "videoRenderer", "title", "runs", "[0]", "text")
-		if err != nil {
-			return
-		}
-
-		uploader, err := jsonparser.GetString(value, "videoRenderer", "ownerText", "runs", "[0]", "text")
-		if err != nil {
-			return
-		}
-
-		live := false
-		duration, err := jsonparser.GetString(value, "videoRenderer", "lengthText", "simpleText")
-
-		if err != nil {
-			duration = ""
-			live = true
-		}
-
-		parsedDuration, err := parseDurationFromMMSS(duration)
-		if err != nil {
-			return
-		}
-
-		results = append(results, audio.TrackInfo{
-			ID:       id,
-			Title:    title,
-			Artist:   uploader,
-			Duration: parsedDuration,
-			Live:     live,
-		})
-	})
-
+	log.Printf("youtube: found %d results", len(results))
 	return
 }

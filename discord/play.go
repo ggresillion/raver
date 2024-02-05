@@ -2,7 +2,6 @@ package discord
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/bwmarrin/discordgo"
 
@@ -31,71 +30,95 @@ func (c PlayCommand) Command() *discordgo.ApplicationCommand {
 func (c PlayCommand) Handler(g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	switch i.Type {
 	case discordgo.InteractionApplicationCommand:
-		data := i.ApplicationCommandData()
-		trackID := data.Options[0].StringValue()
-
-		err := g.JoinUserChannel(i.Member.User.ID)
-		if err != nil {
-			sendError(s, i.Interaction, err)
-			return
-		}
-
-		track, err := youtube.GetPlayableTrackFromYoutube(trackID)
-		if err != nil {
-			sendError(s, i.Interaction, err)
-			return
-		}
-
-		g.Playlist.RegisterOnChange(func() { g.PrintPlaylist(i.Interaction) })
-
-		err = g.Playlist.Add(track)
-		if err != nil {
-			sendError(s, i.Interaction, err)
-			return
-		}
-
-		err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("Added %q to queue", trackID),
-			},
-		})
-		if err != nil {
-			sendError(s, i.Interaction, err)
-			return
-		}
-
+		addToPlaylist(g, s, i)
 	case discordgo.InteractionApplicationCommandAutocomplete:
-		data := i.ApplicationCommandData()
-		q := data.Options[0].StringValue()
-		if len(q) < 3 {
-			return
-		}
-		tracks, err := youtube.Search(data.Options[0].StringValue(), 0)
-		if err != nil {
-			log.Println(err)
-			sendError(s, i.Interaction, err)
-			return
-		}
+		autocompleteSearch(s, i)
+	}
+}
 
-		var choices []*discordgo.ApplicationCommandOptionChoice
-		for _, track := range tracks {
-			choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-				Name:  fmt.Sprintf("%q - %q", track.Title, track.Artist),
-				Value: track.ID,
-			})
-		}
-
-		err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionApplicationCommandAutocompleteResult,
-			Data: &discordgo.InteractionResponseData{
-				Choices: choices,
-			},
-		})
-		if err != nil {
-			sendError(s, i.Interaction, err)
-			return
-		}
+func autocompleteSearch(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	data := i.ApplicationCommandData()
+	q := data.Options[0].StringValue()
+	if len(q) < 3 {
+		return
+	}
+	tracks, err := youtube.Search(data.Options[0].StringValue(), 0)
+	if err != nil {
+		sendError(s, i.Interaction, err)
+		return
 	}
 
+	var choices []*discordgo.ApplicationCommandOptionChoice
+	for _, track := range tracks {
+		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+			Name:  fmt.Sprintf("%q - %q", truncate(track.Title, 50), truncate(track.Artist, 50)),
+			Value: track.ID,
+		})
+	}
+
+	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
+		Data: &discordgo.InteractionResponseData{
+			Choices: choices,
+		},
+	})
+	if err != nil {
+		sendError(s, i.Interaction, err)
+		return
+	}
+}
+
+func addToPlaylist(g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	data := i.ApplicationCommandData()
+	trackID := data.Options[0].StringValue()
+
+	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Flags: discordgo.MessageFlagsEphemeral,
+		},
+	})
+	if err != nil {
+		sendError(s, i.Interaction, err)
+		return
+	}
+
+	err = g.JoinUserChannel(i.Member.User.ID)
+	if err != nil {
+		sendError(s, i.Interaction, err)
+		return
+	}
+
+	track, err := youtube.GetPlayableTrackFromYoutube(trackID)
+	if err != nil {
+		sendError(s, i.Interaction, err)
+		return
+	}
+
+	go func() {
+		change := g.Player.Change
+		for {
+			<-change
+			g.PrintPlaylist(s, i.Interaction)
+		}
+	}()
+
+	err = g.Player.Add(track)
+	if err != nil {
+		sendError(s, i.Interaction, err)
+		return
+	}
+
+	err = s.InteractionResponseDelete(i.Interaction)
+	if err != nil {
+		sendError(s, i.Interaction, err)
+		return
+	}
+}
+
+func truncate(s string, max int) string {
+	if len(s) > max {
+		return s[:max]
+	}
+	return s
 }
