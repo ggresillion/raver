@@ -59,8 +59,8 @@ func (p *Player) Play() error {
 			p.Play()
 		} else {
 			log.Println("player: no more tracks")
-			p.notifyChange()
 		}
+		p.notifyChange()
 	}()
 	p.notifyChange()
 	return nil
@@ -110,6 +110,17 @@ func (p *Player) Add(t *Track) error {
 	return nil
 }
 
+func (p *Player) Stop() {
+	if len(p.Queue) == 0 {
+		log.Println("player: cannot stop, no track in playlist")
+		return
+	}
+	log.Println("player: manually stopping")
+	t := p.Queue[0]
+	p.Queue = p.Queue[:1]
+	t.Stop()
+}
+
 func (p *Player) pipe(c chan []byte) {
 	go func() {
 		for {
@@ -123,6 +134,7 @@ func (p *Player) pipe(c chan []byte) {
 }
 
 func (p *Player) notifyChange() {
+	log.Printf("player: sending playlist update (tracks: %d, state: %d)", len(p.Queue), p.State)
 	go func() { p.Change <- struct{}{} }()
 }
 

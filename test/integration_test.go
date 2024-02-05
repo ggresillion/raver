@@ -102,6 +102,7 @@ func TestPlayerAutoskip(t *testing.T) {
 	assert.Equal(t, audio.Playing, player.State)
 	assert.Equal(t, 2, len(player.Queue))
 	<-player.Change
+	<-player.Change
 	assert.Equal(t, audio.Playing, player.State)
 	assert.Equal(t, 1, len(player.Queue))
 	<-player.Change

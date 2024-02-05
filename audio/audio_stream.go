@@ -102,7 +102,7 @@ func (s *AudioStream) Stop() {
 		log.Printf("stream[%p]: not playing", s)
 		return
 	}
-	go func() { s.end <- nil }()
+	s.end <- nil
 }
 
 func (s *AudioStream) OnStop() <-chan struct{} {

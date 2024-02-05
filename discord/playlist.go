@@ -8,6 +8,21 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+/**
+Button codes
+play 1142048243073695765
+pause 892404982970740786
+skip 892404982911991949
+previous 892404982538719274
+forward 924991555771711518
+backwards 924991555847200778
+volume down 924991555893342268
+volume up 924991555842998333
+replay 892404982521933876
+replay playlist 1016805948779663501
+stop 892404982828113961
+*/
+
 type PlaylistCommand struct{}
 
 func (c PlaylistCommand) Command() *discordgo.ApplicationCommand {
@@ -23,16 +38,64 @@ func (c PlaylistCommand) Handler(g *GBot, s *discordgo.Session, i *discordgo.Int
 }
 
 func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
-	log.Printf("bot: updating playlist display for: %s", i.ChannelID)
-	if len(g.Player.Queue) == 0 {
-		err := s.ChannelMessageDelete(g.PlaylistChannelID, g.PlaylistMessageID)
-		if err != nil {
-			sendError(s, i, err)
-			return
-		}
-		g.PlaylistChannelID = ""
-		g.PlaylistMessageID = ""
+	if g.PlaylistAlreadyDisplayed {
 		return
+	}
+	log.Printf("bot[%s]: creating playlist display", i.GuildID)
+	m, err := g.session.ChannelMessageSendComplex(i.ChannelID, &discordgo.MessageSend{
+		Content:    "",
+		Embeds:     generateEmbeds(g),
+		Components: generateComponents(g),
+	})
+	if err != nil {
+		sendError(s, i, err)
+		return
+	}
+	g.PlaylistAlreadyDisplayed = true
+	go func() {
+		change := g.Player.Change
+		defer func() {
+			log.Printf("bot[%s]: deleting playlist display", i.GuildID)
+			err := s.ChannelMessageDelete(m.ChannelID, m.ID)
+			if err != nil {
+				sendError(s, i, err)
+				return
+			}
+			g.PlaylistAlreadyDisplayed = false
+			return
+		}()
+		for {
+			<-change
+			log.Printf("bot[%s]: got playlist update (tracks: %d, state: %d)", i.GuildID, len(g.Player.Queue), g.Player.State)
+			if len(g.Player.Queue) == 0 {
+				return
+			}
+			log.Printf("bot[%s]: updating playlist display", i.GuildID)
+
+			_, err := g.session.ChannelMessageEditComplex(&discordgo.MessageEdit{
+				ID:         m.ID,
+				Channel:    m.ChannelID,
+				Embeds:     generateEmbeds(g),
+				Components: generateComponents(g),
+			})
+			// workaround because message was sometimes not updated
+			// _, err = g.session.ChannelMessageEditComplex(&discordgo.MessageEdit{
+			// 	ID:         m.ID,
+			// 	Channel:    m.ChannelID,
+			// 	Embeds:     generateEmbeds(g),
+			// 	Components: generateComponents(g),
+			// })
+			if err != nil {
+				sendError(s, i, err)
+				return
+			}
+		}
+	}()
+}
+
+func generateEmbeds(g *GBot) []*discordgo.MessageEmbed {
+	if len(g.Player.Queue) == 0 {
+		return []*discordgo.MessageEmbed{}
 	}
 	var tracks []*discordgo.MessageEmbedField
 	for _, track := range g.Player.Queue {
@@ -41,8 +104,7 @@ func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
 			Value: track.Artist,
 		})
 	}
-
-	embeds := []*discordgo.MessageEmbed{
+	return []*discordgo.MessageEmbed{
 		{
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
 				URL: fmt.Sprintf("https://img.youtube.com/vi/%s/0.jpg", g.Player.Queue[0].ID),
@@ -52,40 +114,36 @@ func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
 			Fields: tracks,
 		},
 	}
+}
 
-	var playPause discordgo.MessageComponent
+func generateComponents(g *GBot) []discordgo.MessageComponent {
+	var playPause discordgo.Button
 	if g.Player.State == audio.Playing {
-		playPause = discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{
-				discordgo.Button{
-					CustomID: "pause",
-					Style:    discordgo.SecondaryButton,
-					Emoji: discordgo.ComponentEmoji{
-						Name: "custom",
-						ID:   "1142048234123042907",
-					},
+		playPause =
+			discordgo.Button{
+				CustomID: "pause",
+				Style:    discordgo.SecondaryButton,
+				Emoji: discordgo.ComponentEmoji{
+					Name: "custom",
+					ID:   "1142048234123042907",
 				},
-			},
-		}
+			}
 	} else {
-		playPause = discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{
-				discordgo.Button{
-					CustomID: "resume",
-					Style:    discordgo.SecondaryButton,
-					Emoji: discordgo.ComponentEmoji{
-						Name: "custom",
-						ID:   "1142048243073695765",
-					},
+		playPause =
+			discordgo.Button{
+				CustomID: "resume",
+				Style:    discordgo.SecondaryButton,
+				Emoji: discordgo.ComponentEmoji{
+					Name: "custom",
+					ID:   "1142048243073695765",
 				},
-			},
-		}
+			}
 	}
 
-	components := []discordgo.MessageComponent{
-		playPause,
+	return []discordgo.MessageComponent{
 		discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{
+				playPause,
 				discordgo.Button{
 					CustomID: "skip",
 					Style:    discordgo.SecondaryButton,
@@ -95,39 +153,15 @@ func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
 						ID:   "1142048259607629905",
 					},
 				},
+				discordgo.Button{
+					CustomID: "stop",
+					Style:    discordgo.DangerButton,
+					Emoji: discordgo.ComponentEmoji{
+						Name: "custom",
+						ID:   "892404982828113961",
+					},
+				},
 			},
 		},
-	}
-
-	if g.PlaylistMessageID != "" {
-		_, err := g.session.ChannelMessageEditComplex(&discordgo.MessageEdit{
-			ID:         g.PlaylistMessageID,
-			Channel:    i.ChannelID,
-			Embeds:     embeds,
-			Components: components,
-		})
-		// workaround because message was sometimes not updated
-		_, err = g.session.ChannelMessageEditComplex(&discordgo.MessageEdit{
-			ID:         g.PlaylistMessageID,
-			Channel:    i.ChannelID,
-			Embeds:     embeds,
-			Components: components,
-		})
-		if err != nil {
-			sendError(s, i, err)
-			return
-		}
-	} else {
-		m, err := g.session.ChannelMessageSendComplex(i.ChannelID, &discordgo.MessageSend{
-			Content:    "",
-			Embeds:     embeds,
-			Components: components,
-		})
-		if err != nil {
-			sendError(s, i, err)
-			return
-		}
-		g.PlaylistMessageID = m.ID
-		g.PlaylistChannelID = m.ChannelID
 	}
 }

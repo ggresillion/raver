@@ -3,9 +3,6 @@ package discord
 import (
 	"fmt"
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"raver/audio"
 
@@ -19,16 +16,19 @@ type Bot struct {
 }
 
 type GBot struct {
-	Player            *audio.Player
-	PlaylistMessageID string
-	PlaylistChannelID string
-	session           *discordgo.Session
-	guild             *discordgo.Guild
-	vc                *discordgo.VoiceConnection
+	Player                   *audio.Player
+	PlaylistAlreadyDisplayed bool
+	session                  *discordgo.Session
+	guild                    *discordgo.Guild
+	vc                       *discordgo.VoiceConnection
 }
 
 func NewBot(token string) *Bot {
 	return &Bot{token: token, gbots: map[string]*GBot{}}
+}
+
+func (b *Bot) Session() *discordgo.Session {
+	return b.session
 }
 
 func (b *Bot) Connect() error {
@@ -87,21 +87,13 @@ func (b *Bot) Connect() error {
 		log.Fatalf("Cannot register commands: %v", err)
 	}
 
-	// Handle cleanup
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		<-sigs
-		for _, v := range b.gbots {
-			b.session.ChannelMessageDelete(v.PlaylistChannelID, v.PlaylistMessageID)
-		}
-		os.Exit(0)
-	}()
-
 	return nil
 }
 
 func (b *Bot) Stop() {
+	for _, g := range b.gbots {
+		g.Player.Stop()
+	}
 	b.session.Close()
 }
 

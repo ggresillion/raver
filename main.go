@@ -1,10 +1,11 @@
 package main
 
 import (
-	"log"
 	"os"
 	"os/signal"
+	"raver/api"
 	"raver/discord"
+	"syscall"
 )
 
 var token string
@@ -18,12 +19,17 @@ func Start(bot *discord.Bot) {
 	if err != nil {
 		panic(err)
 	}
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
-	log.Println("Blocking, press ctrl+c to continue...")
-	<-stop
-	log.Println("Gracefully shutting down")
-	bot.Stop()
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sigs
+		bot.Stop()
+		os.Exit(0)
+	}()
+	err = api.Listen()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {
