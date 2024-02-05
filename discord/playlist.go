@@ -3,14 +3,29 @@ package discord
 import (
 	"fmt"
 	"log"
+	"raver/audio"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-func (g *GBot) PrintPlaylist(i *discordgo.Interaction) {
+type PlaylistCommand struct{}
 
+func (c PlaylistCommand) Command() *discordgo.ApplicationCommand {
+	return &discordgo.ApplicationCommand{
+		Name:        "playlist",
+		Description: "Display the playlist in this channel",
+		Type:        discordgo.ChatApplicationCommand,
+	}
+}
+
+func (c PlaylistCommand) Handler(g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	g.PrintPlaylist(s, i.Interaction)
+}
+
+func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
+	log.Printf("bot: updating playlist display for: %s", i.ChannelID)
 	var tracks []*discordgo.MessageEmbedField
-	for _, track := range g.Playlist.Queue {
+	for _, track := range g.Player.Queue {
 		tracks = append(tracks, &discordgo.MessageEmbedField{
 			Name:  track.Title,
 			Value: track.Artist,
@@ -20,38 +35,77 @@ func (g *GBot) PrintPlaylist(i *discordgo.Interaction) {
 	embeds := []*discordgo.MessageEmbed{
 		{
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: "https://www.startpage.com/av/proxy-image?piurl=http%3A%2F%2Fdroplr.com%2Fwp-content%2Fuploads%2F2020%2F10%2FDiscord-music-e1635364775454.png&sp=1696163152Tb7a0d1728f87144df9c9d0fed65754d282d2be0b09c87afdabaa4e29ba3cca27",
+				URL: fmt.Sprintf("https://img.youtube.com/vi/%s/0.jpg", g.Player.Queue[0].ID),
 			},
-			Title:  "Playlist",
+			Title:  "Now playing",
 			Type:   discordgo.EmbedTypeRich,
 			Fields: tracks,
 		},
 	}
 
-	components := []discordgo.MessageComponent{
-		discordgo.ActionsRow{
+	var playPause discordgo.MessageComponent
+	if g.Player.State == audio.Playing {
+		playPause = discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{
 				discordgo.Button{
 					CustomID: "pause",
 					Style:    discordgo.SecondaryButton,
 					Emoji: discordgo.ComponentEmoji{
 						Name: "custom",
-						ID:   "892404982970740786",
+						ID:   "1142048234123042907",
+					},
+				},
+			},
+		}
+	} else {
+		playPause = discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.Button{
+					CustomID: "resume",
+					Style:    discordgo.SecondaryButton,
+					Emoji: discordgo.ComponentEmoji{
+						Name: "custom",
+						ID:   "1142048243073695765",
+					},
+				},
+			},
+		}
+	}
+
+	components := []discordgo.MessageComponent{
+		playPause,
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.Button{
+					CustomID: "skip",
+					Style:    discordgo.SecondaryButton,
+					Disabled: len(g.Player.Queue) < 2,
+					Emoji: discordgo.ComponentEmoji{
+						Name: "custom",
+						ID:   "1142048259607629905",
 					},
 				},
 			},
 		},
 	}
 
-	if g.PlaylistMessageID != nil {
+	if g.PlaylistMessageID != "" {
 		_, err := g.session.ChannelMessageEditComplex(&discordgo.MessageEdit{
-			ID:         *g.PlaylistMessageID,
+			ID:         g.PlaylistMessageID,
+			Channel:    i.ChannelID,
+			Embeds:     embeds,
+			Components: components,
+		})
+		// workaround because message was sometimes not updated
+		_, err = g.session.ChannelMessageEditComplex(&discordgo.MessageEdit{
+			ID:         g.PlaylistMessageID,
 			Channel:    i.ChannelID,
 			Embeds:     embeds,
 			Components: components,
 		})
 		if err != nil {
-			log.Println(fmt.Errorf("could not print playlist: %w", err))
+			sendError(s, i, err)
+			return
 		}
 	} else {
 		m, err := g.session.ChannelMessageSendComplex(i.ChannelID, &discordgo.MessageSend{
@@ -60,9 +114,10 @@ func (g *GBot) PrintPlaylist(i *discordgo.Interaction) {
 			Components: components,
 		})
 		if err != nil {
-			log.Println(fmt.Errorf("could not print playlist: %w", err))
+			sendError(s, i, err)
+			return
 		}
-		g.PlaylistMessageID = &m.ID
+		g.PlaylistMessageID = m.ID
+		g.PlaylistChannelID = m.ChannelID
 	}
-
 }

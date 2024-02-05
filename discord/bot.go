@@ -1,9 +1,11 @@
 package discord
 
 import (
-	"errors"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"raver/audio"
 
@@ -17,8 +19,9 @@ type Bot struct {
 }
 
 type GBot struct {
-	Playlist          *audio.Playlist
-	PlaylistMessageID *string
+	Player            *audio.Player
+	PlaylistMessageID string
+	PlaylistChannelID string
 	session           *discordgo.Session
 	guild             *discordgo.Guild
 	vc                *discordgo.VoiceConnection
@@ -43,15 +46,32 @@ func (b *Bot) Connect() error {
 	b.session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsGuildVoiceStates
 
 	// Register handlers
-	b.session.AddHandler(func(_ *discordgo.Session, _ *discordgo.Ready) { log.Println("Bot: connected") })
+	b.session.AddHandler(func(_ *discordgo.Session, _ *discordgo.Ready) { log.Println("bot: connected") })
 	b.session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if h, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
-			g, err := b.Guild(i.GuildID)
-			if err != nil {
-				log.Println(err)
-				return
+		g, err := b.Guild(i.GuildID)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		switch i.Type {
+		case discordgo.InteractionApplicationCommand:
+			command := i.ApplicationCommandData().Name
+			log.Printf("bot: received slash command: %s", command)
+			if h, ok := CommandHandlers[command]; ok {
+				h(g, s, i)
 			}
-			h(g, s, i)
+		case discordgo.InteractionMessageComponent:
+			command := i.MessageComponentData().CustomID
+			log.Printf("bot: received component action: %s", command)
+			if h, ok := CommandHandlers[command]; ok {
+				h(g, s, i)
+			}
+		default:
+			command := i.ApplicationCommandData().Name
+			log.Printf("bot: received interaction: %s", command)
+			if h, ok := CommandHandlers[command]; ok {
+				h(g, s, i)
+			}
 		}
 	})
 
@@ -66,6 +86,17 @@ func (b *Bot) Connect() error {
 	if err != nil {
 		log.Fatalf("Cannot register commands: %v", err)
 	}
+
+	// Handle cleanup
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sigs
+		for _, v := range b.gbots {
+			b.session.ChannelMessageDelete(v.PlaylistChannelID, v.PlaylistMessageID)
+		}
+		os.Exit(0)
+	}()
 
 	return nil
 }
@@ -86,41 +117,38 @@ func (b *Bot) Guild(guildID string) (*GBot, error) {
 	g = &GBot{
 		session: b.session,
 		guild:   guild,
-		Playlist: audio.NewPlaylist(
-			guildID,
-			func(stream *audio.AudioStream) error {
-				return g.BindStream(stream)
-			}),
+		Player:  audio.NewPlayer(guildID),
 	}
 	b.gbots[guildID] = g
 	return g, nil
 }
 
-func (g *GBot) BindStream(audioStream *audio.AudioStream) error {
-	if g.vc == nil {
-		return errors.New("no voice connection available")
-	}
-	err := g.vc.Speaking(true)
-	if err != nil {
-		return err
-	}
-
-	audioStream.Out = g.vc.OpusSend
-
-	go func() {
-		audioStream.BlockUntilStop()
-		err := g.vc.Speaking(false)
-		if err != nil {
-			log.Println(err)
-		}
-	}()
-
-	log.Printf("Bot: playing stream %p", audioStream)
-	return nil
-}
+// func (g *GBot) BindStream(audioStream *audio.AudioStream) error {
+// 	if g.vc == nil {
+// 		return errors.New("no voice connection available")
+// 	}
+// 	err := g.vc.Speaking(true)
+// 	if err != nil {
+// 		return err
+// 	}
+//
+// 	audioStream.Out = g.vc.OpusSend
+//
+// 	go func() {
+// 		<-audioStream.OnStop()
+// 		log.Println("bot: got stream end signal")
+// 		err := g.vc.Speaking(false)
+// 		if err != nil {
+// 			log.Println(err)
+// 		}
+// 	}()
+//
+// 	log.Printf("bot: playing stream %p", audioStream)
+// 	return nil
+// }
 
 func (g *GBot) JoinUserChannel(userID string) error {
-	log.Printf("Bot: trying to join voice channel for user %s", userID)
+	log.Printf("bot: trying to join voice channel for user %s", userID)
 	// guild, err := g.session.State.Guild(g.guild.ID)
 	// if err != nil {
 	// 	return err
@@ -133,10 +161,19 @@ func (g *GBot) JoinUserChannel(userID string) error {
 			}
 
 			g.vc = vc
+			go func() {
+				for {
+					data, ok := <-g.Player.LineOut
+					if !ok {
+						return
+					}
+					g.vc.OpusSend <- data
+				}
+			}()
 			vc.Speaking(true)
-			log.Printf("Bot: joinned voice channel %s", vc.ChannelID)
+			log.Printf("bot: joinned voice channel %s", vc.ChannelID)
 			return nil
 		}
 	}
-	return fmt.Errorf("Bot: user %s not in a voice channel", userID)
+	return fmt.Errorf("bot: user %s not in a voice channel", userID)
 }
