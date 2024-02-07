@@ -21,6 +21,7 @@ type AudioStream struct {
 	buffer  chan []byte
 	playing bool
 	stopped bool
+	close   chan struct{}
 }
 
 func NewAudioStream() *AudioStream {
@@ -82,6 +83,6 @@ func (s *AudioStream) Stop() {
 	log.Printf("stream[%p]: stopped stream", s)
 }
 
-func (s *AudioStream) End() {
+func (s *AudioStream) Close() {
 	s.buffer <- []byte{}
 }
