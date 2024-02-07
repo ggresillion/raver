@@ -16,12 +16,15 @@ const (
 
 func TestPlayerPlaySingleTrack(t *testing.T) {
 	player := audio.NewPlayer(guildID)
+	t.Log("getting track from youtube")
 	track, err := youtube.GetPlayableTrackFromYoutube(videoID)
 	if err != nil {
 		t.Errorf("error loading from youtube: %v", err)
 	}
+	t.Log("adding track to playlist")
 	player.Add(track)
-	<-player.LineOut
+	t.Log("waiting for data on player")
+	assert.NotNil(t, player.Read())
 	assert.NotNil(t, <-player.Change)
 }
 
@@ -29,23 +32,27 @@ func TestPlayerSkip(t *testing.T) {
 	player := audio.NewPlayer(guildID)
 	go func() {
 		for {
-			<-player.LineOut
+			player.Read()
 			time.Sleep(10 * time.Millisecond)
 		}
 	}()
 
 	// get some tracks
+	t.Log("adding first track")
 	track1, err := youtube.GetPlayableTrackFromYoutube(videoID)
 	assert.Nil(t, err)
 	assert.Equal(t, audio.IDLE, player.State)
 	player.Add(track1)
+	t.Log("should be notified")
 	<-player.Change
 	assert.Equal(t, audio.Playing, player.State)
 	assert.Equal(t, 1, len(player.Queue))
 
+	t.Log("adding second track")
 	track2, err := youtube.GetPlayableTrackFromYoutube(videoID)
 	assert.Nil(t, err)
 	player.Add(track2)
+	t.Log("should be notified")
 	<-player.Change
 	assert.Equal(t, audio.Playing, player.State)
 	assert.Equal(t, 2, len(player.Queue))
@@ -62,7 +69,7 @@ func TestPlayerAutostop(t *testing.T) {
 	player := audio.NewPlayer(guildID)
 	go func() {
 		for {
-			<-player.LineOut
+			player.Read()
 			time.Sleep(10 * time.Millisecond)
 		}
 	}()
@@ -84,7 +91,7 @@ func TestPlayerAutoskip(t *testing.T) {
 	player := audio.NewPlayer(guildID)
 	go func() {
 		for {
-			<-player.LineOut
+			player.Read()
 			time.Sleep(10 * time.Millisecond)
 		}
 	}()
@@ -96,12 +103,13 @@ func TestPlayerAutoskip(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, audio.IDLE, player.State)
 	player.Add(track1)
-	player.Add(track2)
 	<-player.Change
+	assert.Equal(t, audio.Playing, player.State)
+	assert.Equal(t, 1, len(player.Queue))
+	player.Add(track2)
 	<-player.Change
 	assert.Equal(t, audio.Playing, player.State)
 	assert.Equal(t, 2, len(player.Queue))
-	<-player.Change
 	<-player.Change
 	assert.Equal(t, audio.Playing, player.State)
 	assert.Equal(t, 1, len(player.Queue))
