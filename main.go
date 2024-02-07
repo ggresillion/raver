@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 	"os/signal"
-	"raver/api"
 	"raver/discord"
 	"syscall"
 )
@@ -19,17 +18,10 @@ func Start(bot *discord.Bot) {
 	if err != nil {
 		panic(err)
 	}
+	defer bot.Stop()
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		<-sigs
-		bot.Stop()
-		os.Exit(0)
-	}()
-	err = api.Listen()
-	if err != nil {
-		panic(err)
-	}
+	<-sigs
 }
 
 func main() {
