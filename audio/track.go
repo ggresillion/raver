@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+const audioBufferSize = 200
+const endOfFile = "EOF"
+
 type TrackInfo struct {
 	ID       string
 	Title    string
@@ -22,7 +25,7 @@ type AudioStream struct {
 
 func NewAudioStream() *AudioStream {
 	s := &AudioStream{
-		buffer:  make(chan []byte),
+		buffer:  make(chan []byte, audioBufferSize),
 		playing: false,
 		stopped: false,
 	}
@@ -51,7 +54,11 @@ func (s *AudioStream) Read() ([]byte, error) {
 	if s.stopped {
 		return nil, io.EOF
 	}
-	return <-s.buffer, nil
+	data := <-s.buffer
+	if len(data) == 0 {
+		return nil, io.EOF
+	}
+	return data, nil
 }
 
 func (s *AudioStream) Play() {
@@ -71,5 +78,10 @@ func (s *AudioStream) Resume() {
 
 func (s *AudioStream) Stop() {
 	s.stopped = true
+	close(s.buffer)
 	log.Printf("stream[%p]: stopped stream", s)
+}
+
+func (s *AudioStream) End() {
+	s.buffer <- []byte{}
 }

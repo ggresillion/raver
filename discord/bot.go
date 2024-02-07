@@ -115,36 +115,8 @@ func (b *Bot) Guild(guildID string) (*GBot, error) {
 	return g, nil
 }
 
-// func (g *GBot) BindStream(audioStream *audio.AudioStream) error {
-// 	if g.vc == nil {
-// 		return errors.New("no voice connection available")
-// 	}
-// 	err := g.vc.Speaking(true)
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	audioStream.Out = g.vc.OpusSend
-//
-// 	go func() {
-// 		<-audioStream.OnStop()
-// 		log.Println("bot: got stream end signal")
-// 		err := g.vc.Speaking(false)
-// 		if err != nil {
-// 			log.Println(err)
-// 		}
-// 	}()
-//
-// 	log.Printf("bot: playing stream %p", audioStream)
-// 	return nil
-// }
-
 func (g *GBot) JoinUserChannel(userID string) error {
 	log.Printf("bot: trying to join voice channel for user %s", userID)
-	// guild, err := g.session.State.Guild(g.guild.ID)
-	// if err != nil {
-	// 	return err
-	// }
 	for _, v := range g.guild.VoiceStates {
 		if v.UserID == userID {
 			vc, err := g.session.ChannelVoiceJoin(g.guild.ID, v.ChannelID, false, true)
@@ -155,11 +127,7 @@ func (g *GBot) JoinUserChannel(userID string) error {
 			g.vc = vc
 			go func() {
 				for {
-					data, ok := <-g.Player.LineOut
-					if !ok {
-						return
-					}
-					g.vc.OpusSend <- data
+					g.vc.OpusSend <- g.Player.Read()
 				}
 			}()
 			vc.Speaking(true)

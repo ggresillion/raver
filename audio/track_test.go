@@ -1,6 +1,7 @@
 package audio
 
 import (
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -61,5 +62,5 @@ func TestStop(t *testing.T) {
 	s.Stop()
 	t.Log("check that the stream has been stopped")
 	_, err = s.Read()
-	assert.Equal(t, ErrStreamClosed, err)
+	assert.Equal(t, io.EOF, err)
 }

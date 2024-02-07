@@ -61,7 +61,7 @@ func extractOpus(stream io.ReadSeeker) (*audio.AudioStream, error) {
 			packet, ok := <-wr.Chan
 			if len(packet.Data) == 0 || !ok {
 				log.Printf("youtube[%p]: end of input stream", audioStream)
-				audioStream.Stop()
+				audioStream.End()
 			}
 			err := audioStream.Write(packet.Data)
 			if err == io.EOF {
