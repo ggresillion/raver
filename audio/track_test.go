@@ -8,53 +8,58 @@ import (
 
 func TestPlay(t *testing.T) {
 	sampleData := []byte{255}
-	in := make(chan []byte)
-	s := NewAudioStream(in)
-	in <- sampleData
+	s := NewAudioStream()
+	s.Write(sampleData)
 	t.Log("play the stream")
 	s.Play()
-	data := <-s.Out
+	data, err := s.Read()
 	t.Log("check that we received data")
-	assert.Equal(t, data, sampleData)
+	assert.Nil(t, err)
+	assert.Equal(t, sampleData, data)
 }
 
 func TestPause(t *testing.T) {
 	sampleData := []byte{255}
-	in := make(chan []byte, 1)
-	s := NewAudioStream(in)
-	in <- sampleData
+	s := NewAudioStream()
+	s.Write(sampleData)
 	t.Log("play the stream")
 	s.Play()
 	t.Log("check that we received data")
-	assert.Equal(t, sampleData, <-s.Out)
+	data, err := s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, sampleData, data)
 	t.Log("pause the stream")
 	s.Pause()
-	in <- sampleData
+	s.Write(sampleData)
 	t.Log("check that we received no more data")
+	dataCh := make(chan []byte)
 	select {
-	case <-s.Out:
-		t.Error("error")
+	case <-dataCh:
+		t.Error("should not received data when paused")
 	default:
 		break
 	}
 	t.Log("resume the steam")
-	s.Pause()
+	s.Play()
 	t.Log("check that we received data")
-	assert.Equal(t, sampleData, <-s.Out)
+	data, err = s.Read()
+	assert.Nil(t, err)
+	assert.Equal(t, sampleData, data)
 }
 
 func TestStop(t *testing.T) {
 	sampleData := []byte{255}
-	in := make(chan []byte)
-	s := NewAudioStream(in)
-	in <- sampleData
+	s := NewAudioStream()
+	s.Write(sampleData)
 	t.Log("play the stream")
 	s.Play()
-	data := <-s.Out
 	t.Log("check that we have data")
+	data, err := s.Read()
+	assert.Nil(t, err)
 	assert.Equal(t, sampleData, data)
 	t.Log("stop the stream")
 	s.Stop()
-	t.Log("check that we received stop signal")
-	assert.NotNil(t, <-s.OnStop())
+	t.Log("check that the stream has been stopped")
+	_, err = s.Read()
+	assert.Equal(t, ErrStreamClosed, err)
 }

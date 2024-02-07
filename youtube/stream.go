@@ -49,8 +49,7 @@ func GetPlayableTrackFromYoutube(videoID string) (*audio.Track, error) {
 
 // extractOpus reads the incoming stream, parses it as a webm container and extract opus stream.
 func extractOpus(stream io.ReadSeeker) (*audio.AudioStream, error) {
-	in := make(chan []byte)
-	audioStream := audio.NewAudioStream(in)
+	audioStream := audio.NewAudioStream()
 	var w webm.WebM
 	wr, err := webm.Parse(stream, &w)
 	if err != nil {
@@ -58,20 +57,17 @@ func extractOpus(stream io.ReadSeeker) (*audio.AudioStream, error) {
 	}
 
 	go func() {
-		<-audioStream.OnStop()
-		log.Printf("youtube[%p]: stoping input stream", audioStream)
-		wr.Shutdown()
-	}()
-
-	go func() {
 		for {
 			packet, ok := <-wr.Chan
 			if len(packet.Data) == 0 || !ok {
 				log.Printf("youtube[%p]: end of input stream", audioStream)
-				close(audioStream.In)
+				audioStream.Stop()
+			}
+			err := audioStream.Write(packet.Data)
+			if err == io.EOF {
+				wr.Shutdown()
 				return
 			}
-			audioStream.In <- packet.Data
 		}
 	}()
 

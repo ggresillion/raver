@@ -3,7 +3,6 @@ package audio
 import (
 	"fmt"
 	"log"
-	"time"
 )
 
 type PlaylistState int
@@ -17,17 +16,17 @@ const (
 type Player struct {
 	Queue   []*Track
 	State   PlaylistState
-	LineOut chan []byte
 	Change  chan struct{}
+	line    chan []byte
 	guildID string
 }
 
 func NewPlayer(guildID string) *Player {
 	return &Player{
 		Queue:   make([]*Track, 0),
-		guildID: guildID,
-		LineOut: make(chan []byte),
 		Change:  make(chan struct{}),
+		guildID: guildID,
+		line:    make(chan []byte),
 	}
 }
 
@@ -38,32 +37,42 @@ func (p *Player) Play() error {
 	}
 	if p.State == Paused {
 		log.Println("player: resuming")
-		p.Queue[0].Play()
+		p.Queue[0].Resume()
 	}
 	if len(p.Queue) < 1 {
 		log.Println("player: no track in playlist")
 		return nil
 	}
 	track := p.Queue[0]
-	p.pipe(track.Out)
+	go func() {
+		for {
+			data, err := track.Read()
+			if err != nil {
+				log.Println("player: got stream end signal")
+				p.State = IDLE
+				p.Queue = p.Queue[1:]
+				if len(p.Queue) > 0 {
+					log.Println("player: skipped to next track")
+					p.Play()
+				} else {
+					log.Println("player: no more tracks")
+					p.notifyChange()
+				}
+				return
+
+			}
+			p.line <- data
+		}
+	}()
 	track.Play()
 	p.State = Playing
 	log.Printf("player: playing track %s", track.ID)
-	go func() {
-		<-track.OnStop()
-		log.Println("player: got stream end signal")
-		p.State = IDLE
-		p.Queue = p.Queue[1:]
-		if len(p.Queue) > 0 {
-			log.Println("player: skipped to next track")
-			p.Play()
-		} else {
-			log.Println("player: no more tracks")
-		}
-		p.notifyChange()
-	}()
 	p.notifyChange()
 	return nil
+}
+
+func (p *Player) Read() []byte {
+	return <-p.line
 }
 
 func (p *Player) Pause() {
@@ -79,7 +88,7 @@ func (p *Player) Pause() {
 		p.notifyChange()
 		break
 	case Paused:
-		p.Queue[0].Play()
+		p.Queue[0].Resume()
 		p.State = Playing
 		log.Println("player: resuming")
 		p.notifyChange()
@@ -121,36 +130,7 @@ func (p *Player) Stop() {
 	t.Stop()
 }
 
-func (p *Player) pipe(c chan []byte) {
-	go func() {
-		for {
-			data, ok := <-c
-			if !ok {
-				return
-			}
-			p.LineOut <- data
-		}
-	}()
-}
-
 func (p *Player) notifyChange() {
 	log.Printf("player: sending playlist update (tracks: %d, state: %d)", len(p.Queue), p.State)
 	go func() { p.Change <- struct{}{} }()
-}
-
-type TrackInfo struct {
-	ID       string
-	Title    string
-	Artist   string
-	Duration time.Duration
-	Live     bool
-}
-
-type Track struct {
-	TrackInfo
-	*AudioStream
-}
-
-func NewTrack(infos TrackInfo, stream *AudioStream) *Track {
-	return &Track{infos, stream}
 }
