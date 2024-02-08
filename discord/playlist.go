@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"raver/audio"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -22,6 +23,8 @@ replay 892404982521933876
 replay playlist 1016805948779663501
 stop 892404982828113961
 */
+
+const sizeProgressBar = 27
 
 type PlaylistCommand struct{}
 
@@ -53,7 +56,6 @@ func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
 	}
 	g.PlaylistAlreadyDisplayed = true
 	go func() {
-		change := g.Player.Change
 		defer func() {
 			log.Printf("bot[%s]: deleting playlist display", i.GuildID)
 			err := s.ChannelMessageDelete(m.ChannelID, m.ID)
@@ -64,30 +66,27 @@ func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
 			g.PlaylistAlreadyDisplayed = false
 			return
 		}()
+		ticker := time.NewTicker(time.Second)
 		for {
-			<-change
-			log.Printf("bot[%s]: got playlist update (tracks: %d, state: %d)", i.GuildID, len(g.Player.Queue), g.Player.State)
-			if len(g.Player.Queue) == 0 {
-				return
-			}
-			log.Printf("bot[%s]: updating playlist display", i.GuildID)
+			select {
+			case <-g.Player.Change:
+			case <-ticker.C:
+				log.Printf("bot[%s]: got playlist update (tracks: %d, state: %d)", i.GuildID, len(g.Player.Queue), g.Player.State)
+				if len(g.Player.Queue) == 0 {
+					return
+				}
+				log.Printf("bot[%s]: updating playlist display", i.GuildID)
 
-			_, err := g.session.ChannelMessageEditComplex(&discordgo.MessageEdit{
-				ID:         m.ID,
-				Channel:    m.ChannelID,
-				Embeds:     generateEmbeds(g),
-				Components: generateComponents(g),
-			})
-			// workaround because message was sometimes not updated
-			// _, err = g.session.ChannelMessageEditComplex(&discordgo.MessageEdit{
-			// 	ID:         m.ID,
-			// 	Channel:    m.ChannelID,
-			// 	Embeds:     generateEmbeds(g),
-			// 	Components: generateComponents(g),
-			// })
-			if err != nil {
-				sendError(s, i, err)
-				return
+				_, err := g.session.ChannelMessageEditComplex(&discordgo.MessageEdit{
+					ID:         m.ID,
+					Channel:    m.ChannelID,
+					Embeds:     generateEmbeds(g),
+					Components: generateComponents(g),
+				})
+				if err != nil {
+					sendError(s, i, err)
+					return
+				}
 			}
 		}
 	}()
@@ -97,13 +96,25 @@ func generateEmbeds(g *GBot) []*discordgo.MessageEmbed {
 	if len(g.Player.Queue) == 0 {
 		return []*discordgo.MessageEmbed{}
 	}
-	var tracks []*discordgo.MessageEmbedField
+	var fields []*discordgo.MessageEmbedField
 	for _, track := range g.Player.Queue {
-		tracks = append(tracks, &discordgo.MessageEmbedField{
+		fields = append(fields, &discordgo.MessageEmbedField{
 			Name:  track.Title,
 			Value: track.Artist,
 		})
 	}
+	progress := g.Player.Queue[0].Progress
+	duration := g.Player.Queue[0].Duration
+	var progressBar []rune
+	for i := 0; i < sizeProgressBar; i++ {
+		progressBar = append(progressBar, '▬')
+	}
+	progressIndex := int(float64(progress) / float64(duration) * sizeProgressBar)
+	progressBar[progressIndex] = '🔘'
+
+	fields = append(fields, &discordgo.MessageEmbedField{
+		Name: string(progressBar),
+	})
 	return []*discordgo.MessageEmbed{
 		{
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
@@ -111,7 +122,7 @@ func generateEmbeds(g *GBot) []*discordgo.MessageEmbed {
 			},
 			Title:  "Now playing",
 			Type:   discordgo.EmbedTypeRich,
-			Fields: tracks,
+			Fields: fields,
 		},
 	}
 }

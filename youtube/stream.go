@@ -1,6 +1,7 @@
 package youtube
 
 import (
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -24,6 +25,10 @@ func GetPlayableTrackFromYoutube(videoID string) (*audio.Track, error) {
 	log.Printf("youtube: got video info %q", video.ID)
 
 	formats := video.Formats.Quality("251") // only get videos with audio
+
+	if len(formats) < 1 {
+		return nil, errors.New("youtube: could not find suitable audio format")
+	}
 
 	url, err := client.GetStreamURL(video, &formats[0])
 	if err != nil {
@@ -61,11 +66,12 @@ func extractOpus(stream io.ReadSeeker) (*audio.AudioStream, error) {
 			packet, ok := <-wr.Chan
 			if len(packet.Data) == 0 || !ok {
 				log.Printf("youtube[%p]: end of input stream", audioStream)
-				audioStream.Close()
+				audioStream.Stop()
 				wr.Shutdown()
 				return
 			}
 			err := audioStream.Write(packet.Data)
+			audioStream.Progress = packet.Timecode
 			if err == io.EOF {
 				wr.Shutdown()
 				return
