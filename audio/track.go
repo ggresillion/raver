@@ -3,11 +3,17 @@ package audio
 import (
 	"io"
 	"log"
+	"sync"
 	"time"
 )
 
-const audioBufferSize = 200
-const endOfFile = "EOF"
+const audioBufferSize = 10
+
+type AudioBuffer struct {
+	c        chan []byte
+	closed   bool
+	closeMux sync.Mutex
+}
 
 type TrackInfo struct {
 	ID       string
@@ -18,17 +24,16 @@ type TrackInfo struct {
 }
 
 type AudioStream struct {
-	buffer  chan []byte
-	playing bool
-	stopped bool
-	close   chan struct{}
+	Progress time.Duration
+	buffer   *AudioBuffer
+	playing  bool
 }
 
 func NewAudioStream() *AudioStream {
 	s := &AudioStream{
-		buffer:  make(chan []byte, audioBufferSize),
-		playing: false,
-		stopped: false,
+		buffer: &AudioBuffer{
+			c: make(chan []byte, audioBufferSize),
+		},
 	}
 	log.Printf("stream[%p]: created a new stream", s)
 	return s
@@ -44,45 +49,32 @@ func NewTrack(infos TrackInfo, stream *AudioStream) *Track {
 }
 
 func (s *AudioStream) Write(bytes []byte) error {
-	if s.stopped {
+	s.buffer.closeMux.Lock()
+	defer s.buffer.closeMux.Unlock()
+
+	if s.buffer.closed {
 		return io.EOF
 	}
-	s.buffer <- bytes
+
+	s.buffer.c <- bytes
 	return nil
 }
 
 func (s *AudioStream) Read() ([]byte, error) {
-	if s.stopped {
-		return nil, io.EOF
-	}
-	data := <-s.buffer
-	if len(data) == 0 {
+	data, ok := <-s.buffer.c
+	if !ok || len(data) == 0 {
 		return nil, io.EOF
 	}
 	return data, nil
 }
 
-func (s *AudioStream) Play() {
-	s.playing = true
-	log.Printf("stream[%p]: playing stream", s)
-}
-
-func (s *AudioStream) Pause() {
-	s.playing = false
-	log.Printf("stream[%p]: paused stream", s)
-}
-
-func (s *AudioStream) Resume() {
-	s.playing = true
-	log.Printf("stream[%p]: paused stream", s)
-}
-
 func (s *AudioStream) Stop() {
-	s.stopped = true
-	close(s.buffer)
-	log.Printf("stream[%p]: stopped stream", s)
-}
+	s.buffer.closeMux.Lock()
+	defer s.buffer.closeMux.Unlock()
 
-func (s *AudioStream) Close() {
-	s.buffer <- []byte{}
+	if !s.buffer.closed {
+		close(s.buffer.c)
+		s.buffer.closed = true
+		log.Printf("stream[%p]: stopped stream", s)
+	}
 }

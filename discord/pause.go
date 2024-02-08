@@ -1,6 +1,8 @@
 package discord
 
 import (
+	"raver/audio"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -15,7 +17,11 @@ func (c PauseCommand) Command() *discordgo.ApplicationCommand {
 }
 
 func (c PauseCommand) Handler(g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	g.Player.Pause()
+	if g.Player.State == audio.Playing {
+		g.Player.Pause()
+	} else {
+		g.Player.Resume()
+	}
 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseUpdateMessage,
