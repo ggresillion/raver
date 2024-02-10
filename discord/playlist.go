@@ -64,6 +64,11 @@ func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
 				return
 			}
 			g.PlaylistAlreadyDisplayed = false
+			err = g.vc.Disconnect()
+			if err != nil {
+				sendError(s, i, err)
+				return
+			}
 			return
 		}()
 		ticker := time.NewTicker(time.Second)
@@ -99,7 +104,7 @@ func generateEmbeds(g *GBot) []*discordgo.MessageEmbed {
 	var fields []*discordgo.MessageEmbedField
 	for _, track := range g.Player.Queue {
 		fields = append(fields, &discordgo.MessageEmbedField{
-			Name:  track.Title,
+			Name:  fmt.Sprintf("%s [%s]", track.Title, formatDuration(track.Duration)),
 			Value: track.Artist,
 		})
 	}

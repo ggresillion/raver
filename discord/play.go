@@ -2,6 +2,7 @@ package discord
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 
@@ -51,7 +52,7 @@ func autocompleteSearch(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	var choices []*discordgo.ApplicationCommandOptionChoice
 	for _, track := range tracks {
 		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-			Name:  fmt.Sprintf("%q - %q", truncate(track.Title, 50), truncate(track.Artist, 50)),
+			Name:  fmt.Sprintf("%q - **%q** [%s]", truncate(track.Title, 50), truncate(track.Artist, 50), formatDuration(track.Duration)),
 			Value: track.ID,
 		})
 	}
@@ -115,4 +116,12 @@ func truncate(s string, max int) string {
 		return s[:max]
 	}
 	return s
+}
+
+func formatDuration(duration time.Duration) string {
+	hours := int(duration.Hours())
+	minutes := int(duration.Minutes()) % 60
+	seconds := int(duration.Seconds()) % 60
+
+	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
 }
