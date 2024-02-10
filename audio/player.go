@@ -45,18 +45,7 @@ func (p *Player) Play() error {
 	track := p.Queue[0]
 	go func() {
 		// track ended or stoped
-		defer func() {
-			log.Println("player: got stream end signal")
-			p.State = IDLE
-			p.Queue = p.Queue[1:]
-			if len(p.Queue) > 0 {
-				log.Println("player: skipped to next track")
-				p.Play()
-			} else {
-				log.Println("player: no more tracks")
-				p.notifyChange()
-			}
-		}()
+		defer p.onTrackStop()
 		// pipe incoming audio to the line
 	play:
 		log.Println("player: playing")
@@ -150,6 +139,20 @@ func (p *Player) Progress() time.Duration {
 		return 0
 	}
 	return p.Queue[0].Progress
+}
+
+func (p *Player) onTrackStop() {
+	log.Println("player: got stream end signal")
+	p.State = IDLE
+	p.Queue = p.Queue[1:]
+	if len(p.Queue) > 0 {
+		log.Println("player: skipped to next track")
+		p.Play()
+	} else {
+		log.Println("player: no more tracks")
+		p.notifyChange()
+	}
+
 }
 
 func (p *Player) notifyChange() {
