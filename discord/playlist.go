@@ -108,13 +108,15 @@ func generateEmbeds(g *GBot) []*discordgo.MessageEmbed {
 			Value: track.Artist,
 		})
 	}
-	progress := g.Player.Queue[0].Progress
-	duration := g.Player.Queue[0].Duration
+	// progress := g.Player.Queue[0].Progress
+	// duration := g.Player.Queue[0].Duration
 	var progressBar []rune
 	for i := 0; i < sizeProgressBar; i++ {
 		progressBar = append(progressBar, '▬')
 	}
-	progressIndex := int(float64(progress) / float64(duration) * sizeProgressBar)
+	progressIndex := int(g.Player.Progress() / 100 * sizeProgressBar)
+	// progressIndex := int(float64(progress) / float64(duration) * sizeProgressBar)
+	fmt.Println(progressIndex)
 	progressBar[progressIndex] = '🔘'
 
 	fields = append(fields, &discordgo.MessageEmbedField{

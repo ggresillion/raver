@@ -24,7 +24,11 @@ func TestPlayerPlaySingleTrack(t *testing.T) {
 	t.Log("adding track to playlist")
 	player.Add(track)
 	t.Log("waiting for data on player")
-	assert.NotNil(t, player.Read())
+	bytes := make([]byte, 1000)
+	n, err := player.Read(bytes)
+	assert.Nil(t, err)
+	assert.NotZero(t, n)
+	assert.NotEmpty(t, bytes)
 	assert.NotNil(t, <-player.Change)
 }
 
@@ -32,7 +36,8 @@ func TestPlayerSkip(t *testing.T) {
 	player := audio.NewPlayer(guildID)
 	go func() {
 		for {
-			player.Read()
+			bytes := make([]byte, 1000)
+			player.Read(bytes)
 			time.Sleep(10 * time.Millisecond)
 		}
 	}()
@@ -69,7 +74,8 @@ func TestPlayerAutostop(t *testing.T) {
 	player := audio.NewPlayer(guildID)
 	go func() {
 		for {
-			player.Read()
+			bytes := make([]byte, 1000)
+			player.Read(bytes)
 			time.Sleep(10 * time.Millisecond)
 		}
 	}()
@@ -91,7 +97,8 @@ func TestPlayerAutoskip(t *testing.T) {
 	player := audio.NewPlayer(guildID)
 	go func() {
 		for {
-			player.Read()
+			bytes := make([]byte, 1000)
+			player.Read(bytes)
 			time.Sleep(10 * time.Millisecond)
 		}
 	}()

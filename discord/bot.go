@@ -127,7 +127,13 @@ func (g *GBot) JoinUserChannel(userID string) error {
 			g.vc = vc
 			go func() {
 				for {
-					g.vc.OpusSend <- g.Player.Read()
+					bytes := make([]byte, 1000)
+					n, err := g.Player.Read(bytes)
+					if err != nil {
+						log.Printf("bot: error writing to bot audio: %v", err)
+						return
+					}
+					g.vc.OpusSend <- bytes[:n]
 				}
 			}()
 			vc.Speaking(true)
