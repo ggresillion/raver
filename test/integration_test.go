@@ -48,7 +48,7 @@ func TestPlayerSkip(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, audio.IDLE, player.State)
 	player.Add(track1)
-	t.Log("should be notified")
+	t.Log("should have 1 track")
 	<-player.Change
 	assert.Equal(t, audio.Playing, player.State)
 	assert.Equal(t, 1, len(player.Queue))
@@ -57,17 +57,19 @@ func TestPlayerSkip(t *testing.T) {
 	track2, err := youtube.GetPlayableTrackFromYoutube(videoID)
 	assert.Nil(t, err)
 	player.Add(track2)
-	t.Log("should be notified")
+	t.Log("should have 2 tracks")
 	<-player.Change
 	assert.Equal(t, audio.Playing, player.State)
 	assert.Equal(t, 2, len(player.Queue))
+	t.Log("skipping")
 	player.Skip()
+	t.Log("should have 0 tracks")
 	<-player.Change
 	assert.Equal(t, audio.Playing, player.State)
 	assert.Equal(t, 1, len(player.Queue))
-	player.Skip()
-	assert.Equal(t, audio.Playing, player.State)
-	assert.Equal(t, 1, len(player.Queue))
+	<-player.Change
+	assert.Equal(t, audio.IDLE, player.State)
+	assert.Equal(t, 0, len(player.Queue))
 }
 
 func TestPlayerAutostop(t *testing.T) {
