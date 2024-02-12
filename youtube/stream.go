@@ -43,7 +43,7 @@ func GetPlayableTrackFromYoutube(videoID string) (*audio.Track, error) {
 	rs := httprs.NewHttpReadSeeker(resp)
 	log.Println("youtube: got webm video stream")
 
-	audioStream, err := extractOpus(rs)
+	audioStream, err := extractOpus(rs, resp.ContentLength)
 	if err != nil {
 		return nil, err
 	}
@@ -53,31 +53,45 @@ func GetPlayableTrackFromYoutube(videoID string) (*audio.Track, error) {
 }
 
 // extractOpus reads the incoming stream, parses it as a webm container and extract opus stream.
-func extractOpus(stream io.ReadSeeker) (*audio.AudioStream, error) {
-	audioStream := audio.NewAudioStream()
+func extractOpus(stream io.ReadSeeker, length int64) (*audio.AudioStream, error) {
 	var w webm.WebM
 	wr, err := webm.Parse(stream, &w)
 	if err != nil {
 		return nil, err
 	}
 
-	go func() {
-		for {
-			packet, ok := <-wr.Chan
-			if len(packet.Data) == 0 || !ok {
-				log.Printf("youtube[%p]: end of input stream", audioStream)
-				audioStream.Stop()
-				wr.Shutdown()
-				return
-			}
-			err := audioStream.Write(packet.Data)
-			audioStream.Progress = packet.Timecode
-			if err == io.EOF {
-				wr.Shutdown()
-				return
-			}
-		}
-	}()
+	in := NewYTReadCloser(wr)
+	log.Printf("youtube[%p]: created new input stream", &in)
+	audioStream := audio.NewAudioStream(in, length)
 
 	return audioStream, nil
+}
+
+type YTReadCloser struct {
+	wr *webm.Reader
+}
+
+func NewYTReadCloser(wr *webm.Reader) *YTReadCloser {
+	return &YTReadCloser{wr: wr}
+}
+
+func (r *YTReadCloser) Read(bytes []byte) (n int, err error) {
+	packet, ok := <-r.wr.Chan
+	if !ok {
+		log.Printf("youtube[%p]: closed stream", &r)
+		return 0, io.EOF
+	}
+	if len(packet.Data) == 0 {
+		log.Printf("youtube[%p]: end of input stream", &r)
+		r.wr.Shutdown()
+		return 0, io.EOF
+	}
+	copy(bytes, packet.Data)
+	return len(packet.Data), nil
+}
+
+func (r *YTReadCloser) Close() (err error) {
+	log.Printf("youtube[%p]: closing stream", &r)
+	r.wr.Shutdown()
+	return
 }
