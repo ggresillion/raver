@@ -75,13 +75,15 @@ func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
 		for {
 			select {
 			case <-g.Player.Change:
-			case <-ticker.C:
 				log.Printf("bot[%s]: got playlist update (tracks: %d, state: %d)", i.GuildID, len(g.Player.Queue), g.Player.State)
 				if len(g.Player.Queue) == 0 {
 					return
 				}
-				log.Printf("bot[%s]: updating playlist display", i.GuildID)
-
+			case <-ticker.C:
+				if len(g.Player.Queue) == 0 {
+					log.Printf("bot[%s]: playlist empty, stoping update loop", i.GuildID)
+					return
+				}
 				_, err := g.session.ChannelMessageEditComplex(&discordgo.MessageEdit{
 					ID:         m.ID,
 					Channel:    m.ChannelID,
