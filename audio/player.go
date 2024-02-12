@@ -70,7 +70,9 @@ func (p *Player) Resume() {
 func (p *Player) Skip() {
 	if len(p.Queue) > 1 {
 		log.Println("player: skipping")
-		p.Queue[0].Close()
+		t := p.Queue[0]
+		p.Queue = p.Queue[1:]
+		t.Close()
 		return
 	}
 	log.Println("player: cannot skip, no more track in playlist")
