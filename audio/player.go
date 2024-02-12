@@ -73,6 +73,7 @@ func (p *Player) Skip() {
 		t := p.Queue[0]
 		p.Queue = p.Queue[1:]
 		t.Close()
+		p.notifyChange()
 		return
 	}
 	log.Println("player: cannot skip, no more track in playlist")
