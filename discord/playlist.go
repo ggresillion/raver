@@ -28,6 +28,8 @@ const sizeProgressBar = 27
 
 type PlaylistCommand struct{}
 
+func (c PlaylistCommand) Name() string { return "playlist" }
+
 func (c PlaylistCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        "playlist",

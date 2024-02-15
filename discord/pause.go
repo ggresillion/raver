@@ -8,6 +8,8 @@ import (
 
 type PauseCommand struct{}
 
+func (c PauseCommand) Name() string { return "command" }
+
 func (c PauseCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        "pause",

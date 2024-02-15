@@ -11,6 +11,8 @@ import (
 
 type PlayCommand struct{}
 
+func (c PlayCommand) Name() string { return "play" }
+
 func (c PlayCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        "play",
