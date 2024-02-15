@@ -53,26 +53,19 @@ func (b *Bot) Connect() error {
 			log.Println(err)
 			return
 		}
+		var command string
 		switch i.Type {
 		case discordgo.InteractionApplicationCommand:
-			command := i.ApplicationCommandData().Name
+			command = i.ApplicationCommandData().Name
 			log.Printf("bot: received slash command: %s", command)
-			if h, ok := CommandHandlers[command]; ok {
-				h(g, s, i)
-			}
 		case discordgo.InteractionMessageComponent:
-			command := i.MessageComponentData().CustomID
+			command = i.MessageComponentData().CustomID
 			log.Printf("bot: received component action: %s", command)
-			if h, ok := CommandHandlers[command]; ok {
-				h(g, s, i)
-			}
 		default:
-			command := i.ApplicationCommandData().Name
+			command = i.ApplicationCommandData().Name
 			log.Printf("bot: received interaction: %s", command)
-			if h, ok := CommandHandlers[command]; ok {
-				h(g, s, i)
-			}
 		}
+		handleCommand(command, g, s, i)
 	})
 
 	// Open the websocket and begin listening.
@@ -142,4 +135,12 @@ func (g *GBot) JoinUserChannel(userID string) error {
 		}
 	}
 	return fmt.Errorf("bot: user %s not in a voice channel", userID)
+}
+
+func handleCommand(command string, g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	for _, v := range Commands {
+		if v.Name() == command {
+			v.Handler(g, s, i)
+		}
+	}
 }

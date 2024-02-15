@@ -7,20 +7,13 @@ import (
 )
 
 type Command interface {
+	Name() string
 	Command() *discordgo.ApplicationCommand
 	Handler(g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
 var (
-	Commands        = []*discordgo.ApplicationCommand{PlayCommand{}.Command()}
-	CommandHandlers = map[string]func(g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate){
-		"play":     PlayCommand{}.Handler,
-		"playlist": PlaylistCommand{}.Handler,
-		"pause":    PauseCommand{}.Handler,
-		"resume":   PauseCommand{}.Handler,
-		"skip":     SkipCommand{}.Handler,
-		"stop":     StopCommand{}.Handler,
-	}
+	Commands = []Command{PlayCommand{}, PauseCommand{}, SkipCommand{}, PlaylistCommand{}, StopCommand{}}
 )
 
 func sendError(s *discordgo.Session, i *discordgo.Interaction, err error) error {

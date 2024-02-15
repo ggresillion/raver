@@ -6,6 +6,8 @@ import (
 
 type SkipCommand struct{}
 
+func (c SkipCommand) Name() string { return "skip" }
+
 func (c SkipCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name:        "skip",
