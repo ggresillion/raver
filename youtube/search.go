@@ -11,7 +11,6 @@ import (
 // Search searches for audio tracks on YouTube.
 func Search(searchTerm string, limit int) (results []audio.TrackInfo, err error) {
 	videos, err := searchtube.Search(searchTerm, limit)
-
 	if err != nil {
 		return nil, err
 	}

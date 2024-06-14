@@ -4,8 +4,9 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"raver/discord"
 	"syscall"
+
+	"raver/discord"
 )
 
 var token string

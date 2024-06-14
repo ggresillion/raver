@@ -61,9 +61,12 @@ func (b *Bot) Connect() error {
 		case discordgo.InteractionMessageComponent:
 			command = i.MessageComponentData().CustomID
 			log.Printf("bot: received component action: %s", command)
-		default:
+		case discordgo.InteractionApplicationCommandAutocomplete:
 			command = i.ApplicationCommandData().Name
-			log.Printf("bot: received interaction: %s", command)
+			log.Printf("bot: received autocomplete request: %s", command)
+		default:
+			log.Printf("bot: received unknown interaction %s: %s", i.Type.String(), command)
+			return
 		}
 		handleCommand(command, g, s, i)
 	})
@@ -74,8 +77,13 @@ func (b *Bot) Connect() error {
 		return fmt.Errorf("error opening Discord session: %w", err)
 	}
 
+	commands := make([]*discordgo.ApplicationCommand, 0)
+	for _, c := range Commands {
+		commands = append(commands, c.Command())
+	}
+
 	// Create commands
-	_, err = b.session.ApplicationCommandBulkOverwrite(b.session.State.User.ID, "", Commands)
+	_, err = b.session.ApplicationCommandBulkOverwrite(b.session.State.User.ID, "", commands)
 	if err != nil {
 		log.Fatalf("Cannot register commands: %v", err)
 	}
@@ -120,7 +128,7 @@ func (g *GBot) JoinUserChannel(userID string) error {
 			g.vc = vc
 			go func() {
 				for {
-					bytes := make([]byte, 1000)
+					bytes := make([]byte, 960)
 					n, err := g.Player.Read(bytes)
 					if err != nil {
 						log.Printf("bot: error writing to bot audio: %v", err)

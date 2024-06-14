@@ -49,7 +49,16 @@ func GetPlayableTrackFromYoutube(videoID string) (*audio.Track, error) {
 	}
 	log.Println("youtube: converting to opus stream")
 
-	return audio.NewTrack(audio.TrackInfo{ID: video.ID, Title: video.Title, Artist: video.Author, Duration: video.Duration, Live: false}, audioStream), nil
+	return audio.NewTrack(
+		audio.TrackInfo{
+			ID:       video.ID,
+			Title:    video.Title,
+			Artist:   video.Author,
+			Duration: video.Duration,
+			Live:     false,
+		},
+		audioStream,
+	), nil
 }
 
 // extractOpus reads the incoming stream, parses it as a webm container and extract opus stream.

@@ -53,8 +53,12 @@ func autocompleteSearch(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 	var choices []*discordgo.ApplicationCommandOptionChoice
 	for _, track := range tracks {
+		name := fmt.Sprintf("%q - **%q** [%s]", truncate(track.Title, 50), truncate(track.Artist, 50), formatDuration(track.Duration))
+		if len(name) < 1 || len(name) > 100 {
+			continue
+		}
 		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-			Name:  fmt.Sprintf("%q - **%q** [%s]", truncate(track.Title, 50), truncate(track.Artist, 50), formatDuration(track.Duration)),
+			Name:  name,
 			Value: track.ID,
 		})
 	}

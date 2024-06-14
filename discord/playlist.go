@@ -3,8 +3,9 @@ package discord
 import (
 	"fmt"
 	"log"
-	"raver/audio"
 	"time"
+
+	"raver/audio"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -86,11 +87,13 @@ func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
 					log.Printf("bot[%s]: playlist empty, stoping update loop", i.GuildID)
 					return
 				}
+				embeds := generateEmbeds(g)
+				components := generateComponents(g)
 				_, err := g.session.ChannelMessageEditComplex(&discordgo.MessageEdit{
 					ID:         m.ID,
 					Channel:    m.ChannelID,
-					Embeds:     generateEmbeds(g),
-					Components: generateComponents(g),
+					Embeds:     &embeds,
+					Components: &components,
 				})
 				if err != nil {
 					sendError(s, i, err)
@@ -137,25 +140,23 @@ func generateEmbeds(g *GBot) []*discordgo.MessageEmbed {
 func generateComponents(g *GBot) []discordgo.MessageComponent {
 	var playPause discordgo.Button
 	if g.Player.State == audio.Playing {
-		playPause =
-			discordgo.Button{
-				CustomID: "pause",
-				Style:    discordgo.SecondaryButton,
-				Emoji: discordgo.ComponentEmoji{
-					Name: "custom",
-					ID:   "1142048234123042907",
-				},
-			}
+		playPause = discordgo.Button{
+			CustomID: "pause",
+			Style:    discordgo.SecondaryButton,
+			Emoji: &discordgo.ComponentEmoji{
+				Name: "custom",
+				ID:   "1142048234123042907",
+			},
+		}
 	} else {
-		playPause =
-			discordgo.Button{
-				CustomID: "resume",
-				Style:    discordgo.SecondaryButton,
-				Emoji: discordgo.ComponentEmoji{
-					Name: "custom",
-					ID:   "1142048243073695765",
-				},
-			}
+		playPause = discordgo.Button{
+			CustomID: "resume",
+			Style:    discordgo.SecondaryButton,
+			Emoji: &discordgo.ComponentEmoji{
+				Name: "custom",
+				ID:   "1142048243073695765",
+			},
+		}
 	}
 
 	return []discordgo.MessageComponent{
@@ -166,7 +167,7 @@ func generateComponents(g *GBot) []discordgo.MessageComponent {
 					CustomID: "skip",
 					Style:    discordgo.SecondaryButton,
 					Disabled: len(g.Player.Queue) < 2,
-					Emoji: discordgo.ComponentEmoji{
+					Emoji: &discordgo.ComponentEmoji{
 						Name: "custom",
 						ID:   "1142048259607629905",
 					},
@@ -174,7 +175,7 @@ func generateComponents(g *GBot) []discordgo.MessageComponent {
 				discordgo.Button{
 					CustomID: "stop",
 					Style:    discordgo.DangerButton,
-					Emoji: discordgo.ComponentEmoji{
+					Emoji: &discordgo.ComponentEmoji{
 						Name: "custom",
 						ID:   "892404982828113961",
 					},

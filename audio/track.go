@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	maxBufferedBytes = 100_000
+	maxBufferedBytes = 1000
 	maxBytesPerFrame = 960
 )
 
@@ -21,10 +21,10 @@ type TrackInfo struct {
 }
 
 type AudioStream struct {
+	io.ReadCloser
 	ProgressBytes int64
 	TotalBytes    int64
-	io.ReadCloser
-	buffer chan []byte
+	buffer        chan []byte
 }
 
 func NewAudioStream(in io.ReadCloser, length int64) *AudioStream {
@@ -39,11 +39,11 @@ func NewAudioStream(in io.ReadCloser, length int64) *AudioStream {
 		for {
 			buf := make([]byte, maxBufferedBytes)
 			n, err := in.Read(buf)
-			s.buffer <- buf[:n]
 			if err != nil {
 				close(s.buffer)
 				break
 			}
+			s.buffer <- buf[:n]
 		}
 	}()
 	return s
@@ -55,8 +55,7 @@ func (s *AudioStream) Read(bytes []byte) (n int, err error) {
 		err = io.EOF
 		return
 	}
-	n = len(buf)
-	copy(bytes, buf)
+	n = copy(bytes, buf)
 	s.ProgressBytes += int64(n)
 	return
 }

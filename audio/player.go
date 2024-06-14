@@ -15,22 +15,24 @@ const (
 )
 
 type Player struct {
-	Queue   []*Track
-	State   PlaylistState
-	Change  chan struct{}
-	guildID string
+	Queue    []*Track
+	State    PlaylistState
+	Change   chan struct{}
+	guildID  string
+	autoplay bool
 }
 
 func NewPlayer(guildID string) *Player {
 	return &Player{
-		Queue:   make([]*Track, 0),
-		Change:  make(chan struct{}),
-		guildID: guildID,
+		Queue:    make([]*Track, 0),
+		Change:   make(chan struct{}),
+		guildID:  guildID,
+		autoplay: true,
 	}
 }
 
 func (p *Player) Read(bytes []byte) (n int, err error) {
-	if p.State != Playing || len(p.Queue) < 1 {
+	if p.State != Playing {
 		return 0, nil
 	}
 	n, err = p.Queue[0].Read(bytes)
@@ -45,8 +47,8 @@ func (p *Player) Read(bytes []byte) (n int, err error) {
 			log.Println("player: skipped to next track")
 			p.play()
 		} else {
-			p.Queue = make([]*Track, 0)
 			log.Println("player: no more tracks")
+			p.Queue = make([]*Track, 0)
 			p.notifyChange()
 		}
 		return 0, nil
@@ -67,6 +69,7 @@ func (p *Player) Resume() {
 	}
 	p.State = Playing
 }
+
 func (p *Player) Skip() {
 	if len(p.Queue) > 1 {
 		log.Println("player: skipping")
