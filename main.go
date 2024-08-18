@@ -1,12 +1,11 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
-	"syscall"
-
 	"raver/discord"
+	"syscall"
 )
 
 var token string
@@ -25,7 +24,7 @@ func Start(bot *discord.Bot) {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs
-	log.Println("exiting...")
+	slog.Info("exiting...")
 }
 
 func main() {

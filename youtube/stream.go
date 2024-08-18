@@ -3,9 +3,8 @@ package youtube
 import (
 	"errors"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
-
 	"raver/audio"
 
 	"github.com/ebml-go/webm"
@@ -14,7 +13,7 @@ import (
 )
 
 // GetPlayableTrackFromYoutube returns a audio.Track from a given videoID
-func GetPlayableTrackFromYoutube(videoID string) (*audio.Track, error) {
+func GetPlayableTrackFromYoutube(guildID, videoID string) (*audio.Track, error) {
 	client := youtube.Client{}
 
 	video, err := client.GetVideo(videoID)
@@ -22,7 +21,7 @@ func GetPlayableTrackFromYoutube(videoID string) (*audio.Track, error) {
 		return nil, err
 	}
 
-	log.Printf("youtube: got video info %q", video.ID)
+	slog.Info("youtube: got video info", "video_id", video.ID, "guild_id", guildID)
 
 	formats := video.Formats.Quality("251") // only get videos with audio
 
@@ -41,13 +40,13 @@ func GetPlayableTrackFromYoutube(videoID string) (*audio.Track, error) {
 	}
 
 	rs := httprs.NewHttpReadSeeker(resp)
-	log.Println("youtube: got webm video stream")
+	slog.Info("youtube: got webm video stream", "guild_id", guildID)
 
-	audioStream, err := extractOpus(rs, resp.ContentLength)
+	audioStream, err := extractOpus(guildID, rs, resp.ContentLength)
 	if err != nil {
 		return nil, err
 	}
-	log.Println("youtube: converting to opus stream")
+	slog.Info("youtube: converting to opus stream", "guild_id", guildID)
 
 	return audio.NewTrack(
 		audio.TrackInfo{
@@ -62,36 +61,37 @@ func GetPlayableTrackFromYoutube(videoID string) (*audio.Track, error) {
 }
 
 // extractOpus reads the incoming stream, parses it as a webm container and extract opus stream.
-func extractOpus(stream io.ReadSeeker, length int64) (*audio.AudioStream, error) {
+func extractOpus(guildID string, stream io.ReadSeeker, length int64) (*audio.AudioStream, error) {
 	var w webm.WebM
 	wr, err := webm.Parse(stream, &w)
 	if err != nil {
 		return nil, err
 	}
 
-	in := NewYTReadCloser(wr)
-	log.Printf("youtube[%p]: created new input stream", &in)
-	audioStream := audio.NewAudioStream(in, length)
+	in := NewYTReadCloser(guildID, wr)
+	slog.Info("youtube: created new input stream", "guild_id", guildID)
+	audioStream := audio.NewAudioStream(guildID, in, length)
 
 	return audioStream, nil
 }
 
 type YTReadCloser struct {
-	wr *webm.Reader
+	guildID string
+	wr      *webm.Reader
 }
 
-func NewYTReadCloser(wr *webm.Reader) *YTReadCloser {
-	return &YTReadCloser{wr: wr}
+func NewYTReadCloser(guildID string, wr *webm.Reader) *YTReadCloser {
+	return &YTReadCloser{guildID: guildID, wr: wr}
 }
 
 func (r *YTReadCloser) Read(bytes []byte) (n int, err error) {
 	packet, ok := <-r.wr.Chan
 	if !ok {
-		log.Printf("youtube[%p]: closed stream", &r)
+		slog.Info("youtube[%p]: closed stream", "guild_id", r.guildID)
 		return 0, io.EOF
 	}
 	if len(packet.Data) == 0 {
-		log.Printf("youtube[%p]: end of input stream", &r)
+		slog.Info("youtube: end of input stream", "guild_id", r.guildID)
 		r.wr.Shutdown()
 		return 0, io.EOF
 	}
@@ -100,7 +100,7 @@ func (r *YTReadCloser) Read(bytes []byte) (n int, err error) {
 }
 
 func (r *YTReadCloser) Close() (err error) {
-	log.Printf("youtube[%p]: closing stream", &r)
+	slog.Info("youtube: closing stream", "guild_id", r.guildID)
 	r.wr.Shutdown()
 	return
 }

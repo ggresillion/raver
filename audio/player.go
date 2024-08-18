@@ -3,7 +3,7 @@ package audio
 import (
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 )
 
 type PlaylistState int
@@ -13,6 +13,18 @@ const (
 	Playing
 	Paused
 )
+
+func (s PlaylistState) String() string {
+	switch s {
+	case IDLE:
+		return "IDLE"
+	case Playing:
+		return "PLAYING"
+	case Paused:
+		return "PAUSED"
+	}
+	return ""
+}
 
 type Player struct {
 	Queue    []*Track
@@ -37,17 +49,17 @@ func (p *Player) Read(bytes []byte) (n int, err error) {
 	}
 	n, err = p.Queue[0].Read(bytes)
 	if err == io.EOF {
-		log.Println("player: got stream end signal")
+		slog.Info("player: got stream end signal", "guild_id", p.guildID)
 		if p.State == IDLE {
 			return
 		}
 		p.State = IDLE
 		if len(p.Queue) > 1 {
 			p.Queue = p.Queue[1:]
-			log.Println("player: skipped to next track")
+			slog.Info("player: skipped to next track", "guild_id", p.guildID)
 			p.play()
 		} else {
-			log.Println("player: no more tracks")
+			slog.Info("player: no more tracks", "guild_id", p.guildID)
 			p.Queue = make([]*Track, 0)
 			p.notifyChange()
 		}
@@ -72,21 +84,21 @@ func (p *Player) Resume() {
 
 func (p *Player) Skip() {
 	if len(p.Queue) > 1 {
-		log.Println("player: skipping")
+		slog.Info("player: skipping", "guild_id", p.guildID)
 		t := p.Queue[0]
 		p.Queue = p.Queue[1:]
 		t.Close()
 		p.notifyChange()
 		return
 	}
-	log.Println("player: cannot skip, no more track in playlist")
+	slog.Info("player: cannot skip, no more track in playlist", "guild_id", p.guildID)
 }
 
 func (p *Player) Add(t *Track) error {
 	p.Queue = append(p.Queue, t)
-	log.Printf("player: added %s to queue", t.ID)
+	slog.Info("player: added to queue", "track_id", t.ID, "guild_id", p.guildID)
 	if p.State == IDLE {
-		log.Println("player: autoplay")
+		slog.Info("player: autoplay", "guild_id", p.guildID)
 		err := p.play()
 		if err != nil {
 			return fmt.Errorf("player: error playing track: %v", err)
@@ -99,10 +111,10 @@ func (p *Player) Add(t *Track) error {
 
 func (p *Player) Stop() {
 	if len(p.Queue) == 0 {
-		log.Println("player: cannot stop, no track in playlist")
+		slog.Info("player: cannot stop, no track in playlist", "guild_id", p.guildID)
 		return
 	}
-	log.Println("player: manually stopping")
+	slog.Info("player: manually stopping", "guild_id", p.guildID)
 	p.Queue[0].Close()
 	p.Queue = []*Track{}
 	p.notifyChange()
@@ -122,20 +134,20 @@ func (p *Player) Progress() int {
 
 func (p *Player) play() error {
 	if p.State != IDLE {
-		log.Println("player: already playing")
+		slog.Info("player: already playing", "guild_id", p.guildID)
 		return nil
 	}
 	if len(p.Queue) < 1 {
-		log.Println("player: no track in playlist")
+		slog.Info("player: no track in playlist", "guild_id", p.guildID)
 		return nil
 	}
 	p.State = Playing
-	log.Printf("player: playing track %s", p.Queue[0].ID)
+	slog.Info("player: playing track", "track_id", p.Queue[0].ID, "guild_id", p.guildID)
 	p.notifyChange()
 	return nil
 }
 
 func (p *Player) notifyChange() {
-	log.Printf("player: sending playlist update (tracks: %d, state: %d)", len(p.Queue), p.State)
+	slog.Info("player: sending playlist update", "guild_id", p.guildID, "tracks", len(p.Queue), "state", p.State.String())
 	go func() { p.Change <- struct{}{} }()
 }

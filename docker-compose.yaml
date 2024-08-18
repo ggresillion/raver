@@ -1,0 +1,23 @@
+services:
+  raver:
+    build: .
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+    ports:
+      - 9090:9090
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - grafana-conf:/etc/grafana
+
+volumes:
+  grafana-data:
+  grafana-conf:

@@ -2,10 +2,9 @@ package discord
 
 import (
 	"fmt"
-	"log"
-	"time"
-
+	"log/slog"
 	"raver/audio"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -47,7 +46,7 @@ func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
 	if g.PlaylistAlreadyDisplayed {
 		return
 	}
-	log.Printf("bot[%s]: creating playlist display", i.GuildID)
+	slog.Info("bot: creating playlist display", "guild_id", i.GuildID)
 	m, err := g.session.ChannelMessageSendComplex(i.ChannelID, &discordgo.MessageSend{
 		Content:    "",
 		Embeds:     generateEmbeds(g),
@@ -60,7 +59,7 @@ func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
 	g.PlaylistAlreadyDisplayed = true
 	go func() {
 		defer func() {
-			log.Printf("bot[%s]: deleting playlist display", i.GuildID)
+			slog.Info("bot: deleting playlist display", "guild_id", i.GuildID)
 			err := s.ChannelMessageDelete(m.ChannelID, m.ID)
 			if err != nil {
 				sendError(s, i, err)
@@ -78,13 +77,13 @@ func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
 		for {
 			select {
 			case <-g.Player.Change:
-				log.Printf("bot[%s]: got playlist update (tracks: %d, state: %d)", i.GuildID, len(g.Player.Queue), g.Player.State)
+				slog.Info("bot: got playlist update", "guild_id", i.GuildID, "tracks", len(g.Player.Queue), "state", g.Player.State)
 				if len(g.Player.Queue) == 0 {
 					return
 				}
 			case <-ticker.C:
 				if len(g.Player.Queue) == 0 {
-					log.Printf("bot[%s]: playlist empty, stoping update loop", i.GuildID)
+					slog.Info("bot: playlist empty, stoping update loop", "guild_id", i.GuildID)
 					return
 				}
 				embeds := generateEmbeds(g)

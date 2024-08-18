@@ -1,7 +1,7 @@
 package discord
 
 import (
-	"log"
+	"log/slog"
 	"runtime/debug"
 
 	"github.com/bwmarrin/discordgo"
@@ -17,7 +17,7 @@ var Commands = []Command{PlayCommand{}, PauseCommand{}, SkipCommand{}, PlaylistC
 
 func sendError(s *discordgo.Session, i *discordgo.Interaction, err error) error {
 	debug.PrintStack()
-	log.Printf("discord: sending error to client: %v", err)
+	slog.Error("discord: sending error to client", "error", err.Error(), "guild_id", i.GuildID)
 	_, err = s.FollowupMessageCreate(i, false, &discordgo.WebhookParams{
 		Content: err.Error(),
 		Flags:   discordgo.MessageFlagsEphemeral,

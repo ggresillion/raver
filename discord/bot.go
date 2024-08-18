@@ -1,9 +1,9 @@
 package discord
 
 import (
+	"errors"
 	"fmt"
-	"log"
-
+	"log/slog"
 	"raver/audio"
 
 	"github.com/bwmarrin/discordgo"
@@ -46,26 +46,26 @@ func (b *Bot) Connect() error {
 	b.session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsGuildVoiceStates
 
 	// Register handlers
-	b.session.AddHandler(func(_ *discordgo.Session, _ *discordgo.Ready) { log.Println("bot: connected") })
+	b.session.AddHandler(func(_ *discordgo.Session, _ *discordgo.Ready) { slog.Info("bot: connected") })
 	b.session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		g, err := b.Guild(i.GuildID)
 		if err != nil {
-			log.Println(err)
+			slog.Error(err.Error())
 			return
 		}
 		var command string
 		switch i.Type {
 		case discordgo.InteractionApplicationCommand:
 			command = i.ApplicationCommandData().Name
-			log.Printf("bot: received slash command: %s", command)
+			slog.Info("bot: received slash command", "command", command, "guild_id", g.guild.ID)
 		case discordgo.InteractionMessageComponent:
 			command = i.MessageComponentData().CustomID
-			log.Printf("bot: received component action: %s", command)
+			slog.Info("bot: received component action", "command", command, "guild_id", g.guild.ID)
 		case discordgo.InteractionApplicationCommandAutocomplete:
 			command = i.ApplicationCommandData().Name
-			log.Printf("bot: received autocomplete request: %s", command)
+			slog.Info("bot: received autocomplete request", "command", command, "guild_id", g.guild.ID)
 		default:
-			log.Printf("bot: received unknown interaction %s: %s", i.Type.String(), command)
+			slog.Info("bot: received unknown interaction", "interaction", i.Type.String(), "command", command, "guild_id", g.guild.ID)
 			return
 		}
 		handleCommand(command, g, s, i)
@@ -85,7 +85,7 @@ func (b *Bot) Connect() error {
 	// Create commands
 	_, err = b.session.ApplicationCommandBulkOverwrite(b.session.State.User.ID, "", commands)
 	if err != nil {
-		log.Fatalf("Cannot register commands: %v", err)
+		return errors.Join(err, errors.New("cannot register commands"))
 	}
 
 	return nil
@@ -117,7 +117,7 @@ func (b *Bot) Guild(guildID string) (*GBot, error) {
 }
 
 func (g *GBot) JoinUserChannel(userID string) error {
-	log.Printf("bot: trying to join voice channel for user %s", userID)
+	slog.Info("bot: trying to join voice channel for user", "user_id", userID)
 	for _, v := range g.guild.VoiceStates {
 		if v.UserID == userID {
 			vc, err := g.session.ChannelVoiceJoin(g.guild.ID, v.ChannelID, false, true)
@@ -131,14 +131,14 @@ func (g *GBot) JoinUserChannel(userID string) error {
 					bytes := make([]byte, 960)
 					n, err := g.Player.Read(bytes)
 					if err != nil {
-						log.Printf("bot: error writing to bot audio: %v", err)
+						slog.Info("bot: error writing to bot audio: %v", err)
 						return
 					}
 					g.vc.OpusSend <- bytes[:n]
 				}
 			}()
 			vc.Speaking(true)
-			log.Printf("bot: joinned voice channel %s", vc.ChannelID)
+			slog.Info("bot: joinned voice channel", "channel_id", vc.ChannelID, "guild_id", g.guild.ID)
 			return nil
 		}
 	}

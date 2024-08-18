@@ -2,7 +2,7 @@ package audio
 
 import (
 	"io"
-	"log"
+	"log/slog"
 	"math"
 	"time"
 )
@@ -27,14 +27,14 @@ type AudioStream struct {
 	buffer        chan []byte
 }
 
-func NewAudioStream(in io.ReadCloser, length int64) *AudioStream {
+func NewAudioStream(guildID string, in io.ReadCloser, length int64) *AudioStream {
 	maxBufferedFrames := int(math.Ceil(float64(maxBufferedBytes) / float64(maxBytesPerFrame)))
 	s := &AudioStream{
 		ReadCloser: in,
 		TotalBytes: length,
 		buffer:     make(chan []byte, maxBufferedFrames),
 	}
-	log.Printf("stream[%p]: created a new stream (max_buffered_bytes: %d, max_bytes_per_frame: %d, max_buffered_frames: %d", s, maxBufferedBytes, maxBytesPerFrame, maxBufferedFrames)
+	slog.Info("stream: created a new stream", "max_buffered_bytes", maxBufferedBytes, "max_bytes_per_frame", maxBytesPerFrame, "max_buffered_frames", maxBufferedFrames, "guild_id", guildID)
 	go func() {
 		for {
 			buf := make([]byte, maxBufferedBytes)

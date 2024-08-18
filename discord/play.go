@@ -2,11 +2,10 @@ package discord
 
 import (
 	"fmt"
+	"raver/youtube"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-
-	"raver/youtube"
 )
 
 type PlayCommand struct{}
@@ -45,7 +44,7 @@ func autocompleteSearch(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if len(q) < 3 {
 		return
 	}
-	tracks, err := youtube.Search(data.Options[0].StringValue(), 0)
+	tracks, err := youtube.Search(i.GuildID, data.Options[0].StringValue(), 0)
 	if err != nil {
 		sendError(s, i.Interaction, err)
 		return
@@ -96,7 +95,7 @@ func addToPlaylist(g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate
 		return
 	}
 
-	track, err := youtube.GetPlayableTrackFromYoutube(trackID)
+	track, err := youtube.GetPlayableTrackFromYoutube(i.GuildID, trackID)
 	if err != nil {
 		sendError(s, i.Interaction, err)
 		return

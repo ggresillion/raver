@@ -1,4 +1,4 @@
-FROM golang:1.22.4-alpine as builder
+FROM golang:1.23-alpine AS builder
 
 WORKDIR /opt/app
 
@@ -8,9 +8,9 @@ RUN go mod download -x
 
 COPY . .
 
-RUN GOOS=linux GOARCH=arm64 go build -o raver
+RUN go build -o raver
 
-FROM alpine:3.19.1
+FROM alpine:3.20.2
 
 WORKDIR /opt/app
 
