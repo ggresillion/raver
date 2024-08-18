@@ -1,16 +1,15 @@
 module raver
 
-go 1.21.1
+go 1.23.0
 
 require (
-	github.com/Pauloo27/searchtube v0.0.0-20220521202404-f65e288832a0
+	github.com/buger/jsonparser v1.1.1
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/stretchr/testify v1.9.0
 )
 
 require (
 	github.com/bitly/go-simplejson v0.5.1 // indirect
-	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dlclark/regexp2 v1.11.4 // indirect
 	github.com/dop251/goja v0.0.0-20240816181238-8130cadc5774 // indirect

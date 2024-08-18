@@ -9,7 +9,7 @@ import (
 
 	"github.com/ebml-go/webm"
 	"github.com/jfbus/httprs"
-	"github.com/kkdai/youtube/v2"
+	youtube "github.com/kkdai/youtube/v2"
 )
 
 // GetPlayableTrackFromYoutube returns a audio.Track from a given videoID
