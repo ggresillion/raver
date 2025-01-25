@@ -1,40 +1,87 @@
 package youtube
 
 import (
-	"errors"
+	"encoding/json"
 	"io"
 	"log/slog"
 	"net/http"
+	"os"
+	"os/exec"
 	"raver/audio"
+	"time"
 
 	"github.com/ebml-go/webm"
 	"github.com/jfbus/httprs"
-	youtube "github.com/kkdai/youtube/v2"
 )
+
+const (
+	ytDlpURL    = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp"
+	ytDlpBinary = "yt-dlp"
+)
+
+// getVideoFromID returns a webm audio stream URL from a youtube video ID or URL
+func getVideoFromID(ID string) (*Video, error) {
+	ytDlp := ytDlpBinary
+	// Check if yt-dlp is already installed
+	if _, err := exec.LookPath(ytDlpBinary); err != nil {
+		ytDlp, err = downloadYtdlp()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Use the installed yt-dlp binary
+	cmd := exec.Command(ytDlp, "-f", "bestaudio", "-J", ID)
+	output, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	var video *Video
+	err = json.Unmarshal(output, &video)
+	if err != nil {
+		return nil, err
+	}
+
+	return video, nil
+}
+
+func downloadYtdlp() (string, error) {
+	slog.Info("yt-dlp not found, downloading...")
+
+	// Download yt-dlp
+	resp, err := http.Get(ytDlpURL)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// Write the binary to a temporary file
+	tmpFile, err := os.CreateTemp("", "yt-dlp-*")
+	if err != nil {
+		return "", err
+	}
+	defer os.Remove(tmpFile.Name()) // Clean up the temporary file
+
+	if _, err := io.Copy(tmpFile, resp.Body); err != nil {
+		return "", err
+	}
+	if err := tmpFile.Chmod(0755); err != nil { // Make the file executable
+		return "", err
+	}
+	tmpFile.Close()
+
+	return tmpFile.Name(), nil
+}
 
 // GetPlayableTrackFromYoutube returns a audio.Track from a given videoID
 func GetPlayableTrackFromYoutube(guildID, videoID string) (*audio.Track, error) {
-	client := youtube.Client{}
-
-	video, err := client.GetVideo(videoID)
+	v, err := getVideoFromID(videoID)
 	if err != nil {
 		return nil, err
 	}
 
-	slog.Info("youtube: got video info", "video_id", video.ID, "guild_id", guildID)
-
-	formats := video.Formats.Quality("251") // only get videos with audio
-
-	if len(formats) < 1 {
-		return nil, errors.New("youtube: could not find suitable audio format")
-	}
-
-	url, err := client.GetStreamURL(video, &formats[0])
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := http.Get(url)
+	resp, err := http.Get(v.URL)
 	if err != nil {
 		return nil, err
 	}
@@ -50,11 +97,11 @@ func GetPlayableTrackFromYoutube(guildID, videoID string) (*audio.Track, error) 
 
 	return audio.NewTrack(
 		audio.TrackInfo{
-			ID:       video.ID,
-			Title:    video.Title,
-			Artist:   video.Author,
-			Duration: video.Duration,
-			Live:     false,
+			ID:       v.ID,
+			Title:    v.Title,
+			Artist:   v.Channel,
+			Duration: time.Duration(v.Duration) * time.Second,
+			Live:     v.IsLive,
 		},
 		audioStream,
 	), nil
