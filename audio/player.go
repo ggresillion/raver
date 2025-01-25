@@ -72,6 +72,7 @@ func (p *Player) Pause() {
 	if p.State != Playing {
 		return
 	}
+	slog.Info("player: paused", "guild_id", p.guildID)
 	p.State = Paused
 }
 
@@ -79,6 +80,7 @@ func (p *Player) Resume() {
 	if p.State != Paused {
 		return
 	}
+	slog.Info("player: resumed", "guild_id", p.guildID)
 	p.State = Playing
 }
 

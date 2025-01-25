@@ -12,7 +12,14 @@ type Command interface {
 	Handler(g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
-var Commands = []Command{PlayCommand{}, PauseCommand{}, SkipCommand{}, PlaylistCommand{}, StopCommand{}}
+var Commands = []Command{
+	PlayCommand{},
+	PauseCommand{},
+	ResumeCommand{},
+	SkipCommand{},
+	PlaylistCommand{},
+	StopCommand{},
+}
 
 func sendError(s *discordgo.Session, i *discordgo.Interaction, err error) error {
 	slog.Error("discord: sending error to client", "error", err.Error(), "guild_id", i.GuildID)

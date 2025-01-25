@@ -8,7 +8,7 @@ import (
 
 type PauseCommand struct{}
 
-func (c PauseCommand) Name() string { return "command" }
+func (c PauseCommand) Name() string { return "pause" }
 
 func (c PauseCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
@@ -28,7 +28,6 @@ func (c PauseCommand) Handler(g *GBot, s *discordgo.Session, i *discordgo.Intera
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseUpdateMessage,
 	})
-
 	if err != nil {
 		sendError(s, i.Interaction, err)
 		return
