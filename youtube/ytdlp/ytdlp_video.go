@@ -1,4 +1,4 @@
-package youtube
+package ytdlp
 
 type Video struct {
 	ID      string `json:"id"`

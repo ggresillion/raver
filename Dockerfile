@@ -12,6 +12,8 @@ RUN go build -o raver
 
 FROM alpine:3.20.2
 
+RUN apk add --no-cache yt-dlp
+
 WORKDIR /opt/app
 
 COPY --from=builder /opt/app/raver /opt/app/raver

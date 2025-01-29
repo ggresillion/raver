@@ -1,82 +1,20 @@
 package youtube
 
 import (
-	"encoding/json"
 	"io"
 	"log/slog"
 	"net/http"
-	"os"
-	"os/exec"
 	"raver/audio"
+	"raver/youtube/ytdlp"
 	"time"
 
 	"github.com/ebml-go/webm"
 	"github.com/jfbus/httprs"
 )
 
-const (
-	ytDlpURL    = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp"
-	ytDlpBinary = "yt-dlp"
-)
-
-// getVideoFromID returns a webm audio stream URL from a youtube video ID or URL
-func getVideoFromID(ID string) (*Video, error) {
-	ytDlp := ytDlpBinary
-	// Check if yt-dlp is already installed
-	if _, err := exec.LookPath(ytDlpBinary); err != nil {
-		ytDlp, err = downloadYtdlp()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Use the installed yt-dlp binary
-	cmd := exec.Command(ytDlp, "-f", "bestaudio", "-J", ID)
-	output, err := cmd.Output()
-	if err != nil {
-		return nil, err
-	}
-
-	var video *Video
-	err = json.Unmarshal(output, &video)
-	if err != nil {
-		return nil, err
-	}
-
-	return video, nil
-}
-
-func downloadYtdlp() (string, error) {
-	slog.Info("yt-dlp not found, downloading...")
-
-	// Download yt-dlp
-	resp, err := http.Get(ytDlpURL)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	// Write the binary to a temporary file
-	tmpFile, err := os.CreateTemp("", "yt-dlp-*")
-	if err != nil {
-		return "", err
-	}
-	defer os.Remove(tmpFile.Name()) // Clean up the temporary file
-
-	if _, err := io.Copy(tmpFile, resp.Body); err != nil {
-		return "", err
-	}
-	if err := tmpFile.Chmod(0755); err != nil { // Make the file executable
-		return "", err
-	}
-	tmpFile.Close()
-
-	return tmpFile.Name(), nil
-}
-
 // GetPlayableTrackFromYoutube returns a audio.Track from a given videoID
 func GetPlayableTrackFromYoutube(guildID, videoID string) (*audio.Track, error) {
-	v, err := getVideoFromID(videoID)
+	v, err := ytdlp.GetVideoByID(videoID)
 	if err != nil {
 		return nil, err
 	}
