@@ -7,9 +7,16 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"sync"
 )
 
-var path string
+var (
+	path       string
+	cmd        *exec.Cmd
+	stdinPipe  io.WriteCloser
+	stdoutPipe io.ReadCloser
+	mu         sync.Mutex
+)
 
 const (
 	url    = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp"
@@ -19,31 +26,60 @@ const (
 func init() {
 	if _, err := exec.LookPath(binary); err != nil {
 		// If not, download it
+		var err error
 		path, err = downloadYtdlp()
 		if err != nil {
 			panic(err)
 		}
-		return
+	} else {
+		slog.Info("ytdlp: yt-dlp found")
+		path = binary
 	}
-	slog.Info("ytdlp: yt-dlp found")
-	path = binary
+
+	// Start the persistent yt-dlp process
+	startPersistentProcess()
+}
+
+func startPersistentProcess() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	cmd = exec.Command(path, "--no-cache-dir", "--no-progress", "-J", "-")
+	var err error
+	stdinPipe, err = cmd.StdinPipe()
+	if err != nil {
+		panic(err)
+	}
+	stdoutPipe, err = cmd.StdoutPipe()
+	if err != nil {
+		panic(err)
+	}
+
+	if err := cmd.Start(); err != nil {
+		panic(err)
+	}
+
+	slog.Info("ytdlp: started persistent yt-dlp process")
 }
 
 func GetVideoByID(ID string) (*Video, error) {
-	// Use the installed yt-dlp binary
-	cmd := exec.Command(path, "-f", "bestaudio", "-J", ID)
-	output, err := cmd.Output()
+	mu.Lock()
+	defer mu.Unlock()
+
+	// Write the video ID to the stdin of the persistent process
+	_, err := io.WriteString(stdinPipe, ID+"\n")
 	if err != nil {
 		return nil, err
 	}
 
-	var video *Video
-	err = json.Unmarshal(output, &video)
-	if err != nil {
+	// Read the JSON output from stdout
+	decoder := json.NewDecoder(stdoutPipe)
+	var video Video
+	if err := decoder.Decode(&video); err != nil {
 		return nil, err
 	}
 
-	return video, nil
+	return &video, nil
 }
 
 func downloadYtdlp() (string, error) {
@@ -71,6 +107,6 @@ func downloadYtdlp() (string, error) {
 	}
 	tmpFile.Close()
 
-	slog.Info("ytdlp: yd-dlp downloaded at " + tmpFile.Name())
+	slog.Info("ytdlp: yt-dlp downloaded at " + tmpFile.Name())
 	return tmpFile.Name(), nil
 }
