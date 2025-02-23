@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"net/http"
 	"raver/audio"
-	"raver/youtube/ytdlp"
 	"time"
 
 	"github.com/ebml-go/webm"
@@ -13,8 +12,8 @@ import (
 )
 
 // GetPlayableTrackFromYoutube returns a audio.Track from a given videoID
-func GetPlayableTrackFromYoutube(guildID, videoID string) (*audio.Track, error) {
-	v, err := ytdlp.GetVideoByID(videoID)
+func (y Youtube) GetPlayableTrackFromYoutube(guildID, videoID string) (*audio.Track, error) {
+	v, err := y.adapter.GetVideoByID(videoID)
 	if err != nil {
 		return nil, err
 	}

@@ -3,6 +3,7 @@ package discord
 import (
 	"fmt"
 	"raver/youtube"
+	"raver/youtube/ytdlp"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -95,7 +96,7 @@ func addToPlaylist(g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate
 		return
 	}
 
-	track, err := youtube.GetPlayableTrackFromYoutube(i.GuildID, trackID)
+	track, err := youtube.NewYoutube(ytdlp.NewYoutubeAdapter()).GetPlayableTrackFromYoutube(i.GuildID, trackID)
 	if err != nil {
 		sendError(s, i.Interaction, err)
 		return
