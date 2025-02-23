@@ -1,6 +1,0 @@
-[project]
-name = "raver"
-version = "0.1.0"
-dependencies = [
-    "yt_dlp"
-]

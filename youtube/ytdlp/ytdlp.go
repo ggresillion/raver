@@ -2,6 +2,7 @@ package ytdlp
 
 import (
 	"bufio"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,10 +15,8 @@ import (
 
 var path string
 
-const (
-	url    = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp"
-	binary = "yt-dlp"
-)
+//go:embed ytdlp_wrapper.py
+var ytdlpWrapper embed.FS
 
 var (
 	in  io.WriteCloser
@@ -27,28 +26,25 @@ var (
 func init() {
 	slog.Info("ytdlp: initializing...")
 
-	// Check if the virtual environment exists
-	if _, err := os.Stat("venv"); os.IsNotExist(err) {
-		slog.Info("ytdlp: virtual environment not found, creating...")
-		// Create the virtual environment
-		cmd := exec.Command("python3", "-m", "venv", "venv")
-		if err := cmd.Run(); err != nil {
-			panic(fmt.Sprintf("ytdlp: error creating virtual environment: %v", err))
-		}
-		slog.Info("ytdlp: virtual environment created")
+	// Read the embedded Python script
+	scriptData, err := ytdlpWrapper.ReadFile("ytdlp_wrapper.py")
+	if err != nil {
+		panic(fmt.Sprintf("ytdlp: error reading embedded script: %v", err))
 	}
 
-	// Install dependencies in the virtual environment
-	slog.Info("ytdlp: installing dependencies...")
-	cmd := exec.Command("venv/bin/python3", "-m", "pip", "install", ".")
-	if err := cmd.Run(); err != nil {
-		panic(fmt.Sprintf("ytdlp: error installing dependencies: %v", err))
+	// Write the script to a temporary file
+	tmpFile, err := os.CreateTemp("", "ytdlp_wrapper_*.py")
+	if err != nil {
+		panic(fmt.Sprintf("ytdlp: error creating temporary file: %v", err))
 	}
-	slog.Info("ytdlp: dependencies installed")
+	defer tmpFile.Close()
+
+	if _, err := tmpFile.Write(scriptData); err != nil {
+		panic(fmt.Sprintf("ytdlp: error writing to temporary file: %v", err))
+	}
 
 	// Start the Python wrapper
-	cmd = exec.Command("venv/bin/python3", "ytdlp_wrapper.py")
-	var err error
+	cmd := exec.Command("python3", tmpFile.Name())
 	in, err = cmd.StdinPipe()
 	if err != nil {
 		panic(fmt.Sprintf("ytdlp: error creating stdin pipe: %v", err))

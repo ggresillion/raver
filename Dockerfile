@@ -12,7 +12,7 @@ RUN go build -o raver
 
 FROM alpine:3.20.2
 
-RUN apk add --no-cache yt-dlp
+RUN apk add python3 py3-pip yt-dlp
 
 WORKDIR /opt/app
 
