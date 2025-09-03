@@ -13,11 +13,12 @@ const (
 )
 
 type TrackInfo struct {
-	ID       string
-	Title    string
-	Artist   string
-	Duration time.Duration
-	Live     bool
+	ID        string
+	Title     string
+	Artist    string
+	Duration  time.Duration
+	Live      bool
+	Thumbnail string
 }
 
 type AudioStream struct {

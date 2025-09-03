@@ -46,7 +46,7 @@ func (b *Bot) Connect() error {
 	b.session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsGuildVoiceStates
 
 	// Register handlers
-	b.session.AddHandler(func(_ *discordgo.Session, _ *discordgo.Ready) { slog.Info("bot: connected") })
+	b.session.AddHandler(func(_ *discordgo.Session, _ *discordgo.Ready) { slog.Info("[bot] connected") })
 	b.session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		g, err := b.Guild(i.GuildID)
 		if err != nil {
@@ -57,15 +57,15 @@ func (b *Bot) Connect() error {
 		switch i.Type {
 		case discordgo.InteractionApplicationCommand:
 			command = i.ApplicationCommandData().Name
-			slog.Info("bot: received slash command", "command", command, "guild_id", g.guild.ID)
+			slog.Info("[bot] received slash command", "command", command, "guild_id", g.guild.ID)
 		case discordgo.InteractionMessageComponent:
 			command = i.MessageComponentData().CustomID
-			slog.Info("bot: received component action", "command", command, "guild_id", g.guild.ID)
+			slog.Info("[bot] received component action", "command", command, "guild_id", g.guild.ID)
 		case discordgo.InteractionApplicationCommandAutocomplete:
 			command = i.ApplicationCommandData().Name
-			slog.Info("bot: received autocomplete request", "command", command, "guild_id", g.guild.ID)
+			slog.Info("[bot] received autocomplete request", "command", command, "guild_id", g.guild.ID)
 		default:
-			slog.Info("bot: received unknown interaction", "interaction", i.Type.String(), "command", command, "guild_id", g.guild.ID)
+			slog.Info("[bot] received unknown interaction", "interaction", i.Type.String(), "command", command, "guild_id", g.guild.ID)
 			return
 		}
 		handleCommand(command, g, s, i)
@@ -105,7 +105,7 @@ func (b *Bot) Guild(guildID string) (*GBot, error) {
 	}
 	guild, err := b.session.State.Guild(guildID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[bot] error getting guild %s: %v", guildID, err)
 	}
 	g = &GBot{
 		session: b.session,
@@ -117,12 +117,12 @@ func (b *Bot) Guild(guildID string) (*GBot, error) {
 }
 
 func (g *GBot) JoinUserChannel(userID string) error {
-	slog.Info("bot: trying to join voice channel for user", "user_id", userID)
+	slog.Info("[bot] trying to join voice channel for user", "user_id", userID)
 	for _, v := range g.guild.VoiceStates {
 		if v.UserID == userID {
 			vc, err := g.session.ChannelVoiceJoin(g.guild.ID, v.ChannelID, false, true)
 			if err != nil {
-				return err
+				return fmt.Errorf("[bot] error joining voice channel: %v", err)
 			}
 
 			g.vc = vc
@@ -131,18 +131,18 @@ func (g *GBot) JoinUserChannel(userID string) error {
 					bytes := make([]byte, 960)
 					n, err := g.Player.Read(bytes)
 					if err != nil {
-						slog.Info("bot: error writing to bot audio: %v", err)
+						slog.Info(fmt.Sprintf("[bot] error writing to bot audio: %v", err))
 						return
 					}
 					g.vc.OpusSend <- bytes[:n]
 				}
 			}()
 			vc.Speaking(true)
-			slog.Info("bot: joinned voice channel", "channel_id", vc.ChannelID, "guild_id", g.guild.ID)
+			slog.Info("[bot] joinned voice channel", "channel_id", vc.ChannelID, "guild_id", g.guild.ID)
 			return nil
 		}
 	}
-	return fmt.Errorf("bot: user %s not in a voice channel", userID)
+	return fmt.Errorf("[bot] user %s not in a voice channel", userID)
 }
 
 func handleCommand(command string, g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate) {

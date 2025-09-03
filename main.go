@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"raver/discord"
+	"raver/web"
 	"syscall"
 )
 
@@ -15,19 +16,20 @@ func init() {
 }
 
 func Start(bot *discord.Bot) {
+}
+
+func main() {
+	bot := discord.NewBot(token)
 	err := bot.Connect()
 	if err != nil {
 		panic(err)
 	}
 	defer bot.Stop()
 
+	web.Start(bot)
+
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs
 	slog.Info("exiting...")
-}
-
-func main() {
-	bot := discord.NewBot(token)
-	Start(bot)
 }

@@ -120,12 +120,15 @@ func performSearch(guildID, searchTerm string, limit int) (results []audio.Track
 
 		duration, _ := getDuration(rawDuration)
 
+		thumb, _ := jsonparser.GetString(value, "videoRenderer", "thumbnail", "thumbnails", "[0]", "url")
+
 		results = append(results, audio.TrackInfo{
-			ID:       id,
-			Title:    title,
-			Artist:   uploader,
-			Duration: duration,
-			Live:     live,
+			ID:        id,
+			Title:     title,
+			Artist:    uploader,
+			Duration:  duration,
+			Live:      live,
+			Thumbnail: thumb,
 		})
 	})
 	return
