@@ -2,9 +2,10 @@ package discord
 
 import (
 	"fmt"
+	"time"
+
 	"raver/youtube"
 	"raver/youtube/goytdlp"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -15,9 +16,9 @@ func (c PlayCommand) Name() string { return "play" }
 
 func (c PlayCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
+		Type:        discordgo.ChatApplicationCommand,
 		Name:        "play",
 		Description: "Add a music to the playlist",
-		Type:        discordgo.ChatApplicationCommand,
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Name:         "query",

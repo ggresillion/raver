@@ -12,9 +12,9 @@ func (c PauseCommand) Name() string { return "pause" }
 
 func (c PauseCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
+		Type:        discordgo.ChatApplicationCommand,
 		Name:        "pause",
 		Description: "Pause the current track",
-		Type:        discordgo.ChatApplicationCommand,
 	}
 }
 

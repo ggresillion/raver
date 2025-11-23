@@ -51,7 +51,7 @@ func (p *Player) Read(bytes []byte) (n int, err error) {
 	if err == io.EOF {
 		slog.Info("player: got stream end signal", "guild_id", p.guildID)
 		if p.State == IDLE {
-			return
+			return n, err
 		}
 		p.State = IDLE
 		if len(p.Queue) > 1 {

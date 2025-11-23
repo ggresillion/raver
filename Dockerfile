@@ -1,18 +1,18 @@
-FROM golang:1.23-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.25-alpine AS builder
+
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /opt/app
 
 COPY go.mod go.sum ./
-
 RUN go mod download -x
 
 COPY . .
 
-RUN go build -o raver
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o raver
 
 FROM alpine:3.20.2
-
-RUN apk add python3 py3-pip yt-dlp
 
 WORKDIR /opt/app
 

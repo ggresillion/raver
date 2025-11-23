@@ -1,9 +1,11 @@
 package discord
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
+
 	"raver/audio"
 
 	"github.com/bwmarrin/discordgo"
@@ -120,7 +122,7 @@ func (g *GBot) JoinUserChannel(userID string) error {
 	slog.Info("[bot] trying to join voice channel for user", "user_id", userID)
 	for _, v := range g.guild.VoiceStates {
 		if v.UserID == userID {
-			vc, err := g.session.ChannelVoiceJoin(g.guild.ID, v.ChannelID, false, true)
+			vc, err := g.session.ChannelVoiceJoin(context.Background(), g.guild.ID, v.ChannelID, false, true)
 			if err != nil {
 				return fmt.Errorf("[bot] error joining voice channel: %v", err)
 			}
@@ -138,7 +140,7 @@ func (g *GBot) JoinUserChannel(userID string) error {
 				}
 			}()
 			vc.Speaking(true)
-			slog.Info("[bot] joinned voice channel", "channel_id", vc.ChannelID, "guild_id", g.guild.ID)
+			slog.Info("[bot] joinned voice channel", "channel_id", vc, "guild_id", g.guild.ID)
 			return nil
 		}
 	}

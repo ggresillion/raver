@@ -2,12 +2,14 @@ package web
 
 templ index() {
 	<!DOCTYPE html>
-	<html>
+	<html lang="en">
 		<head>
 			<link rel="stylesheet" type="text/css" href="/static/style/app.css"/>
-			<script src="/static/script/htmx.min.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js" crossorigin="anonymous"></script>
+			<script src="https://cdn.jsdelivr.net/npm/htmx-ext-sse@2.2.2" crossorigin="anonymous"></script>
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"/>
 		</head>
-		<body>
+		<body hx-ext="sse">
 			@home()
 		</body>
 	</html>

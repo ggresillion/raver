@@ -10,9 +10,9 @@ func (c SkipCommand) Name() string { return "skip" }
 
 func (c SkipCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
+		Type:        discordgo.ChatApplicationCommand,
 		Name:        "skip",
 		Description: "Skip the current track",
-		Type:        discordgo.ChatApplicationCommand,
 	}
 }
 
@@ -22,7 +22,6 @@ func (c SkipCommand) Handler(g *GBot, s *discordgo.Session, i *discordgo.Interac
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseUpdateMessage,
 	})
-
 	if err != nil {
 		sendError(s, i.Interaction, err)
 		return

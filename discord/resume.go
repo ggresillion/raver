@@ -10,9 +10,9 @@ func (c ResumeCommand) Name() string { return "resume" }
 
 func (c ResumeCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
+		Type:        discordgo.ChatApplicationCommand,
 		Name:        "resume",
 		Description: "Resume the current track",
-		Type:        discordgo.ChatApplicationCommand,
 	}
 }
 

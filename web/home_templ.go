@@ -8,14 +8,7 @@ package web
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"log/slog"
-	"net/http"
-	"raver/audio"
-	"raver/discord"
-	"raver/youtube"
-	"raver/youtube/goytdlp"
-)
+import "raver/audio"
 
 const (
 	guildID = "423590632582414346"
@@ -43,7 +36,7 @@ func home() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex items-center justify-center h-screen bg-cover bg-no-repeat font-nunito\" style=\"background-image: url('https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/aa462558-0106-4268-9864-d34a4f35531f');\"><div class=\"grid grid-cols-[70%_30%] w-[95%] h-[95%] m-10 rounded-xl border border-white/50 bg-[rgba(16,21,61,0.5)] backdrop-blur-md shadow-[inset_0_0.5px_0_1px_rgba(255,255,255,0.23),inset_0_1px_0_0_rgba(255,255,255,0.6),0_4px_16px_rgba(0,0,0,0.12)]\"><!-- LEFT CONTENT --><div class=\"flex flex-col text-gray-200 h-full overflow-x-hidden\"><form class=\"flex flex-col justify-between gap-2 p-6\" hx-post=\"search\" hx-target=\"#results\"><label for=\"search\" class=\"text-lg font-bold\">Search</label> <input name=\"search\" class=\"p-2 border border-white/50 rounded-xl\" type=\"text\" placeholder=\"\"></form><div class=\"flex-1 flex flex-col overflow-auto gap-6 p-6\" id=\"results\"></div></div><!-- RIGHT CONTENT --><div class=\"grid grid-rows-2 border-l border-white/50 p-6 text-gray-200\"><!-- SONGS --><div><h1 class=\"mb-6 text-lg font-bold\">Queue</h1><div id=\"playlist\" class=\"space-y-4\"><!-- Repeat for more songs --></div></div><!-- MUSIC PLAYER --><div class=\"flex flex-col items-center justify-center mt-6 p-6 rounded-xl bg-white/10 backdrop-blur-md shadow-inner\"><div class=\"relative\"><img class=\"rounded-full border-2 border-purple-200 max-w-[120px] aspect-square object-cover\" src=\"images/album-cover.png\"> <span class=\"absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[rgba(17,6,58,0.7)] border-2 border-purple-200\"></span></div><h2 class=\"mt-4 font-medium text-lg\">Redemption</h2><p class=\"text-sm text-gray-300 mb-4\">Besomorph & Coopex</p><input type=\"range\" class=\"w-full accent-purple-700 mb-4\"><div class=\"flex items-center justify-center gap-6\"><button class=\"w-10 h-10 flex items-center justify-center rounded-full bg-purple-300/50 text-white hover:scale-95 transition\"><i class=\"fa-solid fa-backward\"></i></button> <button class=\"w-12 h-12 flex items-center justify-center rounded-full bg-purple-300/50 text-white hover:scale-95 transition\"><i class=\"fa-solid fa-play\"></i></button> <button class=\"w-10 h-10 flex items-center justify-center rounded-full bg-purple-300/50 text-white hover:scale-95 transition\"><i class=\"fa-solid fa-forward\"></i></button></div></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex items-center justify-center h-screen bg-cover bg-no-repeat font-nunito\" style=\"background-image: url('https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/aa462558-0106-4268-9864-d34a4f35531f');\"><div class=\"grid grid-cols-[70%_30%] w-[95%] h-[95%] m-10 rounded-xl border border-white/50 bg-[rgba(16,21,61,0.5)] backdrop-blur-md shadow-[inset_0_0.5px_0_1px_rgba(255,255,255,0.23),inset_0_1px_0_0_rgba(255,255,255,0.6),0_4px_16px_rgba(0,0,0,0.12)]\"><!-- LEFT CONTENT --><div class=\"flex flex-col text-gray-200 h-full overflow-x-hidden\"><form class=\"flex flex-col justify-between gap-2 p-6\" hx-post=\"search\" hx-target=\"#results\"><label for=\"search\" class=\"text-lg font-bold\">Search</label> <input name=\"search\" class=\"p-2 border border-white/50 rounded-xl\" type=\"text\" placeholder=\"\"></form><div class=\"flex-1 flex flex-col overflow-auto gap-6 p-6\" id=\"results\"></div></div><!-- RIGHT CONTENT --><div class=\"h-full\" sse-connect=\"/player\" sse-swap=\"player\"></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -79,7 +72,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(`{"id":"` + track.ID + `"}`)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 70, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 44, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -92,7 +85,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(track.Thumbnail)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 73, Col: 146}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 47, Col: 146}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -105,7 +98,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(track.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 76, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 50, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -118,7 +111,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(track.Artist)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 77, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 51, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -131,7 +124,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(track.Duration.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 79, Col: 68}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 53, Col: 68}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -143,115 +136,6 @@ func track(track audio.TrackInfo) templ.Component {
 		}
 		return nil
 	})
-}
-
-func playlist(tracks []*audio.Track) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		for _, track := range tracks {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"grid grid-cols-[60px_1fr_auto] items-center gap-3\"><div class=\"relative w-[60px] h-[45px] rounded overflow-hidden border border-gray-400/50\"><img class=\"object-cover w-full h-full\" src=\"https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/ea61baa7-9c4b-4f43-805e-81de5fc8aa2b\"><div class=\"absolute inset-0 flex items-center justify-center bg-purple-400/60 opacity-0 hover:opacity-100 transition\"><i class=\"fa-solid fa-play text-xl\"></i></div></div><div><p class=\"text-xs text-gray-400\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(track.Artist)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 93, Col: 51}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</p></div><span class=\"text-xs\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(track.Duration.String())
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 95, Col: 50}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</span></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		return nil
-	})
-}
-
-func Search(w http.ResponseWriter, r *http.Request) {
-	query := r.FormValue("search")
-
-	tracks, err := youtube.Search("", query, 20)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	for _, t := range tracks {
-		track(t).Render(r.Context(), w)
-	}
-}
-
-func Add(bot *discord.Bot) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id := r.FormValue("id")
-
-		gbot, err := bot.Guild(guildID)
-		if err != nil {
-			handleError(w, err)
-			return
-		}
-
-		// err = gbot.JoinUserChannel(userID)
-		// if err != nil {
-		// 	handleError(w, err)
-		// 	return
-		// }
-
-		track, err := youtube.NewYoutube(goytdlp.NewYoutubeAdapter()).GetPlayableTrackFromYoutube(guildID, id)
-		if err != nil {
-			handleError(w, err)
-			return
-		}
-
-		err = gbot.Player.Add(track)
-		if err != nil {
-			handleError(w, err)
-			return
-		}
-
-		playlist(gbot.Player.Queue).Render(r.Context(), w)
-	}
-}
-
-func handleError(w http.ResponseWriter, err error) {
-	http.Error(w, err.Error(), http.StatusInternalServerError)
-	slog.Error(err.Error())
-	return
 }
 
 var _ = templruntime.GeneratedTemplate

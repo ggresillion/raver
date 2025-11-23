@@ -1,10 +1,12 @@
 package discord
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
-	"raver/audio"
 	"time"
+
+	"raver/audio"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -32,9 +34,9 @@ func (c PlaylistCommand) Name() string { return "playlist" }
 
 func (c PlaylistCommand) Command() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
+		Type:        discordgo.ChatApplicationCommand,
 		Name:        "playlist",
 		Description: "Display the playlist in this channel",
-		Type:        discordgo.ChatApplicationCommand,
 	}
 }
 
@@ -66,7 +68,7 @@ func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
 				return
 			}
 			g.PlaylistAlreadyDisplayed = false
-			err = g.vc.Disconnect()
+			err = g.vc.Disconnect(context.Background())
 			if err != nil {
 				sendError(s, i, err)
 				return
