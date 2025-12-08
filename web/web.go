@@ -22,6 +22,8 @@ import (
 var static embed.FS
 
 func Start(bot *discord.Bot) {
+	auth := NewDiscordAuth()
+
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.FileServer(http.FS(static)))
 
@@ -32,6 +34,9 @@ func Start(bot *discord.Bot) {
 	mux.HandleFunc("/resume", resumeHandler(bot))
 	mux.HandleFunc("/pause", pauseHandler(bot))
 	mux.HandleFunc("/skip", skipHandler(bot))
+
+	mux.HandleFunc("/auth/login", auth.LoginHandler)
+	mux.HandleFunc("/auth/callback", auth.CallbackHandler)
 
 	slog.Info("[web] starting server", "port", "3000")
 	go http.ListenAndServe(":3000", mux)

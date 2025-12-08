@@ -7,7 +7,9 @@ require (
 	github.com/buger/jsonparser v1.1.1
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/lrstanley/go-ytdlp v1.2.7
+	github.com/ravener/discord-oauth2 v0.0.0-20230514095040-ae65713199b3
 	github.com/stretchr/testify v1.11.1
+	golang.org/x/oauth2 v0.34.0
 )
 
 require (
@@ -25,14 +27,14 @@ require (
 	github.com/creack/pty v1.1.24 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
-	github.com/dop251/goja v0.0.0-20251103141225-af2ceb9156d7 // indirect
+	github.com/dop251/goja v0.0.0-20251201205617-2bb4c724c0f9 // indirect
 	github.com/ebml-go/ebml v0.0.0-20221114152929-d226b1da0cc9 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gohugoio/hugo v0.147.6 // indirect
-	github.com/google/pprof v0.0.0-20251114195745-4902fdda35c8 // indirect
+	github.com/google/pprof v0.0.0-20251208000136-3d256cb9ff16 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
@@ -46,11 +48,11 @@ require (
 	github.com/spf13/cast v1.8.0 // indirect
 	github.com/tdewolff/parse/v2 v2.8.1 // indirect
 	github.com/ulikunitz/xz v0.5.15 // indirect
-	golang.org/x/mod v0.29.0 // indirect
-	golang.org/x/net v0.46.0 // indirect
-	golang.org/x/sync v0.18.0 // indirect
-	golang.org/x/text v0.31.0 // indirect
-	golang.org/x/tools v0.38.0 // indirect
+	golang.org/x/mod v0.30.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
+	golang.org/x/text v0.32.0 // indirect
+	golang.org/x/tools v0.39.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
@@ -59,9 +61,9 @@ require (
 	github.com/ebml-go/webm v0.0.0-20221117133942-84fa5245cf70
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/jfbus/httprs v1.0.1
-	github.com/kkdai/youtube/v2 v2.10.4
-	golang.org/x/crypto v0.44.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
+	github.com/kkdai/youtube/v2 v2.10.5
+	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
 )
 
 tool (
