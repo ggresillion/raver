@@ -2,6 +2,7 @@ package web
 
 import (
 	"bytes"
+	"context"
 	"embed"
 	"fmt"
 	"log/slog"
@@ -27,7 +28,7 @@ func Start(bot *discord.Bot) {
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.FileServer(http.FS(static)))
 
-	mux.Handle("/", templ.Handler(index()))
+	mux.Handle("/", authenticated(templ.Handler(index())))
 	mux.HandleFunc("/search", searchHandler)
 	mux.HandleFunc("/add", addHandler(bot))
 	mux.HandleFunc("/player", playerHandler(bot))
@@ -40,6 +41,72 @@ func Start(bot *discord.Bot) {
 
 	slog.Info("[web] starting server", "port", "3000")
 	go http.ListenAndServe(":3000", mux)
+}
+
+type key string
+
+const (
+	userKey   key = "user"
+	guildsKey key = "guilds"
+)
+
+func getGuilds(bot *discord.Bot, token string) ([]guild, error) {
+	client := newDiscordClient(token)
+	guilds, err := client.GetUserGuilds(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var guildsInCommon []guild
+	for _, g1 := range bot.Session().State.Guilds {
+		for _, g2 := range guilds {
+			if g1.ID == g2.ID {
+				guildsInCommon = append(guildsInCommon, g2)
+			}
+		}
+	}
+
+	return guildsInCommon, nil
+}
+
+func authenticated(bot *discord.Bot, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		token, err := r.Cookie("token")
+		if err != nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		user, err := newDiscordClient(token.Value).GetUser(userID)
+		if err != nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		guilds, err := newDiscordClient(token.Value).GetUserGuilds(userID)
+		if err != nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		ctx := context.WithValue(r.Context(), userKey, *user)
+		ctx = context.WithValue(ctx, guildsKey, guilds)
+		r = r.WithContext(ctx)
+		next.ServeHTTP(w, r)
+	})
+}
+
+func userFromCtx(ctx context.Context) user {
+	u := ctx.Value(userKey)
+	if u == nil {
+		return user{}
+	}
+	return u.(user)
+}
+
+func guildsFromCtx(ctx context.Context) []guild {
+	g := ctx.Value(guildsKey)
+	if g == nil {
+		return []guild{}
+	}
+	return g.([]guild)
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {

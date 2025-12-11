@@ -2,7 +2,7 @@ package web
 
 import (
 	"context"
-	"io"
+	"encoding/json"
 	"net/http"
 
 	"github.com/ravener/discord-oauth2"
@@ -17,10 +17,9 @@ type DiscordAuth struct {
 
 func NewDiscordAuth() DiscordAuth {
 	return DiscordAuth{conf: &oauth2.Config{
-		RedirectURL: "http://localhost:3000/auth/callback",
-		// This next 2 lines must be edited before running this.
-		ClientID:     "id",
-		ClientSecret: "secret",
+		RedirectURL:  "http://127.0.0.1:7331/auth/callback",
+		ClientID:     "497474636133564417",
+		ClientSecret: "S3LgLHtgT6dSKVpiI-AtILBKnhMqw7vR",
 		Scopes:       []string{discord.ScopeIdentify},
 		Endpoint:     discord.Endpoint,
 	}}
@@ -33,7 +32,7 @@ func (a DiscordAuth) LoginHandler(w http.ResponseWriter, r *http.Request) {
 func (a DiscordAuth) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	if r.FormValue("state") != state {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("State does not match."))
+		w.Write([]byte("state does not match."))
 		return
 	}
 
@@ -44,26 +43,75 @@ func (a DiscordAuth) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := a.conf.Client(context.Background(), token).Get("https://discord.com/api/users/@me")
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    token.AccessToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	})
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
 
-	if err != nil || res.StatusCode != 200 {
-		w.WriteHeader(http.StatusInternalServerError)
-		if err != nil {
-			w.Write([]byte(err.Error()))
-		} else {
-			w.Write([]byte(res.Status))
-		}
-		return
+type DiscordClient struct {
+	Token string
+}
+
+func newDiscordClient(token string) DiscordClient {
+	return DiscordClient{
+		Token: token,
 	}
+}
 
-	defer res.Body.Close()
+type user struct {
+	ID     string `json:"id"`
+	Name   string `json:"username"`
+	Avatar string `json:"avatar"`
+}
 
-	body, err := io.ReadAll(res.Body)
+func (c DiscordClient) GetUser(id string) (*user, error) {
+	req, err := http.NewRequest("GET", "https://discord.com/api/users/@me", nil)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer "+c.Token)
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
 	}
 
-	w.Write(body)
+	var user user
+	err = json.NewDecoder(res.Body).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+type guild struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Icon string `json:"icon"`
+}
+
+func (c DiscordClient) GetUserGuilds(id string) ([]guild, error) {
+	req, err := http.NewRequest("GET", "https://discord.com/api/users/@me/guilds", nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer "+c.Token)
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var userGuilds []guild
+	err = json.NewDecoder(res.Body).Decode(&userGuilds)
+	if err != nil {
+		return nil, err
+	}
+
+	return userGuilds, nil
 }

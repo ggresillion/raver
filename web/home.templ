@@ -7,10 +7,30 @@ const (
 	userID  = "169143950203027456"
 )
 
+templ userIcon(user user) {
+	<div>
+		<img class="w-10 h-10 rounded-full" src={ "https://cdn.discordapp.com/avatars/" + user.ID + "/" + user.Avatar + ".png" }/>
+	</div>
+}
+
+templ guildIcon(guild guild) {
+	<div class="cursor-pointer hover:scale-110">
+		<img class="w-10 h-10 rounded-full" src={ "https://cdn.discordapp.com/icons/" + guild.ID + "/" + guild.Icon + ".png" }/>
+	</div>
+}
+
 templ home() {
+	{{ user := userFromCtx(ctx) }}
+	{{ guilds := guildsFromCtx(ctx) }}
 	<div>
 		<div class="flex flex-col gap-2 items-center bg-red-500"></div>
 		<h1 class="text-blue-600">WORLD</h1>
+		@userIcon(user)
+		<div class="flex flex-col gap-2">
+			for _, guild := range guilds {
+				@guildIcon(guild)
+			}
+		</div>
 	</div>
 	<div
 		class="flex items-center justify-center h-screen bg-cover bg-no-repeat font-nunito"
