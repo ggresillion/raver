@@ -2,7 +2,9 @@ services:
   raver:
     build: .
     environment:
-      BOT_TOKEN: ${BOT_TOKEN}
+      RAVER_TOKEN: ${RAVER_TOKEN}
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
     ports:
       - 9090:9090
   grafana:

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"os"
 
 	"github.com/ravener/discord-oauth2"
 	"golang.org/x/oauth2"
@@ -18,8 +19,8 @@ type DiscordAuth struct {
 func NewDiscordAuth() DiscordAuth {
 	return DiscordAuth{conf: &oauth2.Config{
 		RedirectURL:  "http://127.0.0.1:7331/auth/callback",
-		ClientID:     "497474636133564417",
-		ClientSecret: "S3LgLHtgT6dSKVpiI-AtILBKnhMqw7vR",
+		ClientID:     os.Getenv("RAVER_CLIENT_ID"),
+		ClientSecret: os.Getenv("RAVER_CLIENT_SECRET"),
 		Scopes:       []string{discord.ScopeIdentify},
 		Endpoint:     discord.Endpoint,
 	}}

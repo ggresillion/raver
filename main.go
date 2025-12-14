@@ -12,10 +12,7 @@ import (
 var token string
 
 func init() {
-	token = os.Getenv("BOT_TOKEN")
-}
-
-func Start(bot *discord.Bot) {
+	token = os.Getenv("RAVER_TOKEN")
 }
 
 func main() {

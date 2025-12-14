@@ -99,7 +99,7 @@ func guildIcon(guild guild) templ.Component {
 	})
 }
 
-func home() templ.Component {
+func home(guilds []guild) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -121,7 +121,6 @@ func home() templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		user := userFromCtx(ctx)
-		guilds := guildsFromCtx(ctx)
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div><div class=\"flex flex-col gap-2 items-center bg-red-500\"></div><h1 class=\"text-blue-600\">WORLD</h1>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -130,7 +129,7 @@ func home() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"flex flex-col gap-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"flex flex-col gap-2\"></div></div><div class=\"flex items-center justify-center h-screen bg-cover bg-no-repeat font-nunito\" style=\"background-image: url('https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/aa462558-0106-4268-9864-d34a4f35531f');\"><div class=\"grid grid-cols-[70%_30%] w-[95%] h-[95%] m-10 rounded-xl border border-white/50 bg-[rgba(16,21,61,0.5)] backdrop-blur-md shadow-[inset_0_0.5px_0_1px_rgba(255,255,255,0.23),inset_0_1px_0_0_rgba(255,255,255,0.6),0_4px_16px_rgba(0,0,0,0.12)]\"><!-- LEFT CONTENT --><div class=\"flex flex-col text-gray-200 h-full overflow-x-hidden\"><div class=\"flex flex-row gap-2 items-center h-full\"><div class=\"flex flex-col justify-between gap-2 p-6 border-r-1 h-full\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -140,7 +139,7 @@ func home() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></div><div class=\"flex items-center justify-center h-screen bg-cover bg-no-repeat font-nunito\" style=\"background-image: url('https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/aa462558-0106-4268-9864-d34a4f35531f');\"><div class=\"grid grid-cols-[70%_30%] w-[95%] h-[95%] m-10 rounded-xl border border-white/50 bg-[rgba(16,21,61,0.5)] backdrop-blur-md shadow-[inset_0_0.5px_0_1px_rgba(255,255,255,0.23),inset_0_1px_0_0_rgba(255,255,255,0.6),0_4px_16px_rgba(0,0,0,0.12)]\"><!-- LEFT CONTENT --><div class=\"flex flex-col text-gray-200 h-full overflow-x-hidden\"><form class=\"flex flex-col justify-between gap-2 p-6\" hx-post=\"search\" hx-target=\"#results\"><label for=\"search\" class=\"text-lg font-bold\">Search</label> <input name=\"search\" class=\"p-2 border border-white/50 rounded-xl\" type=\"text\" placeholder=\"\"></form><div class=\"flex-1 flex flex-col overflow-auto gap-6 p-6\" id=\"results\"></div></div><!-- RIGHT CONTENT --><div class=\"h-full\" sse-connect=\"/player\" sse-swap=\"player\"></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div><form class=\"flex flex-col justify-between gap-2 p-6\" hx-post=\"search\" hx-target=\"#results\"><label for=\"search\" class=\"text-lg font-bold\">Search</label> <input name=\"search\" class=\"p-2 border border-white/50 rounded-xl\" type=\"text\" placeholder=\"\"></form></div><div class=\"flex-1 flex flex-col overflow-auto gap-6 p-6\" id=\"results\"></div></div><!-- RIGHT CONTENT --><div class=\"h-full\" sse-connect=\"/player\" sse-swap=\"player\"></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -176,7 +175,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(`{"id":"` + track.ID + `"}`)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 68, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 70, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -189,7 +188,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(track.Thumbnail)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 71, Col: 146}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 73, Col: 146}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -202,7 +201,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(track.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 74, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 76, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -215,7 +214,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(track.Artist)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 75, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 77, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -228,7 +227,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(track.Duration.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 77, Col: 68}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 79, Col: 68}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {

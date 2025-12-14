@@ -19,18 +19,13 @@ templ guildIcon(guild guild) {
 	</div>
 }
 
-templ home() {
+templ home(guilds []guild) {
 	{{ user := userFromCtx(ctx) }}
-	{{ guilds := guildsFromCtx(ctx) }}
 	<div>
 		<div class="flex flex-col gap-2 items-center bg-red-500"></div>
 		<h1 class="text-blue-600">WORLD</h1>
 		@userIcon(user)
-		<div class="flex flex-col gap-2">
-			for _, guild := range guilds {
-				@guildIcon(guild)
-			}
-		</div>
+		<div class="flex flex-col gap-2"></div>
 	</div>
 	<div
 		class="flex items-center justify-center h-screen bg-cover bg-no-repeat font-nunito"
@@ -39,14 +34,21 @@ templ home() {
 		<div class="grid grid-cols-[70%_30%] w-[95%] h-[95%] m-10 rounded-xl border border-white/50 bg-[rgba(16,21,61,0.5)] backdrop-blur-md shadow-[inset_0_0.5px_0_1px_rgba(255,255,255,0.23),inset_0_1px_0_0_rgba(255,255,255,0.6),0_4px_16px_rgba(0,0,0,0.12)]">
 			<!-- LEFT CONTENT -->
 			<div class="flex flex-col text-gray-200 h-full overflow-x-hidden">
-				<form
-					class="flex flex-col justify-between gap-2 p-6"
-					hx-post="search"
-					hx-target="#results"
-				>
-					<label for="search" class="text-lg font-bold">Search</label>
-					<input name="search" class="p-2 border border-white/50 rounded-xl" type="text" placeholder=""/>
-				</form>
+				<div class="flex flex-row gap-2 items-center h-full">
+					<div class="flex flex-col justify-between gap-2 p-6 border-r-1 h-full">
+						for _, guild := range guilds {
+							@guildIcon(guild)
+						}
+					</div>
+					<form
+						class="flex flex-col justify-between gap-2 p-6"
+						hx-post="search"
+						hx-target="#results"
+					>
+						<label for="search" class="text-lg font-bold">Search</label>
+						<input name="search" class="p-2 border border-white/50 rounded-xl" type="text" placeholder=""/>
+					</form>
+				</div>
 				<div class="flex-1 flex flex-col overflow-auto gap-6 p-6" id="results"></div>
 			</div>
 			<!-- RIGHT CONTENT -->

@@ -7,16 +7,12 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"time"
-
 	"raver/discord"
 	"raver/youtube"
 	"raver/youtube/goytdlp"
-
-	"github.com/a-h/templ"
+	"time"
 )
 
-//go:generate tailwindcss -i ./app.css -o ./static/style/app.css
 //go:generate go tool templ generate
 
 //go:embed static
@@ -28,7 +24,7 @@ func Start(bot *discord.Bot) {
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.FileServer(http.FS(static)))
 
-	mux.Handle("/", authenticated(templ.Handler(index())))
+	mux.Handle("/", authenticated(bot, homeHandler(bot)))
 	mux.HandleFunc("/search", searchHandler)
 	mux.HandleFunc("/add", addHandler(bot))
 	mux.HandleFunc("/player", playerHandler(bot))
@@ -46,8 +42,8 @@ func Start(bot *discord.Bot) {
 type key string
 
 const (
-	userKey   key = "user"
-	guildsKey key = "guilds"
+	userKey  key = "user"
+	tokenKey key = "token"
 )
 
 func getGuilds(bot *discord.Bot, token string) ([]guild, error) {
@@ -81,13 +77,8 @@ func authenticated(bot *discord.Bot, next http.Handler) http.Handler {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		guilds, err := newDiscordClient(token.Value).GetUserGuilds(userID)
-		if err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
 		ctx := context.WithValue(r.Context(), userKey, *user)
-		ctx = context.WithValue(ctx, guildsKey, guilds)
+		ctx = context.WithValue(ctx, tokenKey, token.Value)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 	})
@@ -101,12 +92,36 @@ func userFromCtx(ctx context.Context) user {
 	return u.(user)
 }
 
-func guildsFromCtx(ctx context.Context) []guild {
-	g := ctx.Value(guildsKey)
-	if g == nil {
-		return []guild{}
+func tokenFromCtx(ctx context.Context) string {
+	t := ctx.Value(tokenKey)
+	if t == nil {
+		return ""
 	}
-	return g.([]guild)
+	return t.(string)
+}
+
+func homeHandler(bot *discord.Bot) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		guilds, err := newDiscordClient(tokenFromCtx(ctx)).GetUserGuilds(userID)
+		if err != nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		var inCommon []guild
+		for _, guild := range guilds {
+			if _, err := bot.Guild(guild.ID); err == nil {
+				inCommon = append(inCommon, guild)
+			}
+		}
+
+		err = index(inCommon).Render(r.Context(), w)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
