@@ -3,7 +3,7 @@ module raver
 go 1.25
 
 require (
-	github.com/a-h/templ v0.3.960
+	github.com/a-h/templ v0.3.977
 	github.com/buger/jsonparser v1.1.1
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/lrstanley/go-ytdlp v1.2.7
@@ -23,18 +23,18 @@ require (
 	github.com/bitly/go-simplejson v0.5.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cli/browser v1.3.0 // indirect
-	github.com/cloudflare/circl v1.6.1 // indirect
+	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/creack/pty v1.1.24 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
-	github.com/dop251/goja v0.0.0-20251201205617-2bb4c724c0f9 // indirect
+	github.com/dop251/goja v0.0.0-20260106131823-651366fbe6e3 // indirect
 	github.com/ebml-go/ebml v0.0.0-20221114152929-d226b1da0cc9 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gohugoio/hugo v0.147.6 // indirect
-	github.com/google/pprof v0.0.0-20251208000136-3d256cb9ff16 // indirect
+	github.com/google/pprof v0.0.0-20260115054156-294ebfa9ad83 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
@@ -48,22 +48,22 @@ require (
 	github.com/spf13/cast v1.8.0 // indirect
 	github.com/tdewolff/parse/v2 v2.8.1 // indirect
 	github.com/ulikunitz/xz v0.5.15 // indirect
-	golang.org/x/mod v0.30.0 // indirect
-	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/mod v0.31.0 // indirect
+	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/text v0.32.0 // indirect
-	golang.org/x/tools v0.39.0 // indirect
+	golang.org/x/text v0.33.0 // indirect
+	golang.org/x/tools v0.40.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (
-	github.com/ebml-go/webm v0.0.0-20221117133942-84fa5245cf70
+	github.com/ebml-go/webm v0.0.0-20260112103818-aede085bf6e5
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/jfbus/httprs v1.0.1
 	github.com/kkdai/youtube/v2 v2.10.5
-	golang.org/x/crypto v0.45.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/crypto v0.47.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
 )
 
 tool (

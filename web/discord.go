@@ -1,7 +1,6 @@
 package web
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"os"
@@ -37,7 +36,7 @@ func (a DiscordAuth) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := a.conf.Exchange(context.Background(), r.FormValue("code"))
+	token, err := a.conf.Exchange(r.Context(), r.FormValue("code"))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
