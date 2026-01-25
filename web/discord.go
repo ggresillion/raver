@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -15,9 +16,10 @@ type DiscordAuth struct {
 	conf *oauth2.Config
 }
 
-func NewDiscordAuth() DiscordAuth {
+func NewDiscordAuth(origin string) DiscordAuth {
+	fmt.Println(origin)
 	return DiscordAuth{conf: &oauth2.Config{
-		RedirectURL:  "http://127.0.0.1:7331/auth/callback",
+		RedirectURL:  origin + "/auth/callback",
 		ClientID:     os.Getenv("RAVER_CLIENT_ID"),
 		ClientSecret: os.Getenv("RAVER_CLIENT_SECRET"),
 		Scopes:       []string{discord.ScopeIdentify},
@@ -25,11 +27,22 @@ func NewDiscordAuth() DiscordAuth {
 	}}
 }
 
-func (a DiscordAuth) LoginHandler(w http.ResponseWriter, r *http.Request) {
+func getHost(r *http.Request) string {
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	}
+	host := r.Host
+	return fmt.Sprintf("%s://%s", scheme, host)
+}
+
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	a := NewDiscordAuth(getHost(r))
 	http.Redirect(w, r, a.conf.AuthCodeURL(state), http.StatusTemporaryRedirect)
 }
 
-func (a DiscordAuth) CallbackHandler(w http.ResponseWriter, r *http.Request) {
+func callbackHandler(w http.ResponseWriter, r *http.Request) {
+	a := NewDiscordAuth(getHost(r))
 	if r.FormValue("state") != state {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("state does not match."))
@@ -64,13 +77,7 @@ func newDiscordClient(token string) DiscordClient {
 	}
 }
 
-type user struct {
-	ID     string `json:"id"`
-	Name   string `json:"username"`
-	Avatar string `json:"avatar"`
-}
-
-func (c DiscordClient) GetUser(id string) (*user, error) {
+func (c DiscordClient) GetUser() (*User, error) {
 	req, err := http.NewRequest("GET", "https://discord.com/api/users/@me", nil)
 	if err != nil {
 		return nil, err
@@ -81,7 +88,7 @@ func (c DiscordClient) GetUser(id string) (*user, error) {
 		return nil, err
 	}
 
-	var user user
+	var user User
 	err = json.NewDecoder(res.Body).Decode(&user)
 	if err != nil {
 		return nil, err
@@ -90,13 +97,13 @@ func (c DiscordClient) GetUser(id string) (*user, error) {
 	return &user, nil
 }
 
-type guild struct {
+type Guild struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 	Icon string `json:"icon"`
 }
 
-func (c DiscordClient) GetUserGuilds(id string) ([]guild, error) {
+func (c DiscordClient) GetUserGuilds() ([]Guild, error) {
 	req, err := http.NewRequest("GET", "https://discord.com/api/users/@me/guilds", nil)
 	if err != nil {
 		return nil, err
@@ -106,8 +113,11 @@ func (c DiscordClient) GetUserGuilds(id string) ([]guild, error) {
 	if err != nil {
 		return nil, err
 	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code %d", res.StatusCode)
+	}
 
-	var userGuilds []guild
+	var userGuilds []Guild
 	err = json.NewDecoder(res.Body).Decode(&userGuilds)
 	if err != nil {
 		return nil, err

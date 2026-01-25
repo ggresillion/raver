@@ -11,7 +11,6 @@ import (
 )
 
 func init() {
-	ytdlp.MustInstall(context.Background(), nil)
 }
 
 type YoutubeAdapter struct{}
@@ -22,8 +21,6 @@ func NewYoutubeAdapter() YoutubeAdapter {
 
 func (y YoutubeAdapter) GetVideoByID(videoID string) (*youtube.Video, error) {
 	ctx := context.TODO()
-
-	ytdlp.Install(ctx, nil)
 
 	cmd := ytdlp.New().
 		Format("bestaudio[ext=webm][acodec=opus]").

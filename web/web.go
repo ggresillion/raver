@@ -2,14 +2,13 @@ package web
 
 import (
 	"bytes"
-	"context"
 	"embed"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"raver/discord"
 	"raver/youtube"
-	"raver/youtube/goytdlp"
 	"time"
 )
 
@@ -19,21 +18,20 @@ import (
 var static embed.FS
 
 func Start(bot *discord.Bot) {
-	auth := NewDiscordAuth()
-
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.FileServer(http.FS(static)))
 
-	mux.Handle("/", authenticated(bot, homeHandler(bot)))
-	mux.HandleFunc("/search", searchHandler)
-	mux.HandleFunc("/add", addHandler(bot))
-	mux.HandleFunc("/player", playerHandler(bot))
-	mux.HandleFunc("/resume", resumeHandler(bot))
-	mux.HandleFunc("/pause", pauseHandler(bot))
-	mux.HandleFunc("/skip", skipHandler(bot))
+	mux.Handle("/", authenticated(bot)(homeHandler(bot)))
+	mux.Handle("/search", authenticated(bot)(searchHandler()))
+	mux.Handle("/add", authenticated(bot)(addHandler(bot)))
+	mux.Handle("/player", authenticated(bot)(playerHandler(bot)))
+	mux.Handle("/resume", authenticated(bot)(resumeHandler(bot)))
+	mux.Handle("/pause", authenticated(bot)(pauseHandler(bot)))
+	mux.Handle("/skip", authenticated(bot)(skipHandler(bot)))
+	mux.Handle("/guilds", authenticated(bot)(selectGuildHandler(bot)))
 
-	mux.HandleFunc("/auth/login", auth.LoginHandler)
-	mux.HandleFunc("/auth/callback", auth.CallbackHandler)
+	mux.HandleFunc("/auth/login", loginHandler)
+	mux.HandleFunc("/auth/callback", callbackHandler)
 
 	slog.Info("[web] starting server", "port", "3000")
 	go http.ListenAndServe(":3000", mux)
@@ -46,14 +44,14 @@ const (
 	tokenKey key = "token"
 )
 
-func getGuilds(bot *discord.Bot, token string) ([]guild, error) {
+func getGuilds(bot *discord.Bot, token string) ([]Guild, error) {
 	client := newDiscordClient(token)
-	guilds, err := client.GetUserGuilds(userID)
+	guilds, err := client.GetUserGuilds()
 	if err != nil {
 		return nil, err
 	}
 
-	var guildsInCommon []guild
+	var guildsInCommon []Guild
 	for _, g1 := range bot.Session().State.Guilds {
 		for _, g2 := range guilds {
 			if g1.ID == g2.ID {
@@ -65,58 +63,15 @@ func getGuilds(bot *discord.Bot, token string) ([]guild, error) {
 	return guildsInCommon, nil
 }
 
-func authenticated(bot *discord.Bot, next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, err := r.Cookie("token")
-		if err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		user, err := newDiscordClient(token.Value).GetUser(userID)
-		if err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		ctx := context.WithValue(r.Context(), userKey, *user)
-		ctx = context.WithValue(ctx, tokenKey, token.Value)
-		r = r.WithContext(ctx)
-		next.ServeHTTP(w, r)
-	})
-}
-
-func userFromCtx(ctx context.Context) user {
-	u := ctx.Value(userKey)
-	if u == nil {
-		return user{}
-	}
-	return u.(user)
-}
-
-func tokenFromCtx(ctx context.Context) string {
-	t := ctx.Value(tokenKey)
-	if t == nil {
-		return ""
-	}
-	return t.(string)
-}
-
 func homeHandler(bot *discord.Bot) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		guilds, err := newDiscordClient(tokenFromCtx(ctx)).GetUserGuilds(userID)
+		guilds, err := getGuilds(bot, tokenFromCtx(r.Context()))
 		if err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		var inCommon []guild
-		for _, guild := range guilds {
-			if _, err := bot.Guild(guild.ID); err == nil {
-				inCommon = append(inCommon, guild)
-			}
-		}
-
-		err = index(inCommon).Render(r.Context(), w)
+		err = index(guilds, guilds[0].ID).Render(r.Context(), w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -124,26 +79,30 @@ func homeHandler(bot *discord.Bot) http.HandlerFunc {
 	}
 }
 
-func searchHandler(w http.ResponseWriter, r *http.Request) {
-	query := r.FormValue("search")
+func searchHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		query := r.FormValue("search")
 
-	tracks, err := youtube.Search("", query, 20)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	for _, t := range tracks {
-		err := track(t).Render(r.Context(), w)
+		tracks, err := youtube.Search("", query, 20)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
+		}
+
+		for _, t := range tracks {
+			err := track(t).Render(r.Context(), w)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 }
 
 func pauseHandler(bot *discord.Bot) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseForm()
+		guildID := r.Form.Get("guild_id")
 		gbot, err := bot.Guild(guildID)
 		if err != nil {
 			handleError(w, err)
@@ -157,7 +116,8 @@ func pauseHandler(bot *discord.Bot) http.HandlerFunc {
 
 func resumeHandler(bot *discord.Bot) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		gbot, err := bot.Guild(guildID)
+		user := userFromCtx(r.Context())
+		gbot, err := bot.Guild(user.Guild())
 		if err != nil {
 			handleError(w, err)
 			return
@@ -170,7 +130,8 @@ func resumeHandler(bot *discord.Bot) http.HandlerFunc {
 
 func skipHandler(bot *discord.Bot) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		gbot, err := bot.Guild(guildID)
+		user := userFromCtx(r.Context())
+		gbot, err := bot.Guild(user.Guild())
 		if err != nil {
 			handleError(w, err)
 			return
@@ -183,7 +144,12 @@ func skipHandler(bot *discord.Bot) http.HandlerFunc {
 
 func playerHandler(bot *discord.Bot) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		slog.Info("player: starting player stream", "guild_id", guildID)
+		user := userFromCtx(r.Context())
+		if user.Guild() == "" {
+			handleError(w, errors.New("no guild selected"))
+			return
+		}
+		slog.Info("[player] starting player stream", "guild_id", user.Guild())
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")
@@ -198,7 +164,7 @@ func playerHandler(bot *discord.Bot) http.HandlerFunc {
 		ticker := time.NewTicker(time.Second * 10)
 		defer ticker.Stop()
 
-		gbot, err := bot.Guild(guildID)
+		gbot, err := bot.Guild(user.Guild())
 		if err != nil {
 			handleError(w, err)
 			return
@@ -223,36 +189,6 @@ func playerHandler(bot *discord.Bot) http.HandlerFunc {
 			case <-ticker.C:
 				sendPlayerUpdate()
 			}
-		}
-	}
-}
-
-func addHandler(bot *discord.Bot) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id := r.FormValue("id")
-
-		gbot, err := bot.Guild(guildID)
-		if err != nil {
-			handleError(w, err)
-			return
-		}
-
-		err = gbot.JoinUserChannel(userID)
-		if err != nil {
-			handleError(w, err)
-			return
-		}
-
-		track, err := youtube.NewYoutube(goytdlp.NewYoutubeAdapter()).GetPlayableTrackFromYoutube(guildID, id)
-		if err != nil {
-			handleError(w, err)
-			return
-		}
-
-		err = gbot.Player.Add(track)
-		if err != nil {
-			handleError(w, err)
-			return
 		}
 	}
 }

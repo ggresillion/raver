@@ -1,6 +1,6 @@
 package web
 
-templ index(guilds []guild) {
+templ index(guilds []Guild, selectedGuildID string) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -11,7 +11,7 @@ templ index(guilds []guild) {
 			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"/>
 		</head>
 		<body hx-ext="sse">
-			@home(guilds)
+			@home(guilds, selectedGuildID)
 		</body>
 	</html>
 }

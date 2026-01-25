@@ -2,60 +2,23 @@ package web
 
 import "raver/audio"
 
-const (
-	guildID = "423590632582414346"
-	userID  = "169143950203027456"
-)
-
-templ userIcon(user user) {
-	<details class="relative flex flex-row gap-2 items-center rounded-xl p-2 cursor-pointer hover:bg-violet-600/20">
-		<summary class="flex items-center list-none">
-			<span class="text-white/90">{ user.Name }</span>
-			<img class="w-10 h-10 rounded-full ml-2" src={ "https://cdn.discordapp.com/avatars/" + user.ID + "/" + user.Avatar + ".png" }/>
-		</summary>
-		<!-- Dropdown Menu -->
-		<div
-			class="absolute right-0 mt-8 w-40 z-10 bg-gray-900/90 backdrop-blur-md 
-rounded-xl shadow-lg flex flex-col cursor-pointer"
-		>
-			<button
-				class="w-full text-left px-4 py-2 hover:bg-gray-900 text-white rounded-xl cursor-pointer"
-			>
-				Disconnect
-			</button>
-		</div>
-	</details>
-}
-
-templ guildIcon(guild guild) {
-	<div class="cursor-pointer hover:scale-110">
-		<img class="w-10 h-10 rounded-full" src={ "https://cdn.discordapp.com/icons/" + guild.ID + "/" + guild.Icon + ".png" }/>
-	</div>
-}
-
-templ header() {
-	{{ user := userFromCtx(ctx) }}
-	<div class="flex flex-col gap-2 items-center shadow-md p-2 bg-violet-600/10">
-		<div class="self-end">
-			@userIcon(user)
-		</div>
-	</div>
-}
-
-templ home(guilds []guild) {
+templ home(guilds []Guild, selectedGuildID string) {
 	<div
 		class="flex flex-col h-screen max-h-screen bg-cover bg-no-repeat font-nunito text-white"
 		style="background-image: url('https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/aa462558-0106-4268-9864-d34a4f35531f');"
 	>
 		@header()
-		<div class="flex flex-1 m-4 rounded-xl border border-white/50 bg-[rgba(16,21,61,0.5)] backdrop-blur-md shadow-[inset_0_0.5px_0_1px_rgba(255,255,255,0.23),inset_0_1px_0_0_rgba(255,255,255,0.6),0_4px_16px_rgba(0,0,0,0.12)]">
-			<!-- guilds -->
-			<div class="flex flex-col gap-2 p-6 border-r border-white/50 h-full">
-				for _, guild := range guilds {
-					@guildIcon(guild)
-				}
+		<div
+			class="flex flex-1 m-4 rounded-xl 
+         border-1 border-white/50 bg-[rgba(16,21,61,0.5)]
+         backdrop-blur-md
+         shadow-[0_12px_24px_-8px_rgba(0,0,0,0.5)]"
+		>
+			<div
+				class="p-6 border-r border-white/50 h-full"
+			>
+				@guildList(guilds, selectedGuildID)
 			</div>
-			<!-- search -->
 			<div class="flex flex-col w-[70%] gap-2 flex-1">
 				<form class="flex flex-col justify-between gap-2 p-6" hx-post="search" hx-target="#results">
 					<label for="search" class="text-lg font-bold">Search</label>
@@ -63,7 +26,6 @@ templ home(guilds []guild) {
 				</form>
 				<div class="flex-1 overflow-auto flex flex-col gap-6 p-6 max-h-[800px]" id="results"></div>
 			</div>
-			<!-- queue -->
 			<div
 				class="flex flex-col w-[20%] gap-2 flex-1"
 				sse-connect="/player"

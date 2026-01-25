@@ -1,0 +1,24 @@
+package web
+
+templ guildList(guilds []Guild, selectedGuildID string) {
+	<div id="guild-list" class="flex flex-col gap-2">
+		for _, guild := range guilds {
+			@guildIcon(guild, selectedGuildID == guild.ID)
+		}
+	</div>
+}
+
+templ guildIcon(guild Guild, selected bool) {
+	<div
+		class="cursor-pointer hover:scale-110"
+		hx-post="guilds"
+		hx-target="#guild-list"
+		hx-swap="innerHTML"
+		hx-vals={ `{"guild_id":"` + guild.ID + `"}` }
+	>
+		<img
+			class={ "w-14 h-14 rounded-full", templ.KV("border border-white/50 border-2", selected) }
+			src={ "https://cdn.discordapp.com/icons/" + guild.ID + "/" + guild.Icon + ".png" }
+		/>
+	</div>
+}

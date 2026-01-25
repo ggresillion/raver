@@ -20,8 +20,8 @@ type Bot struct {
 type GBot struct {
 	Player                   *audio.Player
 	PlaylistAlreadyDisplayed bool
+	Guild                    *discordgo.Guild
 	session                  *discordgo.Session
-	guild                    *discordgo.Guild
 	vc                       *discordgo.VoiceConnection
 }
 
@@ -45,7 +45,8 @@ func (b *Bot) Connect() error {
 
 	// We need information about guilds (which includes their channels),
 	// messages and voice states.
-	b.session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsGuildVoiceStates
+	b.session.Identify.Intents |= discordgo.IntentGuilds
+	b.session.Identify.Intents |= discordgo.IntentGuildVoiceStates
 
 	// Register handlers
 	b.session.AddHandler(func(_ *discordgo.Session, _ *discordgo.Ready) { slog.Info("[bot] connected") })
@@ -59,15 +60,15 @@ func (b *Bot) Connect() error {
 		switch i.Type {
 		case discordgo.InteractionApplicationCommand:
 			command = i.ApplicationCommandData().Name
-			slog.Info("[bot] received slash command", "command", command, "guild_id", g.guild.ID)
+			slog.Info("[bot] received slash command", "command", command, "guild_id", g.Guild.ID)
 		case discordgo.InteractionMessageComponent:
 			command = i.MessageComponentData().CustomID
-			slog.Info("[bot] received component action", "command", command, "guild_id", g.guild.ID)
+			slog.Info("[bot] received component action", "command", command, "guild_id", g.Guild.ID)
 		case discordgo.InteractionApplicationCommandAutocomplete:
 			command = i.ApplicationCommandData().Name
-			slog.Info("[bot] received autocomplete request", "command", command, "guild_id", g.guild.ID)
+			slog.Info("[bot] received autocomplete request", "command", command, "guild_id", g.Guild.ID)
 		default:
-			slog.Info("[bot] received unknown interaction", "interaction", i.Type.String(), "command", command, "guild_id", g.guild.ID)
+			slog.Info("[bot] received unknown interaction", "interaction", i.Type.String(), "command", command, "guild_id", g.Guild.ID)
 			return
 		}
 		handleCommand(command, g, s, i)
@@ -111,7 +112,7 @@ func (b *Bot) Guild(guildID string) (*GBot, error) {
 	}
 	g = &GBot{
 		session: b.session,
-		guild:   guild,
+		Guild:   guild,
 		Player:  audio.NewPlayer(guildID),
 	}
 	b.gbots[guildID] = g
@@ -119,32 +120,33 @@ func (b *Bot) Guild(guildID string) (*GBot, error) {
 }
 
 func (g *GBot) JoinUserChannel(userID string) error {
+	ctx := context.TODO()
 	slog.Info("[bot] trying to join voice channel for user", "user_id", userID)
-	for _, v := range g.guild.VoiceStates {
-		if v.UserID == userID {
-			vc, err := g.session.ChannelVoiceJoin(context.Background(), g.guild.ID, v.ChannelID, false, true)
-			if err != nil {
-				return fmt.Errorf("[bot] error joining voice channel: %v", err)
-			}
-
-			g.vc = vc
-			go func() {
-				for {
-					bytes := make([]byte, 960)
-					n, err := g.Player.Read(bytes)
-					if err != nil {
-						slog.Info(fmt.Sprintf("[bot] error writing to bot audio: %v", err))
-						return
-					}
-					g.vc.OpusSend <- bytes[:n]
-				}
-			}()
-			vc.Speaking(true)
-			slog.Info("[bot] joinned voice channel", "channel_id", vc, "guild_id", g.guild.ID)
-			return nil
-		}
+	state, err := g.session.State.VoiceState(g.Guild.ID, userID)
+	if err != nil {
+		return fmt.Errorf("[bot] error getting voice state: %v", err)
 	}
-	return fmt.Errorf("[bot] user %s not in a voice channel", userID)
+
+	vc, err := g.session.ChannelVoiceJoin(ctx, g.Guild.ID, state.ChannelID, false, true)
+	if err != nil {
+		return fmt.Errorf("[bot] error joining voice channel: %v", err)
+	}
+
+	g.vc = vc
+	go func() {
+		for {
+			bytes := make([]byte, 960)
+			n, err := g.Player.Read(bytes)
+			if err != nil {
+				slog.Info(fmt.Sprintf("[bot] error writing to bot audio: %v", err))
+				return
+			}
+			g.vc.OpusSend <- bytes[:n]
+		}
+	}()
+	vc.Speaking(true)
+	slog.Info("[bot] joinned voice channel", "channel_id", vc, "guild_id", g.Guild.ID)
+	return nil
 }
 
 func handleCommand(command string, g *GBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
