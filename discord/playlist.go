@@ -68,12 +68,11 @@ func (g *GBot) PrintPlaylist(s *discordgo.Session, i *discordgo.Interaction) {
 				return
 			}
 			g.PlaylistAlreadyDisplayed = false
-			err = g.vc.Disconnect(context.Background())
+			err = g.LeaveChannel(context.Background())
 			if err != nil {
 				sendError(s, i, err)
 				return
 			}
-			return
 		}()
 		ticker := time.NewTicker(time.Second)
 		for {

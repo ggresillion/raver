@@ -11,6 +11,10 @@ import (
 )
 
 func init() {
+	ctx := context.Background()
+	ytdlp.MustInstall(ctx, &ytdlp.InstallOptions{
+		AllowVersionMismatch: true,
+	})
 }
 
 type YoutubeAdapter struct{}

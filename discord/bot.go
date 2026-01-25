@@ -22,7 +22,6 @@ type GBot struct {
 	PlaylistAlreadyDisplayed bool
 	Guild                    *discordgo.Guild
 	session                  *discordgo.Session
-	vc                       *discordgo.VoiceConnection
 }
 
 func NewBot(token string) *Bot {
@@ -132,20 +131,18 @@ func (g *GBot) JoinUserChannel(userID string) error {
 		return fmt.Errorf("[bot] error joining voice channel: %v", err)
 	}
 
-	g.vc = vc
-	go func() {
-		for {
-			bytes := make([]byte, 960)
-			n, err := g.Player.Read(bytes)
-			if err != nil {
-				slog.Info(fmt.Sprintf("[bot] error writing to bot audio: %v", err))
-				return
-			}
-			g.vc.OpusSend <- bytes[:n]
-		}
-	}()
+	g.Player.Plug(vc.OpusSend)
 	vc.Speaking(true)
-	slog.Info("[bot] joinned voice channel", "channel_id", vc, "guild_id", g.Guild.ID)
+	slog.Info("[bot] joined voice channel", "channel_id", state.ChannelID, "guild_id", g.Guild.ID)
+	return nil
+}
+
+func (g *GBot) LeaveChannel(ctx context.Context) error {
+	vc, ok := g.session.VoiceConnections[g.Guild.ID]
+	if !ok {
+		return errors.New("no voice connection found")
+	}
+	vc.Disconnect(ctx)
 	return nil
 }
 

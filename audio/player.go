@@ -68,6 +68,20 @@ func (p *Player) Read(bytes []byte) (n int, err error) {
 	return n, err
 }
 
+func (p *Player) Plug(out chan []byte) {
+	go func() {
+		for {
+			bytes := make([]byte, 960)
+			n, err := p.Read(bytes)
+			if err != nil {
+				slog.Info(fmt.Sprintf("[player] error writing to channel: %v", err))
+				return
+			}
+			out <- bytes[:n]
+		}
+	}()
+}
+
 func (p *Player) Pause() {
 	if p.State != Playing {
 		return
