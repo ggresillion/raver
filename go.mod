@@ -5,7 +5,7 @@ go 1.25
 require (
 	github.com/a-h/templ v0.3.977
 	github.com/buger/jsonparser v1.1.1
-	github.com/bwmarrin/discordgo v0.29.0
+	github.com/bwmarrin/discordgo v0.29.1-0.20251229161010-9f6aa8159fc6
 	github.com/lrstanley/go-ytdlp v1.2.7
 	github.com/ravener/discord-oauth2 v0.0.0-20230514095040-ae65713199b3
 	github.com/stretchr/testify v1.11.1

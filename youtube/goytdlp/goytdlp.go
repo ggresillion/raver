@@ -10,13 +10,6 @@ import (
 	"github.com/lrstanley/go-ytdlp"
 )
 
-func init() {
-	ctx := context.Background()
-	ytdlp.MustInstall(ctx, &ytdlp.InstallOptions{
-		AllowVersionMismatch: true,
-	})
-}
-
 type YoutubeAdapter struct{}
 
 func NewYoutubeAdapter() YoutubeAdapter {

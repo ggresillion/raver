@@ -12,11 +12,8 @@
         let pkgs = import nixpkgs { inherit system; };
         in {
           default = pkgs.mkShell {
-            packages = with pkgs; [ go yt-dlp nix-ld ];
+            packages = with pkgs; [ go yt-dlp ffmpeg ];
             hardeningDisable = [ "fortify" ];
-            shellHook = ''
-              export NIX_LD_LIBRARY_PATH="${pkgs.glibc}/lib:${pkgs.zlib}/lib:${pkgs.xz}/lib"
-            '';
           };
         });
     };
