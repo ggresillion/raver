@@ -1,6 +1,7 @@
 package youtube
 
 import (
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -21,6 +22,9 @@ func (y Youtube) GetPlayableTrackFromYoutube(guildID, videoID string) (*audio.Tr
 	resp, err := http.Get(v.URL)
 	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("youtube: got status code %d", resp.StatusCode)
 	}
 
 	rs := httprs.NewHttpReadSeeker(resp)

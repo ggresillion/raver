@@ -10,6 +10,21 @@ import (
 	"github.com/lrstanley/go-ytdlp"
 )
 
+func init() {
+	slog.Info("[youtube] checking if ytdlp is installed...")
+	ctx := context.Background()
+	res, err := ytdlp.Install(ctx, &ytdlp.InstallOptions{
+		AllowVersionMismatch: true,
+	})
+	if err != nil {
+		panic(err)
+	}
+	if res.Downloaded {
+		slog.Info("[youtube] ytdlp has been downloaded")
+	}
+	slog.Info("[youtube] ytdlp is installed", "path", res.Executable, "version", res.Version)
+}
+
 type YoutubeAdapter struct{}
 
 func NewYoutubeAdapter() YoutubeAdapter {

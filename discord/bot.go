@@ -119,14 +119,13 @@ func (b *Bot) Guild(guildID string) (*GBot, error) {
 }
 
 func (g *GBot) JoinUserChannel(userID string) error {
-	ctx := context.TODO()
 	slog.Info("[bot] trying to join voice channel for user", "user_id", userID)
 	state, err := g.session.State.VoiceState(g.Guild.ID, userID)
 	if err != nil {
 		return fmt.Errorf("[bot] error getting voice state: %v", err)
 	}
 
-	vc, err := g.session.ChannelVoiceJoin(ctx, g.Guild.ID, state.ChannelID, false, true)
+	vc, err := g.session.ChannelVoiceJoin(g.Guild.ID, state.ChannelID, false, true)
 	if err != nil {
 		return fmt.Errorf("[bot] error joining voice channel: %v", err)
 	}
@@ -142,7 +141,7 @@ func (g *GBot) LeaveChannel(ctx context.Context) error {
 	if !ok {
 		return errors.New("no voice connection found")
 	}
-	vc.Disconnect(ctx)
+	vc.Disconnect()
 	return nil
 }
 

@@ -14,7 +14,7 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o raver
 
 FROM alpine:3.20.2
 
-RUN apk add --no-cache yt-dlp ffmpeg
+RUN apk add --no-cache ffmpeg python3
 
 WORKDIR /opt/app
 
