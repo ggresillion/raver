@@ -39,11 +39,12 @@ templ home(guilds []Guild, selectedGuildID string) {
 				</form>
 				<div class="flex-1 overflow-y-auto flex flex-col gap-2 px-6 pb-6" id="results"></div>
 			</div>
-			<div
-				class="flex flex-col w-[25%] gap-2 flex-1"
-				sse-connect="/player"
-				sse-swap="player"
-			></div>
+<div
+			id="playlist"
+			class="flex flex-col w-[25%] gap-2 flex-1"
+			sse-connect="/player"
+			sse-swap="player"
+		></div>
 		</div>
 	</div>
 }

@@ -199,6 +199,7 @@ func skipHandler(bot *discord.Bot) http.HandlerFunc {
 func playerHandler(bot *discord.Bot) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := userFromCtx(r.Context())
+		slog.Info("[player] request", "user_id", user.ID, "guild", user.Guild())
 		if user.Guild() == "" {
 			handleError(w, errors.New("no guild selected"))
 			return
@@ -230,6 +231,7 @@ func playerHandler(bot *discord.Bot) http.HandlerFunc {
 				slog.Error("render error", "err", err)
 				return
 			}
+			slog.Info("[player] sending update", "queue_len", len(gbot.Player.Queue), "state", gbot.Player.State.String())
 			fmt.Fprintf(w, "event: player\n")
 			fmt.Fprintf(w, "data: %s\n\n", buf.String())
 			flusher.Flush()
@@ -240,6 +242,8 @@ func playerHandler(bot *discord.Bot) http.HandlerFunc {
 			select {
 			case <-r.Context().Done():
 				return
+			case <-gbot.Player.Change:
+				sendPlayerUpdate()
 			case <-ticker.C:
 				sendPlayerUpdate()
 			}

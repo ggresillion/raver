@@ -47,7 +47,7 @@ func home(guilds []Guild, selectedGuildID string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"flex flex-col w-[70%] gap-0 flex-1 overflow-hidden\"><form class=\"flex-none p-6 pb-2\" hx-post=\"search\" hx-target=\"#results\"><label for=\"search\" class=\"text-lg font-semibold text-white/90 flex items-center gap-2 mb-3\"><i class=\"bi bi-search text-pink-400\"></i> Search</label> <input name=\"search\" class=\"w-full p-3 px-4 border border-white/10 rounded-xl bg-white/5 text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all\" type=\"text\" placeholder=\"Search for tracks...\"></form><div class=\"flex-1 overflow-y-auto flex flex-col gap-2 px-6 pb-6\" id=\"results\"></div></div><div class=\"flex flex-col w-[25%] gap-2 flex-1\" sse-connect=\"/player\" sse-swap=\"player\"></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"flex flex-col w-[70%] gap-0 flex-1 overflow-hidden\"><form class=\"flex-none p-6 pb-2\" hx-post=\"search\" hx-target=\"#results\"><label for=\"search\" class=\"text-lg font-semibold text-white/90 flex items-center gap-2 mb-3\"><i class=\"bi bi-search text-pink-400\"></i> Search</label> <input name=\"search\" class=\"w-full p-3 px-4 border border-white/10 rounded-xl bg-white/5 text-white placeholder-white/30 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all\" type=\"text\" placeholder=\"Search for tracks...\"></form><div class=\"flex-1 overflow-y-auto flex flex-col gap-2 px-6 pb-6\" id=\"results\"></div></div><div id=\"playlist\" class=\"flex flex-col w-[25%] gap-2 flex-1\" sse-connect=\"/player\" sse-swap=\"player\"></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -83,7 +83,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(`{"id":"` + track.ID + `"}`)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 59, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 60, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -96,7 +96,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(track.Thumbnail)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 62, Col: 137}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 63, Col: 137}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -109,7 +109,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(track.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 68, Col: 95}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 69, Col: 95}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -122,7 +122,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(track.Artist)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 69, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 70, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -135,7 +135,7 @@ func track(track audio.TrackInfo) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(track.Duration.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 71, Col: 70}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/home.templ`, Line: 72, Col: 70}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
