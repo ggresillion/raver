@@ -1,8 +1,10 @@
 package youtubedr
 
 import (
-	"encoding/json"
+	"errors"
+	"log/slog"
 	"raver/youtube"
+	"strings"
 
 	ytdr "github.com/kkdai/youtube/v2"
 )
@@ -20,16 +22,23 @@ func (y *YoutubeDR) GetVideoByID(videoID string) (*youtube.Video, error) {
 		return nil, err
 	}
 
-	format := video.Formats.WithAudioChannels()[0]
+	var format *ytdr.Format
+	for _, f := range video.Formats.WithAudioChannels() {
+		if strings.Contains(f.MimeType, "opus") {
+			format = &f
+		}
+	}
 
-	v, _ := json.Marshal(format)
-	println(string(v))
+	if format == nil {
+		return nil, errors.New("no opus format found")
+	}
 
-	url, err := yt.GetStreamURL(video, &format)
+	url, err := yt.GetStreamURL(video, format)
 	if err != nil {
 		return nil, err
 	}
-	println(url)
+
+	slog.Info("[youtubedr] got stream url", "format", format.MimeType)
 
 	return &youtube.Video{
 		ID:       video.ID,

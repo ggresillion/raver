@@ -44,7 +44,7 @@ func NewPlayer(guildID string) *Player {
 }
 
 func (p *Player) Read(bytes []byte) (n int, err error) {
-	if p.State != Playing {
+	if p.State != Playing || len(p.Queue) < 1 {
 		return 0, nil
 	}
 	n, err = p.Queue[0].Read(bytes)
