@@ -30,7 +30,7 @@ func header() templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		user := userFromCtx(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex w-full items-center gap-3 border-b border-white/50 bg-[rgba(16,21,61,0.5)] backdrop-blur-md shadow-[0_12px_24px_-8px_rgba(0,0,0,0.5)] px-6 py-4\"><h1 class=\"text-2xl font-extrabold tracking-wide text-white\">Raver</h1><div class=\"flex gap-1 h-6 items-end\"><div class=\"w-1 rounded-full bg-gradient-to-t from-purple-500 to-pink-500 animate-[viz_1.2s_ease-in-out_infinite]\"></div><div class=\"w-1 rounded-full bg-gradient-to-t from-purple-500 to-pink-500 animate-[viz_0.9s_ease-in-out_infinite]\"></div><div class=\"w-1 rounded-full bg-gradient-to-t from-purple-500 to-pink-500 animate-[viz_0.7s_ease-in-out_infinite]\"></div><div class=\"w-1 rounded-full bg-gradient-to-t from-purple-500 to-pink-500 animate-[viz_0.9s_ease-in-out_infinite]\"></div><div class=\"w-1 rounded-full bg-gradient-to-t from-purple-500 to-pink-500 animate-[viz_1.2s_ease-in-out_infinite]\"></div></div><div class=\"ml-auto\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex w-full items-center gap-4 border-b border-white/10 bg-gradient-to-b from-[rgba(20,20,40,0.8)] to-[rgba(16,16,32,0.9)] backdrop-blur-xl px-6 py-4\"><h1 class=\"text-2xl font-extrabold tracking-wide bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent\">Raver</h1><div class=\"flex gap-1 h-6 items-end ml-2\"><div class=\"w-1.5 rounded-full bg-gradient-to-t from-purple-500 to-pink-500 animate-[viz_1.2s_ease-in-out_infinite]\"></div><div class=\"w-1.5 rounded-full bg-gradient-to-t from-purple-500 to-pink-500 animate-[viz_0.9s_ease-in-out_infinite]\"></div><div class=\"w-1.5 rounded-full bg-gradient-to-t from-purple-500 to-pink-500 animate-[viz_0.7s_ease-in-out_infinite]\"></div><div class=\"w-1.5 rounded-full bg-gradient-to-t from-purple-500 to-pink-500 animate-[viz_0.9s_ease-in-out_infinite]\"></div><div class=\"w-1.5 rounded-full bg-gradient-to-t from-purple-500 to-pink-500 animate-[viz_1.2s_ease-in-out_infinite]\"></div></div><div class=\"ml-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -67,33 +67,33 @@ func userIcon(user User) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<details class=\"relative flex flex-row gap-2 items-center rounded-xl p-2 cursor-pointer hover:bg-violet-600/20\"><summary class=\"flex items-center list-none\"><span class=\"text-white/90\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<details class=\"group relative flex flex-row gap-3 items-center cursor-pointer\"><summary class=\"flex items-center list-none rounded-full ring-2 ring-purple-500/50 ring-offset-2 ring-offset-transparent hover:ring-purple-400 transition-all duration-300\"><img class=\"w-9 h-9 rounded-full object-cover\" src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("https://cdn.discordapp.com/avatars/" + user.ID + "/" + user.Avatar + ".png")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/header.templ`, Line: 38, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/header.templ`, Line: 37, Col: 132}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span> <img class=\"w-10 h-10 rounded-full ml-2\" src=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"></summary><!-- Dropdown Menu --><div class=\"absolute right-0 top-full mt-3 w-56 z-50 rounded-2xl bg-gradient-to-b from-[rgba(30,30,60,0.95)] to-[rgba(20,20,40,0.95)] backdrop-blur-xl border border-white/10 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)] overflow-hidden opacity-0 invisible group-open:opacity-100 group-open:visible transition-all duration-300 transform translate-y-2 group-open:translate-y-0\"><!-- User Info --><div class=\"px-4 py-3 border-b border-white/10\"><p class=\"text-sm font-semibold text-white truncate\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs("https://cdn.discordapp.com/avatars/" + user.ID + "/" + user.Avatar + ".png")
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/header.templ`, Line: 39, Col: 126}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/header.templ`, Line: 53, Col: 68}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"></summary><!-- Dropdown Menu --><div class=\"absolute right-0 mt-8 w-40 z-10 bg-gray-900/90 backdrop-blur-md rounded-xl shadow-lg flex flex-col cursor-pointer\"><button class=\"w-full text-left px-4 py-2 hover:bg-gray-900 text-white rounded-xl cursor-pointer\">Disconnect</button></div></details>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</p><p class=\"text-xs text-white/50\">Connected to Raver</p></div><!-- Menu Items --><div class=\"py-2\"><form method=\"POST\" action=\"/auth/logout\" class=\"w-full\"><button type=\"submit\" class=\"w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors duration-200\"><i class=\"bi bi-box-arrow-right\"></i> <span>Disconnect</span></button></form></div><!-- Decorative gradient line --><div class=\"h-1 w-full bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500\"></div></div></details>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

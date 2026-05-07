@@ -24,7 +24,7 @@ func selectGuildHandler(bot *discord.Bot) http.HandlerFunc {
 			return
 		}
 
-		err = guildList(userGuilds, guildID).Render(r.Context(), w)
+		err = guildListContent(userGuilds, guildID).Render(r.Context(), w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

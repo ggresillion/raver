@@ -1,58 +1,109 @@
 package web
 
-import "raver/audio"
+import (
+	"fmt"
+	"raver/audio"
+)
 
 templ player(player *audio.Player) {
-	<div class="h-full flex flex-col content-between justify-between border-l border-white/50 p-6 text-gray-200">
-		<div>
-			<h1 class="mb-6 text-lg font-bold">Queue</h1>
-			<div id="playlist" class="space-y-4">
+	<div class="h-full flex flex-col justify-between border-l border-white/10 p-6 text-white/80">
+		<!-- Queue Header -->
+		<div class="flex items-center gap-3 mb-6">
+			<i class="bi bi-music-note-list text-pink-400 text-xl"></i>
+			<h1 class="text-lg font-semibold text-white/90">Queue</h1>
+			<span class="ml-auto text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-300">
+				{ fmt.Sprintf("%d", len(player.Queue)) }
+			</span>
+		</div>
+
+		<!-- Queue List -->
+		<div class="flex-1 overflow-auto space-y-2 mb-6">
+			if len(player.Queue) == 0 {
+				<div class="flex flex-col items-center justify-center h-full text-white/30">
+					<i class="bi bi-music-note text-4xl mb-3"></i>
+					<p class="text-sm">No tracks in queue</p>
+				</div>
+			} else {
 				for _, track := range player.Queue {
-					<div class="grid grid-cols-[60px_1fr_auto] items-center gap-3">
-						<div class="relative w-[60px] h-[45px] rounded overflow-hidden border border-gray-400/50">
-							<img class="object-cover w-full h-full" src="https://github.com/ecemgo/mini-samples-great-tricks/assets/13468728/ea61baa7-9c4b-4f43-805e-81de5fc8aa2b"/>
-							<div class="absolute inset-0 flex items-center justify-center bg-purple-400/60 opacity-0 hover:opacity-100 transition">
-								<i class="fa-solid fa-play text-xl"></i>
-							</div>
+					<div class="group grid grid-cols-[50px_1fr_auto] items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors">
+						<div class="relative w-[50px] h-[40px] rounded-lg overflow-hidden border border-white/10">
+							<img class="object-cover w-full h-full" src={ track.Thumbnail }/>
 						</div>
-						<div>
-							<p class="text-xs text-gray-400">{ track.Artist }</p>
+						<div class="overflow-hidden">
+							<p class="text-sm text-white/90 truncate">{ track.Title }</p>
+							<p class="text-xs text-white/40 truncate">{ track.Artist }</p>
 						</div>
-						<span class="text-xs">{ track.Duration.String() }</span>
+						<span class="text-xs text-white/40">{ track.Duration.String() }</span>
 					</div>
 				}
-			</div>
+			}
 		</div>
+
+		<!-- Now Playing -->
 		if len(player.Queue) == 0 {
 			<div></div>
 		} else {
 			{{ track := player.Queue[0] }}
 			<div
-				class="flex flex-col items-center justify-center mt-6 p-6 rounded-xl bg-white/10 backdrop-blur-md shadow-inner"
+				class="flex flex-col p-5 rounded-2xl 
+				       bg-gradient-to-b from-[rgba(30,30,60,0.6)] to-[rgba(20,20,40,0.8)]
+				       border border-white/10 backdrop-blur-xl
+				       shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)]"
 			>
-				<h2 class="mt-4 font-medium text-lg">{ track.Title }</h2>
-				<p class="text-sm text-gray-300 mb-4">{ track.Artist }</p>
-				<input type="range" class="w-full accent-purple-700 mb-4" disabled value={ player.Progress() }/>
-				<div class="flex items-center justify-center gap-6 h-16">
+				<!-- Track Info -->
+				<div class="flex items-center gap-4 mb-4">
+					<div class="relative w-14 h-14 rounded-xl overflow-hidden ring-2 ring-purple-500/30">
+						<img class="object-cover w-full h-full" src={ track.Thumbnail }/>
+						if player.State == audio.Playing {
+							<div class="absolute inset-0 bg-purple-500/30 flex items-center justify-center">
+								<div class="flex gap-0.5 items-end h-4">
+									<div class="w-1 bg-white animate-[viz_0.5s_ease-in-out_infinite]"></div>
+									<div class="w-1 bg-white animate-[viz_0.4s_ease-in-out_infinite]"></div>
+									<div class="w-1 bg-white animate-[viz_0.6s_ease-in-out_infinite]"></div>
+								</div>
+							</div>
+						}
+					</div>
+					<div class="flex-1 overflow-hidden">
+						<p class="text-sm font-medium text-white truncate">{ track.Title }</p>
+						<p class="text-xs text-white/50 truncate">{ track.Artist }</p>
+					</div>
+				</div>
+
+				<!-- Progress Bar -->
+				<div class="mb-4">
+					<input 
+						type="range" 
+						class="w-full h-1.5 rounded-full appearance-none bg-white/10 cursor-pointer
+						       [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
+						       [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-500
+						       [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(168,85,247,0.5)]"
+						disabled 
+						value={ fmt.Sprintf("%d", player.Progress()) }
+					/>
+				</div>
+
+				<!-- Controls -->
+				<div class="flex items-center justify-center gap-4">
 					<button
-						class="w-10 h-10 flex items-center justify-center rounded-full bg-purple-300/15 text-gray-800"
+						class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-all"
 						disabled
 					>
-						<i class="bi bi-skip-backward text-gray-800"></i>
+						<i class="bi bi-skip-backward-fill"></i>
 					</button>
 					<button
-						class="w-10 h-10 flex items-center justify-center rounded-full bg-purple-300/50 text-white hover:scale-95 transition cursor-pointer"
+						class="w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-white hover:scale-105 hover:shadow-[0_0_20px_-5px_rgba(168,85,247,0.5)] transition-all cursor-pointer"
 					>
 						if player.State == audio.Playing {
-							<i class="min-h-10 min-w-10 bi bi-pause" hx-post="/pause"></i>
+							<i class="bi bi-pause-fill text-xl" hx-post="/pause"></i>
 						} else {
-							<i class="min-h-10 min-w-10 bi bi-play" hx-post="/resume"></i>
+							<i class="bi bi-play-fill text-xl" hx-post="/resume"></i>
 						}
 					</button>
 					<button
-						class="w-10 h-10 flex items-center justify-center rounded-full bg-purple-300/50 text-white hover:scale-95 transition cursor-pointer"
+						class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-all cursor-pointer"
 					>
-						<i class="bi bi-skip-forward" hx-post="/skip"></i>
+						<i class="bi bi-skip-forward-fill" hx-post="/skip"></i>
 					</button>
 				</div>
 			</div>

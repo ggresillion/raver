@@ -1,24 +1,62 @@
 package web
 
+import "fmt"
+
 templ guildList(guilds []Guild, selectedGuildID string) {
-	<div id="guild-list" class="flex flex-col gap-2">
+	<div class="flex flex-col h-full">
+		<!-- Header -->
+		<div class="flex items-center gap-2 px-2 py-3 mb-3 border-b border-white/10">
+			<i class="bi bi-collection text-pink-400 text-lg"></i>
+			<span class="text-base font-semibold text-white/90">Servers</span>
+			<span class="ml-auto text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300">
+				{ fmt.Sprintf("%d", len(guilds)) }
+			</span>
+		</div>
+		<!-- Guild List -->
+		<div id="guild-list" class="flex flex-col gap-2 overflow-y-auto min-h-0">
+			for _, guild := range guilds {
+				@guildItem(guild, selectedGuildID == guild.ID)
+			}
+		</div>
+	</div>
+}
+
+templ guildListContent(guilds []Guild, selectedGuildID string) {
+	<div id="guild-list" class="flex flex-col gap-2 overflow-y-auto min-h-0">
 		for _, guild := range guilds {
-			@guildIcon(guild, selectedGuildID == guild.ID)
+			@guildItem(guild, selectedGuildID == guild.ID)
 		}
 	</div>
 }
 
-templ guildIcon(guild Guild, selected bool) {
+templ guildItem(guild Guild, selected bool) {
 	<div
-		class="cursor-pointer hover:scale-110"
+		class="group flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-all duration-300 border"
 		hx-post="guilds"
 		hx-target="#guild-list"
 		hx-swap="innerHTML"
 		hx-vals={ `{"guild_id":"` + guild.ID + `"}` }
+		class={ 
+			templ.KV("bg-pink-500/10 border-pink-500/30", selected),
+			templ.KV("bg-transparent border-transparent hover:bg-white/5 hover:border-white/10", !selected),
+		}
 	>
 		<img
-			class={ "w-14 h-14 rounded-full", templ.KV("border border-white/50 border-2", selected) }
+			class={ "w-10 h-10 rounded-xl object-cover transition-all duration-300", 
+			        templ.KV("ring-2 ring-pink-500/50 shadow-[0_0_12px_rgba(236,72,153,0.4)]", selected),
+			        templ.KV("group-hover:scale-105", !selected) }
 			src={ "https://cdn.discordapp.com/icons/" + guild.ID + "/" + guild.Icon + ".png" }
 		/>
+		<span class="flex-1 text-sm font-medium truncate transition-colors"
+			class={ 
+				templ.KV("text-white", selected),
+				templ.KV("text-white/60 group-hover:text-white/90", !selected),
+			}
+		>
+			{ guild.Name }
+		</span>
+		if selected {
+			<i class="bi bi-check-circle-fill text-pink-400 text-sm"></i>
+		}
 	</div>
 }
