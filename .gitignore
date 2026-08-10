@@ -4,3 +4,4 @@ __debug*
 .env
 .envrc
 main
+node_modules/
