@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"time"
 )
 
 type PlaylistState int
@@ -76,6 +77,10 @@ func (p *Player) Plug(out chan []byte) {
 			if err != nil {
 				slog.Info(fmt.Sprintf("[player] error writing to channel: %v", err))
 				return
+			}
+			if n == 0 {
+				time.Sleep(20 * time.Millisecond)
+				continue
 			}
 			out <- bytes[:n]
 		}

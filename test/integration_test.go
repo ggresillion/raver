@@ -3,6 +3,7 @@ package test
 import (
 	"raver/audio"
 	"raver/youtube"
+	"raver/youtube/youtubedr"
 	"testing"
 	"time"
 
@@ -14,10 +15,12 @@ const (
 	videoID = "VUfvRciny_Y"
 )
 
+var yt = youtube.NewYoutube(youtubedr.NewYoutubeDRAdapter())
+
 func TestPlayerPlaySingleTrack(t *testing.T) {
 	player := audio.NewPlayer(guildID)
 	t.Log("getting track from youtube")
-	track, err := youtube.GetPlayableTrackFromYoutube(guildID, videoID)
+	track, err := yt.GetPlayableTrackFromYoutube(guildID, videoID)
 	if err != nil {
 		t.Errorf("error loading from youtube: %v", err)
 	}
@@ -44,7 +47,7 @@ func TestPlayerSkip(t *testing.T) {
 
 	// get some tracks
 	t.Log("adding first track")
-	track1, err := youtube.GetPlayableTrackFromYoutube(guildID, videoID)
+	track1, err := yt.GetPlayableTrackFromYoutube(guildID, videoID)
 	assert.Nil(t, err)
 	assert.Equal(t, audio.IDLE, player.State)
 	player.Add(track1)
@@ -54,7 +57,7 @@ func TestPlayerSkip(t *testing.T) {
 	assert.Equal(t, 1, len(player.Queue))
 
 	t.Log("adding second track")
-	track2, err := youtube.GetPlayableTrackFromYoutube(guildID, videoID)
+	track2, err := yt.GetPlayableTrackFromYoutube(guildID, videoID)
 	assert.Nil(t, err)
 	player.Add(track2)
 	t.Log("should have 2 tracks")
@@ -82,7 +85,7 @@ func TestPlayerAutostop(t *testing.T) {
 		}
 	}()
 
-	track, err := youtube.GetPlayableTrackFromYoutube(guildID, videoID)
+	track, err := yt.GetPlayableTrackFromYoutube(guildID, videoID)
 	if err != nil {
 		t.Errorf("error loading from youtube: %v", err)
 	}
@@ -106,9 +109,9 @@ func TestPlayerAutoskip(t *testing.T) {
 	}()
 
 	// get some tracks
-	track1, err := youtube.GetPlayableTrackFromYoutube(guildID, videoID)
+	track1, err := yt.GetPlayableTrackFromYoutube(guildID, videoID)
 	assert.Nil(t, err)
-	track2, err := youtube.GetPlayableTrackFromYoutube(guildID, videoID)
+	track2, err := yt.GetPlayableTrackFromYoutube(guildID, videoID)
 	assert.Nil(t, err)
 	assert.Equal(t, audio.IDLE, player.State)
 	player.Add(track1)

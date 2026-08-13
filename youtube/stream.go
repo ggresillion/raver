@@ -24,6 +24,7 @@ func (y Youtube) GetPlayableTrackFromYoutube(guildID, videoID string) (*audio.Tr
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
 		return nil, fmt.Errorf("youtube: got status code %d", resp.StatusCode)
 	}
 
@@ -32,6 +33,7 @@ func (y Youtube) GetPlayableTrackFromYoutube(guildID, videoID string) (*audio.Tr
 
 	audioStream, err := extractOpus(guildID, rs, resp.ContentLength)
 	if err != nil {
+		rs.Close()
 		return nil, err
 	}
 	slog.Info("youtube: converting to opus stream", "guild_id", guildID)
@@ -49,14 +51,14 @@ func (y Youtube) GetPlayableTrackFromYoutube(guildID, videoID string) (*audio.Tr
 }
 
 // extractOpus reads the incoming stream, parses it as a webm container and extract opus stream.
-func extractOpus(guildID string, stream io.ReadSeeker, length int64) (*audio.AudioStream, error) {
+func extractOpus(guildID string, rs *httprs.HttpReadSeeker, length int64) (*audio.AudioStream, error) {
 	var w webm.WebM
-	wr, err := webm.Parse(stream, &w)
+	wr, err := webm.Parse(rs, &w)
 	if err != nil {
 		return nil, err
 	}
 
-	in := NewYTReadCloser(guildID, wr)
+	in := NewYTReadCloser(guildID, wr, rs)
 	slog.Info("youtube: created new input stream", "guild_id", guildID)
 	audioStream := audio.NewAudioStream(guildID, in, length)
 
@@ -66,10 +68,11 @@ func extractOpus(guildID string, stream io.ReadSeeker, length int64) (*audio.Aud
 type YTReadCloser struct {
 	guildID string
 	wr      *webm.Reader
+	closer  io.Closer
 }
 
-func NewYTReadCloser(guildID string, wr *webm.Reader) *YTReadCloser {
-	return &YTReadCloser{guildID: guildID, wr: wr}
+func NewYTReadCloser(guildID string, wr *webm.Reader, closer io.Closer) *YTReadCloser {
+	return &YTReadCloser{guildID: guildID, wr: wr, closer: closer}
 }
 
 func (r *YTReadCloser) Read(bytes []byte) (n int, err error) {
@@ -80,7 +83,7 @@ func (r *YTReadCloser) Read(bytes []byte) (n int, err error) {
 	}
 	if len(packet.Data) == 0 {
 		slog.Info("youtube: end of input stream", "guild_id", r.guildID)
-		r.wr.Shutdown()
+		r.Close()
 		return 0, io.EOF
 	}
 	copy(bytes, packet.Data)
@@ -90,5 +93,5 @@ func (r *YTReadCloser) Read(bytes []byte) (n int, err error) {
 func (r *YTReadCloser) Close() (err error) {
 	slog.Info("youtube: closing stream", "guild_id", r.guildID)
 	r.wr.Shutdown()
-	return
+	return r.closer.Close()
 }
