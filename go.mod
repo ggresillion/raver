@@ -1,70 +1,70 @@
 module raver
 
-go 1.26
+go 1.27.0
 
 require (
-	github.com/a-h/templ v0.3.1020
+	github.com/a-h/templ v0.3.1070
 	github.com/buger/jsonparser v1.6.1
 	github.com/bwmarrin/discordgo v0.29.1-0.20251229161010-9f6aa8159fc6
-	github.com/lrstanley/go-ytdlp v1.3.5
+	github.com/ebml-go/webm v0.0.0-20260112103818-aede085bf6e5
+	github.com/jfbus/httprs v1.0.1
+	github.com/kkdai/youtube/v2 v2.10.6
+	github.com/lrstanley/go-ytdlp v1.5.4
 	github.com/ravener/discord-oauth2 v0.0.0-20230514095040-ae65713199b3
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/oauth2 v0.36.0
+	golang.org/x/oauth2 v0.37.0
 )
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
-	github.com/ProtonMail/go-crypto v1.4.1 // indirect
+	github.com/ProtonMail/go-crypto v1.5.2 // indirect
 	github.com/a-h/parse v0.0.0-20250122154542-74294addb73e // indirect
-	github.com/air-verse/air v1.62.0 // indirect
-	github.com/andybalholm/brotli v1.1.0 // indirect
+	github.com/air-verse/air v1.67.4 // indirect
+	github.com/andybalholm/brotli v1.2.6 // indirect
 	github.com/bep/godartsass/v2 v2.5.0 // indirect
 	github.com/bep/golibsass v1.2.0 // indirect
+	github.com/bep/helpers v0.12.0 // indirect
 	github.com/bitly/go-simplejson v0.5.1 // indirect
+	github.com/bits-and-blooms/bitset v1.26.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cli/browser v1.3.0 // indirect
 	github.com/cloudflare/circl v1.6.5 // indirect
-	github.com/creack/pty v1.1.24 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/dlclark/regexp2 v1.12.0 // indirect
-	github.com/dlclark/regexp2/v2 v2.6.0 // indirect
-	github.com/dop251/goja v0.0.0-20260806115107-493f22071ef6 // indirect
+	github.com/dlclark/regexp2/v2 v2.8.3 // indirect
+	github.com/dop251/goja v0.0.0-20261007200356-e2ea74d3d210 // indirect
 	github.com/ebml-go/ebml v0.0.0-20221114152929-d226b1da0cc9 // indirect
-	github.com/fatih/color v1.18.0 // indirect
-	github.com/fsnotify/fsnotify v1.9.0 // indirect
+	github.com/fatih/color v1.19.0 // indirect
+	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
-	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/gohugoio/hugo v0.147.6 // indirect
-	github.com/google/pprof v0.0.0-20260802141513-ef3492d7dac3 // indirect
-	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/gobwas/glob v1.0.0 // indirect
+	github.com/gohugoio/hashstructure v1.1.0 // indirect
+	github.com/gohugoio/hugo v0.167.0 // indirect
+	github.com/google/pprof v0.0.0-20261006160405-d99a6174ef52 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
+	github.com/mattn/go-colorable v0.1.16 // indirect
+	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/natefinch/atomic v1.0.1 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
-	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
+	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
 	github.com/petar/GoLLRB v0.0.0-20210522233825-ae3b015fd3e9 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
-	github.com/tdewolff/parse/v2 v2.8.1 // indirect
-	github.com/ulikunitz/xz v0.5.16 // indirect
-	golang.org/x/mod v0.38.0 // indirect
-	golang.org/x/net v0.57.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
-	golang.org/x/tools v0.48.0 // indirect
-	google.golang.org/protobuf v1.36.6 // indirect
+	github.com/tdewolff/parse/v2 v2.8.16 // indirect
+	github.com/ulikunitz/xz v0.5.17 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
+	golang.org/x/mod v0.41.0 // indirect
+	golang.org/x/net v0.59.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/tools v0.51.0 // indirect
+	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
-
-require (
-	github.com/ebml-go/webm v0.0.0-20260112103818-aede085bf6e5
-	github.com/gorilla/websocket v1.5.3 // indirect
-	github.com/jfbus/httprs v1.0.1
-	github.com/kkdai/youtube/v2 v2.10.6
-	golang.org/x/crypto v0.55.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
 )
 
 tool (

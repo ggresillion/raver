@@ -1,5 +1,5 @@
 IMAGE_NAME := raver
-PLATFORM   := linux/arm/v7
+PLATFORM   := linux/arm64
 SSH_HOST   := pi
 ENV_FILE   := raver_env
 CONTAINER_NAME := raver

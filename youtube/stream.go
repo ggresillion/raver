@@ -1,35 +1,65 @@
 package youtube
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
 	"raver/audio"
-	"time"
 
 	"github.com/ebml-go/webm"
 	"github.com/jfbus/httprs"
 )
 
+var ErrStreamRefused = errors.New("youtube: stream refused")
+
 // GetPlayableTrackFromYoutube returns a audio.Track from a given videoID
 func (y Youtube) GetPlayableTrackFromYoutube(guildID, videoID string) (*audio.Track, error) {
-	v, err := y.adapter.GetVideoByID(videoID)
+	var errs []error
+	for _, adapter := range y.adapters {
+		track, err := y.getPlayableTrack(adapter, guildID, videoID)
+		if errors.Is(err, ErrStreamRefused) {
+			slog.Warn("youtube: stream refused, retrying", "adapter", adapter.Name(), "video_id", videoID, "error", err, "guild_id", guildID)
+			track, err = y.getPlayableTrack(adapter, guildID, videoID)
+		}
+		if err == nil {
+			return track, nil
+		}
+		slog.Warn("youtube: adapter failed", "adapter", adapter.Name(), "video_id", videoID, "error", err, "guild_id", guildID)
+		errs = append(errs, fmt.Errorf("%s: %w", adapter.Name(), err))
+	}
+	if len(errs) == 0 {
+		return nil, errors.New("youtube: no adapter configured")
+	}
+	return nil, errors.Join(errs...)
+}
+
+func (y Youtube) getPlayableTrack(adapter YoutubeAdapter, guildID, videoID string) (*audio.Track, error) {
+	v, err := adapter.GetVideoByID(videoID)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := http.Get(v.URL)
+	req, err := http.NewRequest(http.MethodGet, v.URL, nil)
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode != http.StatusOK {
+	for k, val := range v.Headers {
+		req.Header.Set(k, val)
+	}
+	req.Header.Set("Range", "bytes=0-")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusPartialContent {
 		resp.Body.Close()
-		return nil, fmt.Errorf("youtube: got status code %d", resp.StatusCode)
+		return nil, fmt.Errorf("%w: got status code %d", ErrStreamRefused, resp.StatusCode)
 	}
 
 	rs := httprs.NewHttpReadSeeker(resp)
-	slog.Info("youtube: got webm video stream", "guild_id", guildID)
+	slog.Info("youtube: got webm video stream", "adapter", adapter.Name(), "guild_id", guildID)
 
 	audioStream, err := extractOpus(guildID, rs, resp.ContentLength)
 	if err != nil {
@@ -43,7 +73,7 @@ func (y Youtube) GetPlayableTrackFromYoutube(guildID, videoID string) (*audio.Tr
 			ID:       v.ID,
 			Title:    v.Title,
 			Artist:   v.Channel,
-			Duration: time.Duration(v.Duration) * time.Second,
+			Duration: v.Duration,
 			Live:     v.IsLive,
 		},
 		audioStream,

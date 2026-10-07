@@ -9,16 +9,18 @@ type Video struct {
 	Channel  string
 	Duration time.Duration
 	IsLive   bool
+	Headers  map[string]string
 }
 
 type YoutubeAdapter interface {
+	Name() string
 	GetVideoByID(videoID string) (*Video, error)
 }
 
 type Youtube struct {
-	adapter YoutubeAdapter
+	adapters []YoutubeAdapter
 }
 
-func NewYoutube(adapter YoutubeAdapter) Youtube {
-	return Youtube{adapter: adapter}
+func NewYoutube(adapters ...YoutubeAdapter) Youtube {
+	return Youtube{adapters: adapters}
 }

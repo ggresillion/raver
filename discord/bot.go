@@ -7,6 +7,7 @@ import (
 	"log/slog"
 
 	"raver/audio"
+	"raver/youtube"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -15,6 +16,7 @@ type Bot struct {
 	token   string
 	session *discordgo.Session
 	gbots   map[string]*GBot
+	youtube youtube.Youtube
 }
 
 type GBot struct {
@@ -22,10 +24,11 @@ type GBot struct {
 	PlaylistAlreadyDisplayed bool
 	Guild                    *discordgo.Guild
 	session                  *discordgo.Session
+	Youtube                  youtube.Youtube
 }
 
-func NewBot(token string) *Bot {
-	return &Bot{token: token, gbots: map[string]*GBot{}}
+func NewBot(token string, yt youtube.Youtube) *Bot {
+	return &Bot{token: token, gbots: map[string]*GBot{}, youtube: yt}
 }
 
 func (b *Bot) Session() *discordgo.Session {
@@ -113,6 +116,7 @@ func (b *Bot) Guild(guildID string) (*GBot, error) {
 		session: b.session,
 		Guild:   guild,
 		Player:  audio.NewPlayer(guildID),
+		Youtube: b.youtube,
 	}
 	b.gbots[guildID] = g
 	return g, nil

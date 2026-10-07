@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS builder
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -12,9 +12,9 @@ COPY . .
 
 RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o raver
 
-FROM alpine:3.20.2
+FROM alpine:3.24.2
 
-RUN apk add --no-cache ffmpeg python3
+RUN apk add --no-cache ffmpeg yt-dlp
 
 WORKDIR /opt/app
 

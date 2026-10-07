@@ -2,6 +2,7 @@ package goytdlp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"raver/youtube"
@@ -10,37 +11,31 @@ import (
 	"github.com/lrstanley/go-ytdlp"
 )
 
-func init() {
-	slog.Info("[youtube] checking if ytdlp is installed...")
-	ctx := context.Background()
-	res, err := ytdlp.Install(ctx, &ytdlp.InstallOptions{
-		AllowVersionMismatch: true,
-	})
-	if err != nil {
-		panic(err)
-	}
-	if res.Downloaded {
-		slog.Info("[youtube] ytdlp has been downloaded")
-	}
-	slog.Info("[youtube] ytdlp is installed", "path", res.Executable, "version", res.Version)
+type YoutubeAdapter struct {
+	executable string
 }
 
-type YoutubeAdapter struct{}
-
-func NewYoutubeAdapter() YoutubeAdapter {
-	return YoutubeAdapter{}
+func NewYoutubeAdapter(executable string) YoutubeAdapter {
+	return YoutubeAdapter{executable: executable}
 }
+
+func (y YoutubeAdapter) Name() string { return "ytdlp" }
 
 func (y YoutubeAdapter) GetVideoByID(videoID string) (*youtube.Video, error) {
-	ctx := context.TODO()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
 
 	cmd := ytdlp.New().
+		SetExecutable(y.executable).
 		Format("bestaudio[ext=webm][acodec=opus]").
+		NoUpdate().
 		NoProgress().
+		NoPlaylist().
 		SkipDownload().
 		PrintJSON()
 
-	slog.Info("[ytdlp] getting info for video " + videoID + "...")
+	slog.Info("[ytdlp] getting info for video", "video_id", videoID)
+	start := time.Now()
 
 	res, err := cmd.Run(ctx, fmt.Sprintf("https://www.youtube.com/watch?v=%s", videoID))
 	if err != nil {
@@ -51,16 +46,35 @@ func (y YoutubeAdapter) GetVideoByID(videoID string) (*youtube.Video, error) {
 	if err != nil {
 		return nil, err
 	}
+	if len(info) == 0 || info[0].URL == nil {
+		return nil, errors.New("ytdlp: no stream url found")
+	}
 
-	slog.Info("[ytdlp] got info for video " + videoID)
+	slog.Info("[ytdlp] got stream url", "video_id", videoID, "duration", time.Since(start))
 
 	video := info[0]
 
 	return &youtube.Video{
 		ID:       video.ID,
 		URL:      *video.URL,
-		Title:    *video.Title,
-		Channel:  *video.Channel,
-		Duration: time.Duration(*video.Duration * float64(time.Second)),
+		Title:    deref(video.Title),
+		Channel:  deref(video.Channel),
+		Duration: time.Duration(derefFloat(video.Duration) * float64(time.Second)),
+		IsLive:   video.IsLive != nil && *video.IsLive,
+		Headers:  video.HTTPHeaders,
 	}, nil
+}
+
+func deref(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+func derefFloat(f *float64) float64 {
+	if f == nil {
+		return 0
+	}
+	return *f
 }

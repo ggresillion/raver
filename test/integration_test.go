@@ -1,8 +1,10 @@
 package test
 
 import (
+	"os"
 	"raver/audio"
 	"raver/youtube"
+	"raver/youtube/goytdlp"
 	"raver/youtube/youtubedr"
 	"testing"
 	"time"
@@ -14,8 +16,6 @@ const (
 	guildID = "test"
 	videoID = "VUfvRciny_Y"
 )
-
-var yt = youtube.NewYoutube(youtubedr.NewYoutubeDRAdapter())
 
 func TestPlayerPlaySingleTrack(t *testing.T) {
 	player := audio.NewPlayer(guildID)
@@ -128,4 +128,13 @@ func TestPlayerAutoskip(t *testing.T) {
 	<-player.Change
 	assert.Equal(t, audio.IDLE, player.State)
 	assert.Equal(t, 0, len(player.Queue))
+}
+
+var yt = youtube.NewYoutube(youtubedr.NewYoutubeDRAdapter(false), goytdlp.NewYoutubeAdapter(ytdlpPath()))
+
+func ytdlpPath() string {
+	if p := os.Getenv("RAVER_YTDLP_PATH"); p != "" {
+		return p
+	}
+	return "yt-dlp"
 }

@@ -3,8 +3,6 @@ package web
 import (
 	"net/http"
 	"raver/discord"
-	"raver/youtube"
-	"raver/youtube/youtubedr"
 )
 
 func addHandler(bot *discord.Bot) http.HandlerFunc {
@@ -25,7 +23,7 @@ func addHandler(bot *discord.Bot) http.HandlerFunc {
 			return
 		}
 
-		track, err := youtube.NewYoutube(youtubedr.NewYoutubeDRAdapter()).GetPlayableTrackFromYoutube(gbot.Guild.ID, id)
+		track, err := gbot.Youtube.GetPlayableTrackFromYoutube(gbot.Guild.ID, id)
 		if err != nil {
 			handleError(w, err)
 			return
