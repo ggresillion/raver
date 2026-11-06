@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"raver/youtube"
 	"strings"
+
+	"raver/youtube"
 
 	ytdr "github.com/kkdai/youtube/v2"
 )
 
 type YoutubeDR struct {
+	// check if a stream is valid before returning it
 	probe bool
 }
 

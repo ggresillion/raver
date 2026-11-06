@@ -5,13 +5,14 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"strings"
+	"syscall"
+
 	"raver/discord"
 	"raver/web"
 	"raver/youtube"
 	"raver/youtube/goytdlp"
 	"raver/youtube/youtubedr"
-	"strings"
-	"syscall"
 )
 
 var (
@@ -55,7 +56,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	slog.Info("youtube adapters configured", "adapters", youtubeAdapter)
+	slog.Info("[youtube] adapters configured", "adapters", youtubeAdapter)
 
 	bot := discord.NewBot(token, youtube.NewYoutube(adapters...))
 	err = bot.Connect()
